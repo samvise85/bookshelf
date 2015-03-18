@@ -13,6 +13,7 @@ It uses the following technologies/frameworks:
 - more...
 
 ============== What does it do =============
+
 Overview:
 This webapp allows to publish, view and read books online.
 The application uses several web services that allow to save and get a set of books, chapters, users and comments.
@@ -39,6 +40,7 @@ Actually the persistence is on file. Objects are serialized with JSON and saved 
 Operation like edit or delete archive older version of the files in a twin directory structure adding a timestamp suffix to the name of the file.
 
 =============== Installation ================
+
 How to install:
 1 - unzip data.zip into the folder C:\bookshelf
 2 - checkout bookshelf project and build it with maven (you can also import it into an IDE with a maven importer).
@@ -53,6 +55,7 @@ admin/prova
 user/password
 
 ================ Frameworks =================
+
 REST webservices (http://www.html.it/pag/19596/i-principi-dellarchitettura-restful/):
 - Spring 4 (https://spring.io/guides/gs/rest-service/)
 - JSON (http://it.wikipedia.org/wiki/JSON)
@@ -64,6 +67,7 @@ Frontend:
 - CryptoJS (https://code.google.com/p/crypto-js/#SHA-1)
 
 ================ What's left ================
+
 - Integration of server and client in a single web project.
 - Separate the views of anonimous user, logged user and administrator.
 - User Management is just a draft.
@@ -72,5 +76,6 @@ Frontend:
 - Web services of the classes: Comment, Stream, Moderation, Section.
 
 ================ One Last Note ==============
+
 I'm so sorry but there are so few comments and the code (expecially js) isn't really readable!
 I'm here if someone need a help.
