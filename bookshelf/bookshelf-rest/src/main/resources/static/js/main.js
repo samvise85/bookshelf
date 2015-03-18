@@ -80,7 +80,7 @@ window.Router = Backbone.Router.extend({
 	},
 	isAdmin: function () {
 		if(!$.cookie("bookshelf-username")) return false;
-		return this.getUser().admin === true;
+		return this.getUser() && this.getUser().admin === true;
 	},
 	
 	renderView : function(savedViewName, View, headerOptions, viewOptions) {
