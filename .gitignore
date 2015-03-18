@@ -1,5 +1,6 @@
 *.project
 *.classpath
+.metadata
 bookshelf/.settings
 bookshelf/bookshelf-core/.settings
 bookshelf/bookshelf-core/target
