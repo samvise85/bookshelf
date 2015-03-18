@@ -3,6 +3,7 @@
 ================ What's this ===============
 
 JSON/RESTful website to publish and read books with token authentication.
+
 Bookshelf is a work in progress.
 
 It uses the following technologies/frameworks:
@@ -16,44 +17,62 @@ It uses the following technologies/frameworks:
 ============== What does it do =============
 
 Overview:
+
 This webapp allows to publish, view and read books online.
+
 The application uses several web services that allow to save and get a set of books, chapters, users and comments.
+
 The saving services reqest the user to login and verify wether he/she is authorized to do so (e.g. only admin users can publich books and chapters).
 
+
 Security:
+
 Security implementation is simple: the client generates and send a token (remember-me-like) through this function:
-		SHA-1(username + ":" + expiration date + ":" + password + ":" + salt)
+
+  SHA-1(username + ":" + expiration date + ":" + password + ":" + salt)
+  
 NOTE: the expiration date is always -1 and the salt is the phrase "bookshelf by Samvise85!"
+
 When the sever receives the username and the token can verify the token (it can recalculate the token because it knows all the parts that compose it).
+
 The web services are marked with @Secured annotation that indicated wich role the user must possess (NOTE: roles are required to start with the prefix "ROLE_").
 
+
 Is it safe? No, of course! Stealing the token you steal the identity like you are stealing the password. Without https the token can be stolen by anyone sniffing the messages otherwise you can always stole it from the cookies with different techniques.
+
 Can be better? Yes, using an RSA public key for example to encode the token and in other hundreds ways.
 
+
 Persistence:
+
 Actually the persistence is on file. Objects are serialized with JSON and saved in a directory tree structure:
 - data
--- Book
--- Chapter
--- User
--- Etc...
+- - Book
+- - Chapter
+- - User
+- - Etc...
 
 Operation like edit or delete archive older version of the files in a twin directory structure adding a timestamp suffix to the name of the file.
 
 =============== Installation ================
 
 How to install:
+
 1 - unzip data.zip into the folder C:\bookshelf
+
 2 - checkout bookshelf project and build it with maven (you can also import it into an IDE with a maven importer).
 
 How to start it:
+
 1 - Run the runnable jar bookshelf-standalone (in an IDE run Application.java as Java Application)
+
 2 - unzip htdocs.zip into htdocs folder of an Apache installation or unzip somewhere into your filesystem and doubleclick on index.html
 
 Login:
+
 There are two users:
-admin/prova
-user/password
+- admin/prova
+- user/password
 
 ================ Frameworks =================
 
@@ -79,4 +98,5 @@ Frontend:
 ================ One Last Note ==============
 
 I'm so sorry but there are so few comments and the code (expecially js) isn't really readable!
+
 I'm here if someone need a help.
