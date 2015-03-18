@@ -1,0 +1,27 @@
+<div class="navbar navbar-fixed-top">
+    <div class="navbar-inner">
+        <div class="container">
+
+            <a class="brand" href="#">Bookshelf</a>
+
+            <div class="nav-collapse">
+                <ul class="nav">
+                    <li class="home-menu active"><a href="#">Home</a></li>
+                    <li class="contact-menu"><a href="#contact">Contact</a></li>
+                    <li class="book-menu"><a href="#books">Books</a></li>
+                    <li class="user-menu"><a href="#users">People</a></li>
+                </ul>
+                <ul class="nav pull-right">
+				<%
+					if(app.getUser() != null) {%>
+						<li class="logged-menu"><a href="#users/<%= app.getUser().id %>"><%= app.getUser().firstname %> <%= app.getUser().lastname %></a></li>
+						<li class="logout-menu"><a href="#logout">Logout</a></li>
+					<%} else {%>
+						<li class="login-menu"><a href="#login">Login</a></li>
+					<%}
+				%>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
