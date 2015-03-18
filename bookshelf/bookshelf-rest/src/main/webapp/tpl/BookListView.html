@@ -1,0 +1,30 @@
+<% if(app.isAdmin() === true) {%>
+<a href="#books/new" class="btn btn-primary">Create Book</a>
+<hr/>
+<% } %>
+<table class="table striped">
+	<thead>
+		<tr>
+			<th>Title</th>
+			<th>Year</th>
+			<th>Author</th>
+			<th>Genre</th>
+			<% if(app.isAdmin() === true) {%>
+			<th></th>
+			<% } %>
+		</tr>
+	</thead>
+	<tbody>
+	<% _.each(books, function(book) { %>
+		<tr>
+			<td><a href="#book/<%= book.id %>"><%= htmlEncode(book.get('title')) %></a></td>
+			<td><%= htmlEncode(book.get('year')) %></td>
+			<td><%= htmlEncode(book.get('author')) %></td>
+			<td><%= htmlEncode(book.get('genre')) %></td>
+			<% if(app.isAdmin() === true) {%>
+			<td><a class="btn" href="#book/<%= book.id %>/edit">Edit</a></td>
+			<% } %>
+		</tr>
+	<% }); %>
+	</tbody>
+</table>

@@ -1,6 +1,7 @@
 *.project
 *.classpath
 .metadata
+RemoteSystemsTempFiles
 bookshelf/.settings
 bookshelf/bookshelf-core/.settings
 bookshelf/bookshelf-core/target
