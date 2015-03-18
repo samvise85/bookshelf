@@ -66,7 +66,7 @@ How to start it:
 
 1 - Run the runnable jar bookshelf-standalone (in an IDE run Application.java as Java Application)
 
-2 - unzip htdocs.zip into htdocs folder of an Apache installation or unzip somewhere into your filesystem and doubleclick on index.html
+2 - Open a browser and go to http://localhost:8080/
 
 Login:
 
@@ -80,7 +80,8 @@ REST webservices (http://www.html.it/pag/19596/i-principi-dellarchitettura-restf
 - Spring 4 (https://spring.io/guides/gs/rest-service/)
 - JSON (http://it.wikipedia.org/wiki/JSON)
 Security:
-- Spring security (http://stackoverflow.com/questions/10826293/restful-authentication-via-spring / http://automateddeveloper.blogspot.co.uk/2014/03/securing-your-mobile-api-spring-security.html / )
+- Spring security (http://stackoverflow.com/questions/10826293/restful-authentication-via-spring / http://automateddeveloper.blogspot.co.uk/2014/03/securing-your-mobile-api-spring-security.html)
+
 Frontend:
 - jQuery
 - Backbonejs (https://github.com/thomasdavis/backbonetutorials/blob/gh-pages/videos/beginner/index.html / https://github.com/clintberry/backbone-directory-auth)
@@ -88,7 +89,6 @@ Frontend:
 
 ================ What's left ================
 
-- Integration of server and client in a single web project.
 - Separate the views of anonimous user, logged user and administrator.
 - User Management is just a draft.
 - Password is saved uncoded.
