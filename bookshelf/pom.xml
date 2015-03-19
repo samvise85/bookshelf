@@ -8,7 +8,7 @@
   <modules>
   	<module>bookshelf-core</module>
   	<module>bookshelf-file</module>
-  	<module>bookshelf-sqlite</module>
+  	<module>bookshelf-inmemory-db</module>
   	<module>bookshelf-rest</module>
   	<module>bookshelf-security</module>
   	<module>bookshelf-standalone</module>
