@@ -4,6 +4,8 @@ import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.sql.DataSource;
 
+import org.h2.jdbcx.JdbcDataSource;
+import org.h2.jdbcx.JdbcDataSourceFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
@@ -42,7 +44,11 @@ public class InMemoryJPAConfig {
     
 	@Bean(name = "bookshelfDataSource")
 	public DataSource dataSource() {
-	    return new EmbeddedDatabaseBuilder().setName("bookshelfdb").setType(EmbeddedDatabaseType.H2).build();
+		JdbcDataSource ds = new JdbcDataSource();
+		ds.setURL("jdbc:h2:file:~/Bookshelf");
+		ds.setUser("sa");
+		ds.setPassword("sa");
+		return ds;
 	}
 
     @Bean(name = "bookshelfEntityManager")
