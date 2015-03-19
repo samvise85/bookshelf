@@ -1,32 +1,50 @@
 package it.samvise85.bookshelf.model.user;
 
+import it.samvise85.bookshelf.model.Editable;
+import it.samvise85.bookshelf.model.EditableImpl;
 import it.samvise85.bookshelf.model.Identifiable;
 
 import java.util.Date;
+
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 
 @JsonInclude(Include.NON_NULL)
-public class User implements Identifiable {
+@Entity
+public class User extends EditableImpl implements Identifiable, Editable {
 	//internal attributes
+	@Id
+	@GeneratedValue
 	private String id;
+	@Column
 	private String username;
+	@Column
 	private String email;
+	@Column
 	private String password;
+	@Column
 	private Boolean admin = Boolean.FALSE;
+	@Column
 	private String firstname;
+	@Column
 	private String lastname;
+	@Column
 	private String country;
+	@Column
 	private String language;
+	@Column
 	private Integer birthYear;
+	@Column
 	private Date birthday;
+	@Column
 	private String activationCode;
+	@Column
 	private String resetCode;
-	
-	//dates
-	private Date creation;
-	private Date lastModification;
 	
 	public User() {};
 	public User(String username, String email) {
@@ -119,18 +137,6 @@ public class User implements Identifiable {
 	}
 	public void setResetCode(String resetCode) {
 		this.resetCode = resetCode;
-	}
-	public Date getCreation() {
-		return creation;
-	}
-	public void setCreation(Date creation) {
-		this.creation = creation;
-	}
-	public Date getLastModification() {
-		return lastModification;
-	}
-	public void setLastModification(Date lastModification) {
-		this.lastModification = lastModification;
 	}
 	@Override
 	public int hashCode() {

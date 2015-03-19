@@ -7,11 +7,12 @@ bookshelf/bookshelf-core/.settings
 bookshelf/bookshelf-core/target
 bookshelf/bookshelf-file/.settings
 bookshelf/bookshelf-file/target
-bookshelf/bookshelf-sqlite/.settings
-bookshelf/bookshelf-sqlite/target
 bookshelf/bookshelf-rest/.settings
 bookshelf/bookshelf-rest/target
 bookshelf/bookshelf-security/.settings
 bookshelf/bookshelf-security/target
 bookshelf/bookshelf-standalone/.settings
 bookshelf/bookshelf-standalone/target
+bookshelf/bookshelf-inmemory-db/.settings
+bookshelf/bookshelf-inmemory-db/target
+bookshelf/bookshelf-sqlite

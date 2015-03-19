@@ -2,11 +2,17 @@ package it.samvise85.bookshelf.model;
 
 import java.util.Date;
 
+import javax.persistence.Column;
+import javax.persistence.MappedSuperclass;
+
+@MappedSuperclass
 public abstract class EditableImpl implements Editable {
 	
 	//dates
-	private Date creation;
-	private Date lastModification;
+	@Column
+	protected Date creation;
+	@Column
+	protected Date lastModification;
 	
 	public Date getCreation() {
 		return creation;

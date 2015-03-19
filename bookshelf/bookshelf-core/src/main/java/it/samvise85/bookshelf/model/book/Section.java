@@ -5,25 +5,32 @@ import it.samvise85.bookshelf.model.CommentableImpl;
 import it.samvise85.bookshelf.model.Editable;
 import it.samvise85.bookshelf.model.Identifiable;
 
-import java.util.List;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 
 @JsonInclude(Include.NON_NULL)
+@Entity
 public class Section extends CommentableImpl implements Commentable, Editable, Identifiable {
 	//internal attributes
+	@Id
+	@GeneratedValue
 	private String id;
+	@Column
 	private Integer position;
+	@Column
 	private String title;
+	@Column
 	private String synopsis;
+	@Column
+	private String book;
 
-	//external attributes
-	private Book book;
-	private List<Chapter> chapters;
-	
 	public Section() {};
-	public Section(String title, Book book) {
+	public Section(String title, String book) {
 		super();
 		this.title = title;
 		this.book = book;
@@ -53,18 +60,11 @@ public class Section extends CommentableImpl implements Commentable, Editable, I
 	public void setSynopsis(String synopsis) {
 		this.synopsis = synopsis;
 	}
-	public Book getBook() {
+	public String getBook() {
 		return book;
 	}
-	public void setBook(Book book) {
+	public void setBook(String book) {
 		this.book = book;
 	}
-	public List<Chapter> getChapters() {
-		return chapters;
-	}
-	public void setChapters(List<Chapter> chapters) {
-		this.chapters = chapters;
-	}
-	
 	
 }

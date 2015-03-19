@@ -4,6 +4,7 @@ import it.samvise85.bookshelf.model.user.User;
 import it.samvise85.bookshelf.persist.PersistOptions;
 import it.samvise85.bookshelf.persist.clauses.ProjectionClause;
 import it.samvise85.bookshelf.persist.inmemory.InMemoryPersistenceUnit;
+import it.samvise85.bookshelf.persist.inmemory.UserRepository;
 import it.samvise85.bookshelf.utils.UserUtils;
 
 import java.util.Calendar;
@@ -11,11 +12,16 @@ import java.util.Date;
 import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Service;
 
 @Service
 public final class UserManagerImpl extends InMemoryPersistenceUnit<User> implements UserManager {
 
+	@Autowired
+	protected UserRepository repository;
+	
 	public UserManagerImpl() {
 		super(User.class);
 	}
@@ -122,5 +128,10 @@ public final class UserManagerImpl extends InMemoryPersistenceUnit<User> impleme
 		if(year < 1800 || year > thisYear)
 			return null;
 		return year;
+	}
+
+	@Override
+	public CrudRepository<User, String> getRepository() {
+		return repository;
 	}
 }

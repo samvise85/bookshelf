@@ -7,12 +7,17 @@ import it.samvise85.bookshelf.persist.clauses.Order;
 import it.samvise85.bookshelf.persist.clauses.OrderClause;
 import it.samvise85.bookshelf.persist.clauses.ProjectionClause;
 
+import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.log4j.Logger;
+import org.springframework.data.repository.CrudRepository;
 
-public class InMemoryPersistenceUnit<T extends Identifiable> implements PersistenceUnit<T> {
+public abstract class InMemoryPersistenceUnit<T extends Identifiable> implements PersistenceUnit<T> {
 	private Class<T> registeredClass;
 	private static final List<OrderClause> DEFAULT_ORDER = Collections.singletonList(new OrderClause("id", Order.ASC));
 	
@@ -27,20 +32,22 @@ public class InMemoryPersistenceUnit<T extends Identifiable> implements Persiste
 	}
 
 	public T get(String id) {
-		//TODO
-		return null;
+		return getRepository().findOne(id);
 	}
 
 	@Override
 	public T get(String id, ProjectionClause projection) {
-		//TODO
-		return null;
+		return getRepository().findOne(id); //TODO add projection see Spring Data REST
 	}
 
 	@Override
 	public List<T> getList(PersistOptions options) {
-		//TODO
-		return null;
+		Iterable<T> all = getRepository().findAll(); //TODO add selection
+		List<T> res = new ArrayList<T>();
+		Iterator<T> iterator = all.iterator();
+		while(iterator.hasNext())
+			res.add(iterator.next());
+		return res;
 	}
 
 	public T create(T objectToSave) {
@@ -49,13 +56,12 @@ public class InMemoryPersistenceUnit<T extends Identifiable> implements Persiste
 	}
 
 	public T update(T objectToUpdate) {
-		//TODO
-		return null;
+		return getRepository().save(objectToUpdate);
 	}
 
 	public T delete(String id) {
-		//TODO
 		return null;
 	}
 
+	public abstract CrudRepository<T, String> getRepository();
 }

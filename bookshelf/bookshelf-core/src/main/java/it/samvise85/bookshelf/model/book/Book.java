@@ -5,24 +5,34 @@ import it.samvise85.bookshelf.model.CommentableImpl;
 import it.samvise85.bookshelf.model.Editable;
 import it.samvise85.bookshelf.model.Identifiable;
 
-import java.util.List;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 
 @JsonInclude(Include.NON_NULL)
+@Entity
 public class Book extends CommentableImpl implements Commentable, Editable, Identifiable {
 	//internal attributes
+
+	@Column
+	@GeneratedValue
+	private Long generatedId;
+	@Id
 	private String id;
+	@Column
 	private String title;
+	@Column
 	private Integer year;
+	@Column
 	private String synopsis;
+	@Column
 	private String genre;
-	
-	//external attributes
+	@Column
 	private String author;
-	private List<String> chapters;
-	private List<String> sections;
 	
 	public Book() {}
 	public Book(String name, String author) {
@@ -31,6 +41,12 @@ public class Book extends CommentableImpl implements Commentable, Editable, Iden
 		this.author = author;
 	}
 	
+	public Long getGeneratedId() {
+		return generatedId;
+	}
+	public void setGeneratedId(Long generatedId) {
+		this.generatedId = generatedId;
+	}
 	public String getId() {
 		return id;
 	}
@@ -66,18 +82,6 @@ public class Book extends CommentableImpl implements Commentable, Editable, Iden
 	}
 	public void setAuthor(String author) {
 		this.author = author;
-	}
-	public List<String> getChapters() {
-		return chapters;
-	}
-	public void setChapters(List<String> chapters) {
-		this.chapters = chapters;
-	}
-	public List<String> getSections() {
-		return sections;
-	}
-	public void setSections(List<String> sections) {
-		this.sections = sections;
 	}
 	
 }

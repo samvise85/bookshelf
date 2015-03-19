@@ -7,6 +7,7 @@ import it.samvise85.bookshelf.persist.clauses.Order;
 import it.samvise85.bookshelf.persist.clauses.OrderClause;
 import it.samvise85.bookshelf.persist.clauses.SelectionClause;
 import it.samvise85.bookshelf.persist.clauses.SimpleProjectionClause;
+import it.samvise85.bookshelf.persist.inmemory.ChapterRepository;
 import it.samvise85.bookshelf.persist.inmemory.InMemoryPersistenceUnit;
 import it.samvise85.bookshelf.persist.selection.Equals;
 import it.samvise85.bookshelf.persist.selection.IsNotNull;
@@ -18,11 +19,16 @@ import java.util.List;
 import org.apache.commons.lang3.StringEscapeUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Service;
 
 @Service
 public class ChapterManagerImpl extends InMemoryPersistenceUnit<Chapter> implements ChapterManager {
 	private static final Logger log = Logger.getLogger(ChapterManagerImpl.class);
+	
+	@Autowired
+	protected ChapterRepository repository;
 
 	public ChapterManagerImpl() {
 		super(Chapter.class);
@@ -120,6 +126,11 @@ public class ChapterManagerImpl extends InMemoryPersistenceUnit<Chapter> impleme
 	private String nl2p(String text) {
 		String escaped = StringEscapeUtils.escapeHtml4(text);
 		return escaped.replaceAll("^(<p>)?(.*)(</p>)?$", "<p>$2</p>");
+	}
+
+	@Override
+	public CrudRepository<Chapter, String> getRepository() {
+		return repository;
 	}
 
 }

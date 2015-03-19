@@ -1,39 +1,27 @@
 package it.samvise85.bookshelf.model.comment;
 
-import it.samvise85.bookshelf.model.Commentable;
 import it.samvise85.bookshelf.model.Identifiable;
 
-import java.util.List;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 
 @JsonInclude(Include.NON_NULL)
+@Entity
 public class Stream implements Identifiable {
 	//internals
+	@Id
+	@GeneratedValue
 	private String id;
-	
-	//externals
-	private Commentable parent;
-	private List<Comment> comments;
 	
 	public String getId() {
 		return id;
 	}
 	public void setId(String id) {
 		this.id = id;
-	}
-	public Commentable getParent() {
-		return parent;
-	}
-	public void setParent(Commentable parent) {
-		this.parent = parent;
-	}
-	public List<Comment> getComments() {
-		return comments;
-	}
-	public void setComments(List<Comment> comments) {
-		this.comments = comments;
 	}
 	
 }

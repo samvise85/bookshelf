@@ -4,24 +4,33 @@ import it.samvise85.bookshelf.model.Commentable;
 import it.samvise85.bookshelf.model.CommentableImpl;
 import it.samvise85.bookshelf.model.Editable;
 import it.samvise85.bookshelf.model.Identifiable;
-import it.samvise85.bookshelf.model.user.User;
+
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 
 @JsonInclude(Include.NON_NULL)
+@Entity
 public class Comment extends CommentableImpl implements Commentable, Editable, Identifiable {
 	//internal
+	@Id
+	@GeneratedValue
 	private String id;
+	@Column
 	private String comment;
-	
-	//externals
-	private Stream parentStream;
-	private User user;
-	private Moderation moderation;
+	@Column
+	private String parentStream;
+	@Column
+	private String user;
+	@Column
+	private String moderation;
 	
 	public Comment() {};
-	public Comment(String comment, Stream parentStream, User user) {
+	public Comment(String comment, String parentStream, String user) {
 		super();
 		this.comment = comment;
 		this.parentStream = parentStream;
@@ -40,22 +49,22 @@ public class Comment extends CommentableImpl implements Commentable, Editable, I
 	public void setComment(String comment) {
 		this.comment = comment;
 	}
-	public Stream getParentStream() {
+	public String getParentStream() {
 		return parentStream;
 	}
-	public void setParentStream(Stream parentStream) {
+	public void setParentStream(String parentStream) {
 		this.parentStream = parentStream;
 	}
-	public User getUser() {
+	public String getUser() {
 		return user;
 	}
-	public void setUser(User user) {
+	public void setUser(String user) {
 		this.user = user;
 	}
-	public Moderation getModeration() {
+	public String getModeration() {
 		return moderation;
 	}
-	public void setModeration(Moderation moderation) {
+	public void setModeration(String moderation) {
 		this.moderation = moderation;
 	}
 	

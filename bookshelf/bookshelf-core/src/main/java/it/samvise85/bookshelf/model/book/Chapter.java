@@ -1,5 +1,10 @@
 package it.samvise85.bookshelf.model.book;
 
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
+
 import it.samvise85.bookshelf.model.Commentable;
 import it.samvise85.bookshelf.model.CommentableImpl;
 import it.samvise85.bookshelf.model.Editable;
@@ -9,19 +14,27 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 
 @JsonInclude(Include.NON_NULL)
+@Entity
 public class Chapter extends CommentableImpl implements Commentable, Editable, Identifiable {
 	//internal attributes
+	@Id
+	@GeneratedValue
 	private String id;
+	@Column
 	private String title;
+	@Column
 	private String number;
+	@Column
 	private Integer position;
+	@Column
 	private String synopsis;
+	@Column
 	private String text;
-
-	//external attributes
+	@Column
 	private String book;
+	@Column
 	private String section;
-	
+
 	public Chapter() {};
 	public Chapter(String title, String number, String text, String book) {
 		super();
