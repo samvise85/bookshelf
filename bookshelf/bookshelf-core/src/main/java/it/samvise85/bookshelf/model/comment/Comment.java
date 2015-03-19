@@ -4,12 +4,14 @@ import it.samvise85.bookshelf.model.Commentable;
 import it.samvise85.bookshelf.model.CommentableImpl;
 import it.samvise85.bookshelf.model.Editable;
 import it.samvise85.bookshelf.model.Identifiable;
+import it.samvise85.bookshelf.persist.clauses.ProjectionClause;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
+import javax.persistence.Transient;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 
@@ -18,7 +20,6 @@ import com.fasterxml.jackson.annotation.JsonInclude.Include;
 public class Comment extends CommentableImpl implements Commentable, Editable, Identifiable {
 	//internal
 	@Id
-	@GeneratedValue
 	private String id;
 	@Column
 	private String comment;
@@ -28,6 +29,10 @@ public class Comment extends CommentableImpl implements Commentable, Editable, I
 	private String user;
 	@Column
 	private String moderation;
+	
+	@Transient
+	@JsonIgnore
+	private ProjectionClause projection;
 	
 	public Comment() {};
 	public Comment(String comment, String parentStream, String user) {
@@ -66,6 +71,16 @@ public class Comment extends CommentableImpl implements Commentable, Editable, I
 	}
 	public void setModeration(String moderation) {
 		this.moderation = moderation;
+	}
+
+	@Override
+	public ProjectionClause getProjection() {
+		return projection;
+	}
+	@Override
+	public Comment setProjection(ProjectionClause projection) {
+		this.projection = projection;
+		return this;
 	}
 	
 }

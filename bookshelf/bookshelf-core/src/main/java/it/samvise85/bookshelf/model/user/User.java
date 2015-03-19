@@ -3,6 +3,7 @@ package it.samvise85.bookshelf.model.user;
 import it.samvise85.bookshelf.model.Editable;
 import it.samvise85.bookshelf.model.EditableImpl;
 import it.samvise85.bookshelf.model.Identifiable;
+import it.samvise85.bookshelf.persist.clauses.ProjectionClause;
 
 import java.util.Date;
 
@@ -10,7 +11,9 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
+import javax.persistence.Transient;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 
@@ -18,8 +21,10 @@ import com.fasterxml.jackson.annotation.JsonInclude.Include;
 @Entity
 public class User extends EditableImpl implements Identifiable, Editable {
 	//internal attributes
-	@Id
+	@Column
 	@GeneratedValue
+	private Long generatedId;
+	@Id
 	private String id;
 	@Column
 	private String username;
@@ -46,7 +51,14 @@ public class User extends EditableImpl implements Identifiable, Editable {
 	@Column
 	private String resetCode;
 	
+	@Transient
+	@JsonIgnore
+	private ProjectionClause projection;
+	
 	public User() {};
+	public User(ProjectionClause projection) {
+		this.projection = projection;
+	};
 	public User(String username, String email) {
 		super();
 		this.username = username;
@@ -73,70 +85,78 @@ public class User extends EditableImpl implements Identifiable, Editable {
 		this.username = username;
 	}
 	public String getEmail() {
-		return email;
+		return returnNullOrValue("email", email);
 	}
 	public void setEmail(String email) {
 		this.email = email;
 	}
 	public String getPassword() {
-		return password;
+		return returnNullOrValue("password", password);
 	}
 	public void setPassword(String password) {
 		this.password = password;
 	}
 	public Boolean getAdmin() {
-		return admin;
+		return returnNullOrValue("admin", admin);
 	}
 	public void setAdmin(Boolean admin) {
 		this.admin = admin;
 	}
 	public String getFirstname() {
-		return firstname;
+		return returnNullOrValue("firstname", firstname);
 	}
 	public void setFirstname(String firstname) {
 		this.firstname = firstname;
 	}
 	public String getLastname() {
-		return lastname;
+		return returnNullOrValue("lastname", lastname);
 	}
 	public void setLastname(String lastname) {
 		this.lastname = lastname;
 	}
 	public String getCountry() {
-		return country;
+		return returnNullOrValue("country", country);
 	}
 	public void setCountry(String country) {
 		this.country = country;
 	}
 	public String getLanguage() {
-		return language;
+		return returnNullOrValue("language", language);
 	}
 	public void setLanguage(String language) {
 		this.language = language;
 	}
 	public Integer getBirthYear() {
-		return birthYear;
+		return returnNullOrValue("birthYear", birthYear);
 	}
 	public void setBirthYear(Integer birthYear) {
 		this.birthYear = birthYear;
 	}
 	public Date getBirthday() {
-		return birthday;
+		return returnNullOrValue("birthday", birthday);
 	}
 	public void setBirthday(Date birthday) {
 		this.birthday = birthday;
 	}
 	public String getActivationCode() {
-		return activationCode;
+		return returnNullOrValue("activationCode", activationCode);
 	}
 	public void setActivationCode(String activationCode) {
 		this.activationCode = activationCode;
 	}
 	public String getResetCode() {
-		return resetCode;
+		return returnNullOrValue("resetCode", resetCode);
 	}
 	public void setResetCode(String resetCode) {
 		this.resetCode = resetCode;
+	}
+	@Override
+	public Date getCreation() {
+		return returnNullOrValue("creation", super.getCreation());
+	}
+	@Override
+	public Date getLastModification() {
+		return returnNullOrValue("lastModification", super.getLastModification());
 	}
 	@Override
 	public int hashCode() {
@@ -255,5 +275,24 @@ public class User extends EditableImpl implements Identifiable, Editable {
 			return false;
 		return true;
 	}
+	public Long getGeneratedId() {
+		return generatedId;
+	}
+	public void setGeneratedId(Long generatedId) {
+		this.generatedId = generatedId;
+	}
 	
+	@Override
+	public ProjectionClause getProjection() {
+		return projection;
+	}
+	@Override
+	public User setProjection(ProjectionClause projection) {
+		this.projection = projection;
+		return this;
+	}
+	
+	private <T> T returnNullOrValue(String fieldName, T fieldValue) {
+		return returnNullOrValue(projection, fieldName, fieldValue);
+	}
 }

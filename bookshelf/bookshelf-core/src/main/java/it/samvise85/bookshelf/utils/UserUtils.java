@@ -4,6 +4,7 @@ import it.samvise85.bookshelf.model.user.User;
 import it.samvise85.bookshelf.persist.clauses.ExclusionClause;
 import it.samvise85.bookshelf.persist.clauses.NoProjectionClause;
 import it.samvise85.bookshelf.persist.clauses.ProjectionClause;
+import it.samvise85.bookshelf.persist.clauses.SimpleProjectionClause;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -13,7 +14,7 @@ import org.springframework.security.crypto.codec.Hex;
 
 public class UserUtils {
 	public static final String CONCEALED = "";
-	public static final ProjectionClause TOTAL_PROTECTION = new ProjectionClause("id", "username");
+	public static final ProjectionClause TOTAL_PROTECTION = new SimpleProjectionClause("id", "username");
 	public static final ProjectionClause PASSWORD_PROTECTION = new ExclusionClause("password", "resetCode", "activationCode");
 	public static final ProjectionClause NO_PROTECTION = NoProjectionClause.NO_PROJECTION;
 	public static final ProjectionClause AUTHENTICATION_PROTECTION = NO_PROTECTION;

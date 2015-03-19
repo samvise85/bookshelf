@@ -7,21 +7,18 @@ import it.samvise85.bookshelf.persist.clauses.Order;
 import it.samvise85.bookshelf.persist.clauses.OrderClause;
 import it.samvise85.bookshelf.persist.clauses.ProjectionClause;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 
 import org.apache.log4j.Logger;
 import org.springframework.data.repository.CrudRepository;
 
 public abstract class InMemoryPersistenceUnit<T extends Identifiable> implements PersistenceUnit<T> {
-	private Class<T> registeredClass;
-	private static final List<OrderClause> DEFAULT_ORDER = Collections.singletonList(new OrderClause("id", Order.ASC));
-	
-	private static final Logger log = Logger.getLogger(InMemoryPersistenceUnit.class);
+	protected Class<T> registeredClass;
+	protected static final List<OrderClause> DEFAULT_ORDER = Collections.singletonList(new OrderClause("id", Order.ASC));
+	protected static final Logger log = Logger.getLogger(InMemoryPersistenceUnit.class);
 	
 	public InMemoryPersistenceUnit(Class<T> clazz) {
 		registerClass(clazz);
@@ -35,24 +32,25 @@ public abstract class InMemoryPersistenceUnit<T extends Identifiable> implements
 		return getRepository().findOne(id);
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public T get(String id, ProjectionClause projection) {
-		return getRepository().findOne(id); //TODO add projection see Spring Data REST
+		return (T) getRepository().findOne(id).setProjection(projection);
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public List<T> getList(PersistOptions options) {
-		Iterable<T> all = getRepository().findAll(); //TODO add selection
+		Iterable<T> all = getRepository().findAll(); //TODO add selection and order
 		List<T> res = new ArrayList<T>();
 		Iterator<T> iterator = all.iterator();
 		while(iterator.hasNext())
-			res.add(iterator.next());
+			res.add((T) iterator.next().setProjection(options != null ? options.getProjection() : null));
 		return res;
 	}
 
 	public T create(T objectToSave) {
-		//TODO
-		return null;
+		return getRepository().save(objectToSave);
 	}
 
 	public T update(T objectToUpdate) {
@@ -60,6 +58,7 @@ public abstract class InMemoryPersistenceUnit<T extends Identifiable> implements
 	}
 
 	public T delete(String id) {
+		getRepository().delete(id);
 		return null;
 	}
 

@@ -76,18 +76,6 @@ public final class UserManagerImpl extends InMemoryPersistenceUnit<User> impleme
 		return super.get(id, projection);
 	}
 
-//	@Override
-//	public List<User> getList(List<SelectionClause> selection, List<OrderClause> order) {
-//		return getList(null, selection, order);
-//	}
-//
-//	@Override
-//	public List<User> getList(ProjectionClause projection, List<SelectionClause> selection, List<OrderClause> order) {
-//		if(projection == null)
-//			projection = UserUtils.TOTAL_PROTECTION;
-//		return super.getList(projection, selection, order);
-//	}
-
 	@Override
 	public List<User> getList(PersistOptions options) {
 		if(options == null)
