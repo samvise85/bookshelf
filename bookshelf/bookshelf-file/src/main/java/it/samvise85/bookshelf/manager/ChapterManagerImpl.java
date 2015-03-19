@@ -5,6 +5,7 @@ import it.samvise85.bookshelf.persist.PersistOptions;
 import it.samvise85.bookshelf.persist.clauses.NoProjectionClause;
 import it.samvise85.bookshelf.persist.clauses.Order;
 import it.samvise85.bookshelf.persist.clauses.OrderClause;
+import it.samvise85.bookshelf.persist.clauses.ProjectionClause;
 import it.samvise85.bookshelf.persist.clauses.SelectionClause;
 import it.samvise85.bookshelf.persist.clauses.SimpleProjectionClause;
 import it.samvise85.bookshelf.persist.file.FilePersistenceUnit;
@@ -120,6 +121,18 @@ public class ChapterManagerImpl extends FilePersistenceUnit<Chapter> implements 
 	private String nl2p(String text) {
 		String escaped = StringEscapeUtils.escapeHtml4(text);
 		return escaped.replaceAll("^(<p>)?(.*)(</p>)?$", "<p>$2</p>");
+	}
+
+	@Override
+	public Chapter getChapterByBookAndPosition(String book, Integer position,
+			ProjectionClause projection) {
+		List<Chapter> list = getList(new PersistOptions(
+        		NoProjectionClause.NO_PROJECTION,
+        		Arrays.asList(new SelectionClause[] {new SelectionClause("book", Equals.getInstance(), book), new SelectionClause("position", Equals.getInstance(), position)}), 
+        		Arrays.asList(new OrderClause[] {new OrderClause("position", Order.ASC), new OrderClause("number", Order.ASC)})));
+		if(list != null && !list.isEmpty())
+        	return list.get(0);
+        return null;
 	}
 
 }

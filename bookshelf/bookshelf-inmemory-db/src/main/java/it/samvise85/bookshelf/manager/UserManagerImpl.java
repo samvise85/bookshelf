@@ -13,7 +13,6 @@ import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -119,7 +118,7 @@ public final class UserManagerImpl extends InMemoryPersistenceUnit<User> impleme
 	}
 
 	@Override
-	public CrudRepository<User, String> getRepository() {
+	public UserRepository getRepository() {
 		return repository;
 	}
 }

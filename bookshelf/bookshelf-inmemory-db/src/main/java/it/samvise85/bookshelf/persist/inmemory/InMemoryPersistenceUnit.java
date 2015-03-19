@@ -5,6 +5,7 @@ import it.samvise85.bookshelf.persist.PersistOptions;
 import it.samvise85.bookshelf.persist.PersistenceUnit;
 import it.samvise85.bookshelf.persist.clauses.Order;
 import it.samvise85.bookshelf.persist.clauses.OrderClause;
+import it.samvise85.bookshelf.persist.clauses.PaginationClause;
 import it.samvise85.bookshelf.persist.clauses.ProjectionClause;
 
 import java.util.ArrayList;
@@ -13,7 +14,10 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.apache.log4j.Logger;
-import org.springframework.data.repository.CrudRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.repository.PagingAndSortingRepository;
 
 public abstract class InMemoryPersistenceUnit<T extends Identifiable> implements PersistenceUnit<T> {
 	protected Class<T> registeredClass;
@@ -38,15 +42,16 @@ public abstract class InMemoryPersistenceUnit<T extends Identifiable> implements
 		return (T) getRepository().findOne(id).setProjection(projection);
 	}
 
-	@SuppressWarnings("unchecked")
 	@Override
 	public List<T> getList(PersistOptions options) {
-		Iterable<T> all = getRepository().findAll(); //TODO add selection and order
-		List<T> res = new ArrayList<T>();
-		Iterator<T> iterator = all.iterator();
-		while(iterator.hasNext())
-			res.add((T) iterator.next().setProjection(options != null ? options.getProjection() : null));
-		return res;
+		Pageable pageable = createPageable(options != null ? options.getPagination() : null);
+		Iterable<T> all = null;
+		if(pageable != null)
+			all = getRepository().findAll(); //TODO add selection and order
+		else
+			all = getRepository().findAll(pageable);
+		
+		return convertToList(all, options != null ? options.getProjection() : null);
 	}
 
 	public T create(T objectToSave) {
@@ -62,5 +67,32 @@ public abstract class InMemoryPersistenceUnit<T extends Identifiable> implements
 		return null;
 	}
 
-	public abstract CrudRepository<T, String> getRepository();
+	public abstract PagingAndSortingRepository<T, String> getRepository();
+	
+	@SuppressWarnings("unchecked")
+	protected List<T> convertToList(Iterable<T> iterable, ProjectionClause projectionClause) {
+		List<T> res = new ArrayList<T>();
+		Iterator<T> iterator = iterable.iterator();
+		T previous = null;
+		while(iterator.hasNext()) {
+			T curr = iterator.next();
+			if(previous == null || previous != curr) {
+				res.add((T) curr.setProjection(projectionClause));
+				previous = curr;
+			} else break;
+		}
+		return res;
+	}
+	@SuppressWarnings("unchecked")
+	protected List<T> convertToList(Page<T> page, ProjectionClause projectionClause) {
+		List<T> res = new ArrayList<T>();
+		for(T curr : page)
+			res.add((T) curr.setProjection(projectionClause));
+		return res;
+	}
+	
+	protected Pageable createPageable(PaginationClause pagination) {
+		if(pagination == null) return null;
+		return new PageRequest(pagination.getPage()-1, pagination.getPageSize());
+	}
 }

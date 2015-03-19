@@ -9,7 +9,6 @@ import java.util.Date;
 
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -52,7 +51,7 @@ public class BookManagerImpl extends InMemoryPersistenceUnit<Book>  implements B
 	}
 
 	@Override
-	public CrudRepository<Book, String> getRepository() {
+	public BookRepository getRepository() {
 		return repository;
 	}
 }

@@ -31,7 +31,7 @@ public class Chapter extends CommentableImpl implements Commentable, Editable, I
 	private Integer position;
 	@Column
 	private String synopsis;
-	@Column
+	@Column(length=100000)
 	private String text;
 	@Column
 	private String book;
