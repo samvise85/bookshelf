@@ -1,27 +1,47 @@
 package it.samvise85.bookshelf.model.book;
 
+import java.util.Date;
+
 import it.samvise85.bookshelf.model.Commentable;
 import it.samvise85.bookshelf.model.CommentableImpl;
 import it.samvise85.bookshelf.model.Editable;
 import it.samvise85.bookshelf.model.Identifiable;
+import it.samvise85.bookshelf.persist.clauses.ProjectionClause;
 
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.Id;
+import javax.persistence.Transient;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 
 @JsonInclude(Include.NON_NULL)
+@Entity
 public class Chapter extends CommentableImpl implements Commentable, Editable, Identifiable {
 	//internal attributes
+	@Id
 	private String id;
+	@Column
 	private String title;
+	@Column
 	private String number;
+	@Column
 	private Integer position;
+	@Column
 	private String synopsis;
+	@Column(length=100000)
 	private String text;
-
-	//external attributes
+	@Column
 	private String book;
+	@Column
 	private String section;
 	
+	@Transient
+	@JsonIgnore
+	private ProjectionClause projection;
+
 	public Chapter() {};
 	public Chapter(String title, String number, String text, String book) {
 		super();
@@ -38,47 +58,68 @@ public class Chapter extends CommentableImpl implements Commentable, Editable, I
 		this.id = id;
 	}
 	public String getTitle() {
-		return title;
+		return returnNullOrValue("title", title);
 	}
 	public void setTitle(String title) {
 		this.title = title;
 	}
 	public String getNumber() {
-		return number;
+		return returnNullOrValue("number", number);
 	}
 	public void setNumber(String number) {
 		this.number = number;
 	}
 	public Integer getPosition() {
-		return position;
+		return returnNullOrValue("position", position);
 	}
 	public void setPosition(Integer position) {
 		this.position = position;
 	}
 	public String getSynopsis() {
-		return synopsis;
+		return returnNullOrValue("synopsis", synopsis);
 	}
 	public void setSynopsis(String synopsis) {
 		this.synopsis = synopsis;
 	}
 	public String getText() {
-		return text;
+		return returnNullOrValue("text", text);
 	}
 	public void setText(String text) {
 		this.text = text;
 	}
 	public String getBook() {
-		return book;
+		return returnNullOrValue("book", book);
 	}
 	public void setBook(String book) {
 		this.book = book;
 	}
 	public String getSection() {
-		return section;
+		return returnNullOrValue("section", section);
 	}
 	public void setSection(String section) {
 		this.section = section;
 	}
+	@Override
+	public Date getCreation() {
+		return returnNullOrValue("creation", super.getCreation());
+	}
+	@Override
+	public Date getLastModification() {
+		return returnNullOrValue("lastModification", super.getLastModification());
+	}
 	
+	@Override
+	public ProjectionClause getProjection() {
+		return projection;
+	}
+	@Override
+	public Chapter setProjection(ProjectionClause projection) {
+		this.projection = projection;
+		return this;
+	}
+	
+	private <T> T returnNullOrValue(String fieldName, T fieldValue) {
+		return returnNullOrValue(projection, fieldName, fieldValue);
+	}
 	
 }

@@ -16,7 +16,6 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
-import java.util.List;
 
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -54,13 +53,8 @@ public class ChapterController implements ControllerCommons {
 	@RequestMapping(value="/books/{book}/chapters", params={"position"})
     public Chapter getChapterByPosition(@PathVariable String book, @RequestParam(value="position", required=false) Integer position) {
 		log.info("getChapter: book = " + book + "; position = " + position);
-		List<Chapter> list = chapterManager.getList(new PersistOptions(
-        		NoProjectionClause.NO_PROJECTION,
-        		Arrays.asList(new SelectionClause[] {new SelectionClause("book", Equals.getInstance(), book), new SelectionClause("position", Equals.getInstance(), position)}), 
-        		Arrays.asList(new OrderClause[] {new OrderClause("position", Order.ASC), new OrderClause("number", Order.ASC)})));
-        if(list != null && !list.isEmpty())
-        	return list.get(0);
-        return null;
+		Chapter chapter = chapterManager.getChapterByBookAndPosition(book, position, NoProjectionClause.NO_PROJECTION);
+        return chapter;
     }
 
 	@RequestMapping(value="/books/{book}/chapters", method=RequestMethod.POST)

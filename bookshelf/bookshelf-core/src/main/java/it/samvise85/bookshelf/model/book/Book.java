@@ -1,28 +1,47 @@
 package it.samvise85.bookshelf.model.book;
 
+import java.util.Date;
+
 import it.samvise85.bookshelf.model.Commentable;
 import it.samvise85.bookshelf.model.CommentableImpl;
 import it.samvise85.bookshelf.model.Editable;
 import it.samvise85.bookshelf.model.Identifiable;
+import it.samvise85.bookshelf.persist.clauses.ProjectionClause;
 
-import java.util.List;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
+import javax.persistence.Transient;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 
 @JsonInclude(Include.NON_NULL)
+@Entity
 public class Book extends CommentableImpl implements Commentable, Editable, Identifiable {
 	//internal attributes
+
+	@Column
+	@GeneratedValue
+	private Long generatedId;
+	@Id
 	private String id;
+	@Column
 	private String title;
+	@Column
 	private Integer year;
+	@Column
 	private String synopsis;
+	@Column
 	private String genre;
-	
-	//external attributes
+	@Column
 	private String author;
-	private List<String> chapters;
-	private List<String> sections;
+	
+	@Transient
+	@JsonIgnore
+	private ProjectionClause projection;
 	
 	public Book() {}
 	public Book(String name, String author) {
@@ -31,6 +50,12 @@ public class Book extends CommentableImpl implements Commentable, Editable, Iden
 		this.author = author;
 	}
 	
+	public Long getGeneratedId() {
+		return generatedId;
+	}
+	public void setGeneratedId(Long generatedId) {
+		this.generatedId = generatedId;
+	}
 	public String getId() {
 		return id;
 	}
@@ -38,46 +63,55 @@ public class Book extends CommentableImpl implements Commentable, Editable, Iden
 		this.id = id;
 	}
 	public String getTitle() {
-		return title;
+		return returnNullOrValue("title", title);
 	}
 	public void setTitle(String title) {
 		this.title = title;
 	}
 	public Integer getYear() {
-		return year;
+		return returnNullOrValue("year", year);
 	}
 	public void setYear(Integer year) {
 		this.year = year;
 	}
 	public String getSynopsis() {
-		return synopsis;
+		return returnNullOrValue("synopsis", synopsis);
 	}
 	public void setSynopsis(String synopsis) {
 		this.synopsis = synopsis;
 	}
 	public String getGenre() {
-		return genre;
+		return returnNullOrValue("genre", genre);
 	}
 	public void setGenre(String genre) {
 		this.genre = genre;
 	}
 	public String getAuthor() {
-		return author;
+		return returnNullOrValue("author", author);
 	}
 	public void setAuthor(String author) {
 		this.author = author;
 	}
-	public List<String> getChapters() {
-		return chapters;
+	@Override
+	public Date getCreation() {
+		return returnNullOrValue("creation", super.getCreation());
 	}
-	public void setChapters(List<String> chapters) {
-		this.chapters = chapters;
+	@Override
+	public Date getLastModification() {
+		return returnNullOrValue("lastModification", super.getLastModification());
 	}
-	public List<String> getSections() {
-		return sections;
+
+	@Override
+	public ProjectionClause getProjection() {
+		return projection;
 	}
-	public void setSections(List<String> sections) {
-		this.sections = sections;
+	@Override
+	public Book setProjection(ProjectionClause projection) {
+		this.projection = projection;
+		return this;
 	}
-	
+
+	private <T> T returnNullOrValue(String fieldName, T fieldValue) {
+		return returnNullOrValue(projection, fieldName, fieldValue);
+	}
 }

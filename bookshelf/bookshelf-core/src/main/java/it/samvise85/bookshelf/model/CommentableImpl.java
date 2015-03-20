@@ -1,9 +1,13 @@
 package it.samvise85.bookshelf.model;
 
+import javax.persistence.Column;
+import javax.persistence.MappedSuperclass;
 
+@MappedSuperclass
 public abstract class CommentableImpl extends EditableImpl implements Commentable {
 	
-	private String stream;
+	@Column
+	protected String stream;
 
 	public String getStream() {
 		return stream;

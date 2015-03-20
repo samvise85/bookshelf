@@ -13,3 +13,5 @@ bookshelf/bookshelf-security/.settings
 bookshelf/bookshelf-security/target
 bookshelf/bookshelf-standalone/.settings
 bookshelf/bookshelf-standalone/target
+bookshelf/bookshelf-inmemory-db/.settings
+bookshelf/bookshelf-inmemory-db/target

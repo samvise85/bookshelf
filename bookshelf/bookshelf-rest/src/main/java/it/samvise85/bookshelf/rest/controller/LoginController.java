@@ -15,8 +15,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 public class LoginController {
-//	private static final Logger log = Logger.getLogger(LoginController.class); 
-	
 	@Autowired
 	private UserManager userManager;
 	
@@ -25,20 +23,4 @@ public class LoginController {
 	public User login(@RequestHeader(value=SpringSecurityConfig.USERNAME_PARAM_NAME) String username) {
 		return userManager.get(username, UserUtils.PASSWORD_PROTECTION);
 	}
-
-//	@RequestMapping(value = "/loginAdmin", method = RequestMethod.POST)
-//	@Secured(BookshelfRole.ADMIN)
-//	public Boolean loginAdmin(@RequestHeader(value=SpringSecurityConfig.USERNAME_PARAM_NAME) String username) {
-//		Boolean isAdmin = Boolean.FALSE;
-//		if(username != null) {
-//			try {
-//				User user = userManager.get(username, UserUtils.PASSWORD_PROTECTION);
-//				if(user.getAdmin() != null)
-//					isAdmin = user.getAdmin();
-//			} catch(Exception e) {
-//				log.warn(e.getMessage());
-//			}
-//		}
-//		return isAdmin;
-//	}
 }

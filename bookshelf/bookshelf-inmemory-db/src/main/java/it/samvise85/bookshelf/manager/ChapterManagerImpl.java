@@ -3,30 +3,64 @@ package it.samvise85.bookshelf.manager;
 import it.samvise85.bookshelf.model.book.Chapter;
 import it.samvise85.bookshelf.persist.PersistOptions;
 import it.samvise85.bookshelf.persist.clauses.NoProjectionClause;
-import it.samvise85.bookshelf.persist.clauses.Order;
-import it.samvise85.bookshelf.persist.clauses.OrderClause;
 import it.samvise85.bookshelf.persist.clauses.ProjectionClause;
-import it.samvise85.bookshelf.persist.clauses.SelectionClause;
 import it.samvise85.bookshelf.persist.clauses.SimpleProjectionClause;
-import it.samvise85.bookshelf.persist.file.FilePersistenceUnit;
-import it.samvise85.bookshelf.persist.selection.Equals;
-import it.samvise85.bookshelf.persist.selection.IsNotNull;
+import it.samvise85.bookshelf.persist.inmemory.ChapterRepository;
+import it.samvise85.bookshelf.persist.inmemory.InMemoryPersistenceUnit;
 
-import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
 import org.apache.commons.lang3.StringEscapeUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 @Service
-public class ChapterManagerImpl extends FilePersistenceUnit<Chapter> implements ChapterManager {
+public class ChapterManagerImpl extends InMemoryPersistenceUnit<Chapter> implements ChapterManager {
+	private static final SimpleProjectionClause BASIC_PROJECTION = new SimpleProjectionClause("id", "position", "book");
+
 	private static final Logger log = Logger.getLogger(ChapterManagerImpl.class);
+	
+	@Autowired
+	protected ChapterRepository repository;
 
 	public ChapterManagerImpl() {
 		super(Chapter.class);
+	}
+
+	@Override
+	public List<Chapter> getList(PersistOptions options) {
+		if(options != null) {
+			String book = null;
+			Pageable pagination = null;
+			if(options.getSelection() != null && options.getSelection().size() == 1 &&
+					options.getSelection().get(0).getField().equals("book"))
+				book = (String) options.getSelection().get(0).getValue();
+			if(options.getPagination() != null)
+				pagination = createPageable(options.getPagination());
+			if(book != null)
+				return findChapters(book, pagination, options.getProjection());
+		}
+		return super.getList(options);
+	}
+
+	@Override
+	public Chapter getChapterByBookAndPosition(String book, Integer position,
+			ProjectionClause projection) {
+		return repository.findFirstByBookAndPosition(book, position).setProjection(projection);
+	}
+
+	private List<Chapter> findChapters(String book, Pageable pagination, ProjectionClause projection) {
+		if(pagination == null)
+			return convertToList(repository.findByBookOrderByPositionAsc(book), projection);
+		return convertToList(repository.findByBookOrderByPositionAsc(book, pagination), projection);
+	}
+	
+	private Chapter findLastChapter(String book, ProjectionClause projection) {
+		return repository.findFirstByBookOrderByPositionDesc(book);
 	}
 
 	@Override
@@ -87,26 +121,16 @@ public class ChapterManagerImpl extends FilePersistenceUnit<Chapter> implements 
 
 	private void setLastChapterNumber(Chapter chapter) {
 		log.debug("This is the last chapter");
-		List<Chapter> chapters = getList(new PersistOptions(
-        		new SimpleProjectionClause("id", "position", "book"),
-        		Arrays.asList(new SelectionClause[] {new SelectionClause("book", Equals.getInstance(), chapter.getBook()),
-        				new SelectionClause("position", IsNotNull.getInstance(), null)}),
-        		null));
+		Chapter chap = findLastChapter(chapter.getBook(), BASIC_PROJECTION);
 		int position = 1;
-		if(chapters != null)
-			position = chapters.size()+1;
-		
+		if(chap != null)
+			position = chap.getPosition()+1;
 		chapter.setPosition(position);
 	}
 	
 	private void updateOtherChaptersPosition(Chapter chapter) {
 		log.debug("Updating other chapters position");
-		
-		List<Chapter> chapters = getList(new PersistOptions(
-        		new SimpleProjectionClause("id", "position", "book"),
-        		Arrays.asList(new SelectionClause[] {new SelectionClause("book", Equals.getInstance(), chapter.getBook()),
-        				new SelectionClause("position", IsNotNull.getInstance(), null)}),
-        		Arrays.asList(new OrderClause[] {new OrderClause("position", Order.DESC)})));
+		List<Chapter> chapters = findChapters(chapter.getBook(), null, BASIC_PROJECTION);
 		
 		if(chapters != null) {
 			for(Chapter ch : chapters) {
@@ -124,15 +148,8 @@ public class ChapterManagerImpl extends FilePersistenceUnit<Chapter> implements 
 	}
 
 	@Override
-	public Chapter getChapterByBookAndPosition(String book, Integer position,
-			ProjectionClause projection) {
-		List<Chapter> list = getList(new PersistOptions(
-        		NoProjectionClause.NO_PROJECTION,
-        		Arrays.asList(new SelectionClause[] {new SelectionClause("book", Equals.getInstance(), book), new SelectionClause("position", Equals.getInstance(), position)}), 
-        		Arrays.asList(new OrderClause[] {new OrderClause("position", Order.ASC), new OrderClause("number", Order.ASC)})));
-		if(list != null && !list.isEmpty())
-        	return list.get(0);
-        return null;
+	public ChapterRepository getRepository() {
+		return repository;
 	}
 
 }

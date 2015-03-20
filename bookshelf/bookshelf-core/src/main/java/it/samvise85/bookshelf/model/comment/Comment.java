@@ -4,24 +4,38 @@ import it.samvise85.bookshelf.model.Commentable;
 import it.samvise85.bookshelf.model.CommentableImpl;
 import it.samvise85.bookshelf.model.Editable;
 import it.samvise85.bookshelf.model.Identifiable;
-import it.samvise85.bookshelf.model.user.User;
+import it.samvise85.bookshelf.persist.clauses.ProjectionClause;
 
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.Id;
+import javax.persistence.Transient;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 
 @JsonInclude(Include.NON_NULL)
+@Entity
 public class Comment extends CommentableImpl implements Commentable, Editable, Identifiable {
 	//internal
+	@Id
 	private String id;
+	@Column
 	private String comment;
+	@Column
+	private String parentStream;
+	@Column
+	private String user;
+	@Column
+	private String moderation;
 	
-	//externals
-	private Stream parentStream;
-	private User user;
-	private Moderation moderation;
+	@Transient
+	@JsonIgnore
+	private ProjectionClause projection;
 	
 	public Comment() {};
-	public Comment(String comment, Stream parentStream, User user) {
+	public Comment(String comment, String parentStream, String user) {
 		super();
 		this.comment = comment;
 		this.parentStream = parentStream;
@@ -40,23 +54,33 @@ public class Comment extends CommentableImpl implements Commentable, Editable, I
 	public void setComment(String comment) {
 		this.comment = comment;
 	}
-	public Stream getParentStream() {
+	public String getParentStream() {
 		return parentStream;
 	}
-	public void setParentStream(Stream parentStream) {
+	public void setParentStream(String parentStream) {
 		this.parentStream = parentStream;
 	}
-	public User getUser() {
+	public String getUser() {
 		return user;
 	}
-	public void setUser(User user) {
+	public void setUser(String user) {
 		this.user = user;
 	}
-	public Moderation getModeration() {
+	public String getModeration() {
 		return moderation;
 	}
-	public void setModeration(Moderation moderation) {
+	public void setModeration(String moderation) {
 		this.moderation = moderation;
+	}
+
+	@Override
+	public ProjectionClause getProjection() {
+		return projection;
+	}
+	@Override
+	public Comment setProjection(ProjectionClause projection) {
+		this.projection = projection;
+		return this;
 	}
 	
 }
