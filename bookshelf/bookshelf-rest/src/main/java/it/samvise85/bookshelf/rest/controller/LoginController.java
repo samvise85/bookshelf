@@ -18,7 +18,7 @@ public class LoginController {
 	@Autowired
 	private UserManager userManager;
 	
-	@RequestMapping(value = "/login", method = RequestMethod.POST)
+	@RequestMapping(value = "/login", method = RequestMethod.GET)
 	@Secured(BookshelfRole.ANYONE)
 	public User login(@RequestHeader(value=SpringSecurityConfig.USERNAME_PARAM_NAME) String username) {
 		return userManager.get(username, UserUtils.PASSWORD_PROTECTION);

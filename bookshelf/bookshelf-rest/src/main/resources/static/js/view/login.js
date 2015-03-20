@@ -24,7 +24,7 @@ window.LoginView = Backbone.View.extend({
 		$.cookie("bookshelf-token", token.toString(CryptoJS.enc.Hex));
 		
 		$.ajax({url: '/login',
-			type:'POST',
+			type:'GET',
 			success:function (data, textStatus, request) {
 				app.clear();
 				app.user = eval(data);

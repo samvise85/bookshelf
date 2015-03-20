@@ -4,13 +4,13 @@ window.BookListView = Backbone.View.extend({
 	reload : false,
 	clearMessages : true,
 	render: function () {
-		var that = this;
+		var self = this;
 		var books = new Books();
 		books.fetch({
 			success: function(books) {
-				$(that.el).empty();
-				$(that.el).html(that.template({books: books.models}));
-				return that;
+				$(self.el).empty();
+				$(self.el).html(self.template({books: books.models}));
+				return self;
 			},
 			error: function () {
 				app.messageView.errors.push("An error occurred loading book list");
@@ -62,23 +62,23 @@ window.BookEditView = Backbone.View.extend({
 		return false;
 	},
 	render: function (options) {
-		var that = this;
+		var self = this;
 		if(options.id) {
-			that.book = new Book({id: options.id});
-			that.book.fetch({
+			self.book = new Book({id: options.id});
+			self.book.fetch({
 				success: function (book) {
-					$(that.el).empty();
-					$(that.el).html(that.template({book: book}));
-					return that;
+					$(self.el).empty();
+					$(self.el).html(self.template({book: book}));
+					return self;
 				},
 				error: function () {
 					app.messageView.errors.push("An error occurred loading " + book.id);
 				}
 			});
 		} else {
-			$(that.el).empty();
-			$(that.el).html(that.template({book: null}));
-			return that;
+			$(self.el).empty();
+			$(self.el).html(self.template({book: null}));
+			return self;
 		}
 	}
 });
@@ -97,15 +97,15 @@ window.BookReadView = Backbone.View.extend({
 	},
 	render: function (options) {
 		this.lastOptions = options;
-		var that = this;
+		var self = this;
 		if(options.id) {
-			that.book = new Book({id: options.id});
-			that.book.fetch({
+			self.book = new Book({id: options.id});
+			self.book.fetch({
 				success: function (book) {  
-					$(that.el).empty();
-					$(that.el).html(that.template({book: book}));
-					that.loadChapters();
-					return that;  
+					$(self.el).empty();
+					$(self.el).html(self.template({book: book}));
+					self.loadChapters();
+					return self;  
 				},
 				error: function () {
 					app.messageView.errors.push("This is not the book you're looking for");
