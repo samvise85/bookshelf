@@ -8,10 +8,13 @@ Bookshelf is a work in progress.
 
 It uses the following technologies/frameworks:
 - Spring
+- Spring-boot
 - Spring-web
+- Spring-data
 - Spring-security
 - JQuery
 - BackboneJs
+- H2
 - more...
 
 ============== What does it do =============
@@ -20,7 +23,7 @@ Overview:
 
 This webapp allows to publish, view and read books online.
 
-The application uses several web services that allow to save and get a set of books, chapters, users and comments.
+The application uses several web services that allow to save and get a set of books, chapters, users and (in future releases) comments.
 
 The saving services reqest the user to login and verify wether he/she is authorized to do so (e.g. only admin users can publich books and chapters).
 
@@ -54,19 +57,14 @@ Actually the persistence is on file. Objects are serialized with JSON and saved 
 
 Operation like edit or delete archive older version of the files in a twin directory structure adding a timestamp suffix to the name of the file.
 
-=============== Installation ================
+========== Installation and usage ==========
 
 How to install:
-
-1 - unzip data.zip into the folder C:\bookshelf
-
-2 - checkout bookshelf project and build it with maven (you can also import it into an IDE with a maven importer).
+- checkout bookshelf project and build it with maven (you can also import it into an IDE with a maven importer).
 
 How to start it:
-
-1 - Run the runnable jar bookshelf-standalone (in an IDE run Application.java as Java Application)
-
-2 - Open a browser and go to http://localhost:8080/
+- Run the runnable jar bookshelf-standalone (in an IDE run Application.java as Java Application)
+- Open a browser and go to http://localhost:8080/
 
 Login:
 
@@ -78,7 +76,9 @@ There are two users:
 
 REST webservices (http://www.html.it/pag/19596/i-principi-dellarchitettura-restful/):
 - Spring 4 (https://spring.io/guides/gs/rest-service/)
+- Spring Boot (http://docs.spring.io/spring-boot/docs/current/reference/htmlsingle/#using-boot)
 - JSON (http://it.wikipedia.org/wiki/JSON)
+
 Security:
 - Spring security (http://stackoverflow.com/questions/10826293/restful-authentication-via-spring / http://automateddeveloper.blogspot.co.uk/2014/03/securing-your-mobile-api-spring-security.html)
 
@@ -90,7 +90,7 @@ Frontend:
 ================ What's left ================
 
 - Separate the views of anonimous user, logged user and administrator.
-- User Management is just a draft.
+- User Management (now is just a draft).
 - Password is saved uncoded.
 - Security based on RSA keys to prevent the stealing of the token to be fatal.
 - Web services of the classes: Comment, Stream, Moderation, Section.
