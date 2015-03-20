@@ -7,6 +7,8 @@ bookshelf/bookshelf-core/.settings
 bookshelf/bookshelf-core/target
 bookshelf/bookshelf-file/.settings
 bookshelf/bookshelf-file/target
+bookshelf/bookshelf-inmemory-db/.settings
+bookshelf/bookshelf-inmemory-db/target
 bookshelf/bookshelf-rest/.settings
 bookshelf/bookshelf-rest/target
 bookshelf/bookshelf-security/.settings
