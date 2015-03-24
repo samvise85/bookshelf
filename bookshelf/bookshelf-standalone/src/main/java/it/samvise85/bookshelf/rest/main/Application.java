@@ -9,7 +9,7 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Import;
 
 @ComponentScan(basePackages={"it.samvise85.bookshelf"})
-@Import(SpringSecurityConfig.class)
+//@Import(SpringSecurityConfig.class)
 @EnableAutoConfiguration
 @SpringBootApplication
 public class Application {

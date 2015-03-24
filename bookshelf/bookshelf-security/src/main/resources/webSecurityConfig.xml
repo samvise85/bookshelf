@@ -16,7 +16,7 @@
 
 	<!-- Authentication manager -->
 	<authentication-manager alias="authenticationManager">
-		<authentication-provider ref="boohshelfAuthenticationProvider" />
+		<authentication-provider ref="bookshelfAuthenticationProvider" />
 	</authentication-manager>
 	
 	<beans:bean id="bookshelfTokenFilter" class="it.samvise85.bookshelf.rest.security.token.BookshelfTokenFilter">

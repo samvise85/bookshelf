@@ -16,11 +16,6 @@
 		<artifactId>bookshelf-core</artifactId>
 		<version>${parent.version}</version>
 	</dependency>
-	<dependency>
-		<groupId>it.samvise85</groupId>
-		<artifactId>bookshelf-file</artifactId>
-		<version>${parent.version}</version>
-	</dependency>
   </dependencies>
   
   
