@@ -1,4 +1,4 @@
-# bookshelf
+# Bookshelf
 
 ================ What's this ===============
 
@@ -8,7 +8,6 @@ Bookshelf is a work in progress.
 
 It uses the following technologies/frameworks:
 - Spring
-- Spring-boot
 - Spring-web
 - Spring-data
 - Spring-security
@@ -41,21 +40,10 @@ When the sever receives the username and the token can verify the token (it can 
 The web services are marked with @Secured annotation that indicated wich role the user must possess (NOTE: roles are required to start with the prefix "ROLE_").
 
 
-Is it safe? No, of course! Stealing the token you steal the identity like you are stealing the password. Without https the token can be stolen by anyone sniffing the messages otherwise you can always stole it from the cookies with different techniques.
+Is it safe? Of course not! Stealing the token you steal the identity like you are stealing the password. Without https the token can be stolen by anyone sniffing the messages otherwise you can always stole it from the cookies with different techniques.
 
 Can be better? Yes, using an RSA public key for example to encode the token and in other hundreds ways.
 
-
-Persistence:
-
-Actually the persistence is on file. Objects are serialized with JSON and saved in a directory tree structure:
-- data
-- - Book
-- - Chapter
-- - User
-- - Etc...
-
-Operation like edit or delete archive older version of the files in a twin directory structure adding a timestamp suffix to the name of the file.
 
 ========== Installation and usage ==========
 
@@ -89,6 +77,8 @@ Frontend:
 
 ================ What's left ================
 
+- OAuth2 support (FB, Google, Twitter)
+- Build a deployable war
 - Separate the views of anonimous user, logged user and administrator.
 - User Management (now is just a draft).
 - Password is saved uncoded.
