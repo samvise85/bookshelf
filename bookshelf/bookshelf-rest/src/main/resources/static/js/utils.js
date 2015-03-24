@@ -20,7 +20,7 @@ $.getToken = function () {
 }
 $.ajaxPrefilter( function( options, originalOptions, jqXHR ) {
 	if(options.url.indexOf('http') != 0)
-		options.url = 'http://localhost:8080' + options.url;
+		options.url = getAppPath() + options.url;
 	options.headers = $.getToken();
 });
 
@@ -52,14 +52,23 @@ $.urlParam = function(name){
        return results[1] || 0;
     }
 }
-  
+
+window.getAppPath = function() {
+	if(!window.appname) {
+		var name = window.location.pathname.split("/")[1];
+		window.appname = name.toLowerCase().indexOf("bookshelf") >= 0 ? name : null;
+		
+	}
+	return '//' + window.location.host + (window.appname != null ? "/" + window.appname : "");
+};
+	
 window.templateLoader = {
 	load: function(views, callback) {
 		var deferreds = [];
 
 		$.each(views, function(index, view) {
 			if (window[view]) {
-				deferreds.push($.get('/tpl/' + view + '.html', function(data) {
+				deferreds.push($.get(getAppPath() + '/tpl/' + view + '.html', function(data) {
 					window[view].prototype.template = _.template(data);
 				}, 'html'));
 			} else {

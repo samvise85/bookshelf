@@ -54,25 +54,27 @@ window.Router = Backbone.Router.extend({
 	},
 	loadUser: function () {
 		var self = this;
-		try {
-			$.ajax({url: '/login',
-				type:'GET',
-				success:function (data, textStatus, request) {
-					self.user = eval(data);
-					self.init();
-					self.rerenderView();
-				},
-				error: function (request, textStatus, error) {
-					if($.cookie("bookshelf-username")) {
-						$.removeCookie("bookshelf-username");
-						$.removeCookie("bookshelf-token");
-						self.messageView.errors.push("Username or password are not correct");
-						self.messageView.rerender();
+		if($.cookie("bookshelf-username")) {
+			try {
+				$.ajax({url: '/login',
+					type:'GET',
+					success:function (data, textStatus, request) {
+						self.user = eval(data);
+						self.init();
+						self.rerenderView();
+					},
+					error: function (request, textStatus, error) {
+						if($.cookie("bookshelf-username")) {
+							$.removeCookie("bookshelf-username");
+							$.removeCookie("bookshelf-token");
+							self.messageView.errors.push("Username or password are not correct");
+							self.messageView.rerender();
+						}
 					}
-				}
-			});
-		} catch(error) {
-			console.log(error);
+				});
+			} catch(error) {
+				console.log(error);
+			}
 		}
 	},
 	getUser: function () {
