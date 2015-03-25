@@ -30,7 +30,7 @@
 	$('.chapter_text').scroll(function(e) {
 		if($('.chapter_text').scrollTop() + $('.chapter_text').height() >= $('.chapter_text').prop('scrollHeight')) {
 			if(app.chapterReadView)
-				setTimeout(app.chapterReadView.next, 3000);
+				setTimeout(app.chapterReadView.scroll, 3000);
 		}
 	});
 

@@ -179,10 +179,14 @@ window.ChapterReadView = Backbone.View.extend({
 			app.messageView.rerender();
 		}
 	},
+	scroll: function () {
+		var self = this;
+		if(!self.next)
+			self = app.chapterReadView;
+		self.next();
+	},
 	next: function () {
 		var position;
-		if(!this.chapter)
-			this.chapter = app.chapterReadView.chapter;
 		if(this.chapter) {
 			position = parseInt(this.chapter.get('position'))+1;
 			this.navToChapterPosition(position ? position : null);
