@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans:beans xmlns="http://www.springframework.org/schema/security"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:beans="http://www.springframework.org/schema/beans"
+	xmlns:sec="http://www.springframework.org/schema/security"
+	xsi:schemaLocation="
+      http://www.springframework.org/schema/security
+      http://www.springframework.org/schema/security/spring-security-3.2.xsd
+      http://www.springframework.org/schema/beans
+      http://www.springframework.org/schema/beans/spring-beans-4.0.xsd">
+
+	<!-- Rest authentication entry point configuration -->
+	<http realm="Bookshelf" auto-config="false" use-expressions="true" entry-point-ref="restAuthenticationEntryPoint">
+		<intercept-url pattern="/**" />
+		<custom-filter ref="bookshelfTokenFilter" position="FORM_LOGIN_FILTER"/>
+	</http>
+
+	<!-- Authentication manager -->
+	<authentication-manager alias="authenticationManager">
+		<authentication-provider ref="bookshelfAuthenticationProvider" />
+	</authentication-manager>
+	
+	<beans:bean id="bookshelfTokenFilter" class="it.samvise85.bookshelf.rest.security.token.BookshelfTokenFilter">
+	  <beans:property name="authManager" ref="authenticationManager"/>
+	</beans:bean>
+	
+	<beans:bean id="tokenManager" class="it.samvise85.bookshelf.rest.security.token.TokenManagerImpl">
+	  <beans:constructor-arg index="0" value="bookshelf by Samvise85!"/>
+	  <beans:constructor-arg index="1" ref="bookshelfUserDetailsService"/>
+	</beans:bean>
+
+	<!-- Enable the annotations for defining the secure role -->
+	<global-method-security secured-annotations="enabled" />
+
+</beans:beans>
