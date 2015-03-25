@@ -181,9 +181,12 @@ window.ChapterReadView = Backbone.View.extend({
 	},
 	next: function () {
 		var position;
-		if(this.chapter)
+		if(!this.chapter)
+			this.chapter = app.chapterReadView.chapter;
+		if(this.chapter) {
 			position = parseInt(this.chapter.get('position'))+1;
-		this.navToChapterPosition(position ? position : null);
+			this.navToChapterPosition(position ? position : null);
+		}
 	},
 	navToChapterPosition: function(position) {
 		if(this.chapter && position && position != null) {
