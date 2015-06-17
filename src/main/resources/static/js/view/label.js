@@ -1,5 +1,4 @@
 
-
 window.LabelListView = Backbone.View.extend({
 	lastOptions : null,
 	reload : false,
@@ -25,7 +24,6 @@ window.LabelListView = Backbone.View.extend({
 				success: function(labels) {
 					if(labels.models.length == 0) self.stopScroll = true;
 					_.each(labels.models, function (label) {
-//						self.requests[label.id] = label;
 						$('table tbody', self.el).append(new LabelListItemView(label).render().el);
 					}, self);
 					return self;

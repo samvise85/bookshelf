@@ -73,8 +73,14 @@ window.templateLoader = {
 		
 		$.each(views, function(index, view) {
 			if (window[view]) {
-				deferreds.push($.get(getAppPath() + '/tpl/' + view + "_" + date +'.html', function(data) {
-					window[view].prototype.template = _.template(data);
+				var resource = getAppPath() + '/tpl/' + view + "_" + date +'.html';
+				deferreds.push($.get(resource, function(data) {
+					try {
+						window[view].prototype.template = _.template(data);
+					} catch(e) {
+						console.error("Error loading template of view " + view);
+						throw e;
+					}
 				}, 'html'));
 			} else {
 				alert(view + " not found");

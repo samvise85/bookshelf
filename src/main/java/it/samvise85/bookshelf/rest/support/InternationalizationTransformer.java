@@ -44,7 +44,7 @@ public class InternationalizationTransformer {
 		
 		//check markup and substitute labels
 		StringBuffer sb = new StringBuffer();
-		Pattern pattern = Pattern.compile("\\{\\{(.+)\\}\\}");
+		Pattern pattern = Pattern.compile("\\{\\{([^\\}]+)\\}\\}");
 		Matcher matcher = pattern.matcher(fileContent);
 		while(matcher.find()) {
 			String key = matcher.group(1);

@@ -40,7 +40,7 @@ public class LabelController {
 //	@Secured(BookshelfRole.ADMIN)
     public Label getLabel(@PathVariable String id) {
 		log.info(ControllerUtils.getMethodName() + ": id = " + id);
-		return labelManager.get(Long.parseLong(id));
+		return labelManager.get(id);
     }
 
 	@RequestMapping(value="/labels/{id}", method=RequestMethod.PUT)
