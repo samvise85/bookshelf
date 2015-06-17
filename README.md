@@ -111,7 +111,6 @@ Frontend:
 ================ What's left ================
 
 - OAuth2 support (FB, Google, Twitter)
-- 
 - Separate the views of anonimous user, logged user and administrator (similarly to the internationalization).
 - Security based on RSA keys to prevent the stealing of the token to be fatal (or simply hash the content of the request).
 - Web services of the classes: Moderation, Section.
