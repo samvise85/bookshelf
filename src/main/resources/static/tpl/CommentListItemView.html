@@ -1,0 +1,24 @@
+<td>
+<div id="comment-<%= comment.id %>">
+	<div class="comment-author" style="">
+		<a href="#users/<%= comment.get('user') %>"><%= htmlEncode(comment.get('user')) %></a> 
+		<span class="comment-hour"><%= compareDate(new Date(parseInt(comment.get('creation')))) %></span>
+	</div>
+	<div class="comment-text"><%= htmlEncode(comment.get('comment')) %></div>
+
+<% if(app.getUser() && app.getUser().username === comment.get('user')) {%>
+	<a class="btn btn-primary edit">{{comment.list.button.edit}}</a>
+	<a class="btn btn-danger delete">{{comment.list.button.delete}}</a>
+<% } %>
+</div>
+
+<% if(app.getUser() && app.getUser().username === comment.get('user')) {%>
+	<script type="text/javascript">
+		
+		$('#comment-<%=comment.id%> .delete').click(function (e) {
+			e.preventDefault();
+			alert('delete: #comment<%=comment.id%> .delete');
+		});
+	</script>
+<% } %>
+</td>

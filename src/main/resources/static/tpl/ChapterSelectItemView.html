@@ -1,0 +1,9 @@
+<%
+var i = chapter.get('position');
+if(current && chapter.id == current) { %>
+<option value="<%= i %>" selected="selected"><%=chapter.get('title') %>
+</option>
+<% } else { %>
+<option value="<%= i+1 %>">{{chapter.model.position.after}} <%=chapter.get('title') %>
+</option>
+<% } %>

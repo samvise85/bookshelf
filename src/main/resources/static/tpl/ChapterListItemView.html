@@ -1,0 +1,7 @@
+<td class="chapter-number" style="width:50px"><%= htmlEncode(chapter.get('number')) %></td>
+<td><a href="#book/<%= chapter.get('book') %>/chapter/<%= chapter.id %>"><%= htmlEncode(chapter.get('title')) %></a></td>
+<% if(app.isAdmin() === true) {%>
+<td class="chapter-options" style="width:200px;text-align:right;">
+	<a class="btn" href="#book/<%= chapter.get('book') %>/chapter/<%= chapter.id %>/edit">{{chapter.list.button.edit}}</a>
+</td>
+<% } %>

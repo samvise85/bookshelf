@@ -1,0 +1,23 @@
+<h4>Request id: <%= request.id %></h4>
+<div class="section">
+<legend>Request</legend>
+	<div><span class="float-left label">Request URL:</span><%= request.get('requestURL') %></div>
+	<div><span class="float-left label">HTTP Method:</span><%= request.get('httpMethod') %></td>
+	<div><span class="float-left label">Receiving Date:</span><%
+		var d = new Date(parseInt(request.get('date')));
+		var format = $.datepicker.formatDate("yy-mm-dd", d) + " " + (d.getHours() < 10 ? '0':'') + d.getHours() + ":" + (d.getMinutes() < 10 ? '0':'') + d.getMinutes() +":" + (d.getSeconds() < 10 ? '0':'') + d.getSeconds();
+	%><%=format%></div>
+	<div><span class="float-left label">Request body class:</span><%= request.get('objectClass') %></div>
+	</div>
+</div>
+<div class="section">
+	<legend>User Info</legend>
+	<div><span class="float-left label">User IP</span> <%= request.get('ip') %></div>
+	<div><span class="float-left label">Username</span> <%= request.get('username') %></div>
+	<div><span class="float-left label">Browser locale</span> <%= request.get('locale') %></div>
+</div>
+<div class="section">
+	<legend>Response</legend>
+	<div><span class="float-left label">Responding Method</span> <%= request.get('method') %></div>
+	<div class="request-<%=request.id%>-error"></div>
+</div>
