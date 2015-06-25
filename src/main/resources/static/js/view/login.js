@@ -15,7 +15,8 @@ window.LoginView = Backbone.View.extend({
 
     login:function (event) {
         event.preventDefault(); // Don't let this button submit the form
-		app.messageView.clear();
+        if(app.messageView)
+        	app.messageView.clear();
 		
         //console.log('Loggin in... ');
 		var username = $('#username').val();

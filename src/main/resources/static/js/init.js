@@ -45,3 +45,22 @@ $(document).ready(function () {
 	};
 	loader = new ScriptLoader(scripts);
 });
+
+//$(document).ready(function () {
+//	var date = new Date().getTime();
+//	var scripts = ["js/utils_" + date + ".js",
+//	               "js/model/modelCommon_" + date + ".js",
+//	               "js/model/model_" + date + ".js",
+//	               "js/view/header_" + date + ".js",
+//	               "js/view/message_" + date + ".js",
+//	               "js/view/login_" + date + ".js",
+//	               "js/view/contact_" + date + ".js",
+//	               "js/view/user_" + date + ".js",
+//	               "js/view/book_" + date + ".js",
+//	               "js/view/chapter_" + date + ".js",
+//	               "js/view/comment_" + date + ".js",
+//	               "js/main_" + date + ".js"];
+//	scripts.forEach(function(s) {
+//		$('body').append($('<script src="' + s + '"></script>'));
+//	});
+//});

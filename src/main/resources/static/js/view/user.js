@@ -2,11 +2,10 @@ window.UserListItemView = Backbone.View.extend({
 	tagName:"tr",
 
 	initialize:function (user) {
-	this.model = user;
+		this.model = user;
 		this.model.bind("change", this.render, this);
 		this.model.bind("destroy", this.close, this);
 	},
-
 	render:function () {
 		$(this.el).html(this.template({user: this.model}));
 		return this;
@@ -19,7 +18,13 @@ window.UserListView = Backbone.View.extend({
 	clearMessages : true,
 	page: 1,
 	stopScroll: false,
-	
+
+	initialize: function() {
+		var self = this;
+		viewLoader.load("UserListItemView", function() {
+			self.listItemViewReady = true;
+		});
+	},
 	newOptions: function(options) {
 		return !arraysEqual(this.lastOptions, options);
 	},
@@ -35,13 +40,20 @@ window.UserListView = Backbone.View.extend({
 		}
 	},
 	append: function (options) {
+		if(this.listItemViewReady) {
+			this.appendWhenReady(options);
+		} else {
+			var self  = this;
+			setTimeout(function() { self.append(options); }, 100);
+		}
+	},
+	appendWhenReady: function (options) {
 		if(!(this.stopScroll === true)) {
 			var self = this;
 			var users = new Users({page: this.page});
 			users.fetch({
 				success: function(users) {
-					//console.log(chapters.models.length);
-					//console.log(chapters.models.length == 0);
+					var self = this;
 					if(users.models.length == 0) self.stopScroll = true;
 					_.each(users.models, function (user) {
 						$('table tbody', self.el).append(new UserListItemView(user).render().el);
@@ -64,6 +76,13 @@ window.UserEditView = Backbone.View.extend({
 	reload : true, //sempre da ricaricare da zero
 	clearMessages : true,
 	messages: new Messages(true),
+
+	initialize: function() {
+		var self = this;
+		viewLoader.load("LanguageSelectItemView", function() {
+			self.listItemViewReady = true;
+		});
+	},
 	newOptions: function(options) {
 		return !arraysEqual(this.lastOptions, options);
 	},
@@ -119,17 +138,23 @@ window.UserEditView = Backbone.View.extend({
 	},
 	validateOldPassword: function() {
 		var newpassword = $('#newpassword').val();
-		var username = $('#username').val();
-		var token = createToken(username, newpassword);
-		if(token != $.cookie("bookshelf-token")) {
-			this.messages.add("oldpassword_err", "Wrong password!");
-		} else {
-			this.messages.remove("oldpassword_err");
+		if($('#id') && $('#id').size() > 0 && newpassword && !newpassword.isEmpty()) {
+			var oldpassword = $('#oldpassword').val();
+			var username = $('#username').val();
+			var token = createToken(username, oldpassword);
+			if(token != $.cookie("bookshelf-token")) {
+				this.messages.add("oldpassword_err", "Wrong password!");
+			} else {
+				this.messages.remove("oldpassword_err");
+			}
 		}
 	},
 	validateNewPassword: function() {
 		var newpassword = $('#newpassword').val();
-		if(((!$('#id') || $('#id').size() == 0) && (newpassword == null || newpassword.isEmpty())) || !validatePassword(newpassword)) {
+		var a = newpassword == null || newpassword.isEmpty(); //no password
+		var b = !$('#id') || $('#id').size() == 0; //no id
+		var c = !validatePassword(newpassword); //non valid
+		if(c && (b || !a)) {
 			this.messages.add("newpassword_err", "Password must contain at least 8 character");
 		} else {
 			this.messages.remove("newpassword_err");
@@ -175,7 +200,8 @@ window.UserEditView = Backbone.View.extend({
 				"password" : CryptoJS.SHA1($('#newpassword').val()).toString(CryptoJS.enc.Hex),
 				"firstname" : $('[name=firstname]').val(),
 				"lastname" : $('[name=lastname]').val(),
-				"admin" : app.isAdmin() ? $('.user_type .active').html() == 'Administrator' : null
+				"admin" : app.isAdmin() ? $('.user_type .active').html() == 'Administrator' : null,
+				"language" : $('[name=language]').val()
 			};
 			var self = this;
 			$.ajax({url: '/login',
@@ -186,6 +212,7 @@ window.UserEditView = Backbone.View.extend({
 			    dataType: "json",
 				success:function (data, textStatus, request) {
 					if(app.userListView) app.userListView.reload = true;
+					if(self.userj.language != self.user.get('language')) app.languageChanged();
 					app.navigate('users', {trigger:true});
 				},
 				error: function (req, resp) {
@@ -225,6 +252,7 @@ window.UserEditView = Backbone.View.extend({
 					success: function (user) {
 						$(self.el).empty();
 						$(self.el).html(self.template({user: user}));
+						self.addLanguagesWhenReady();
 						return self;
 					},
 					error: function () {
@@ -247,7 +275,42 @@ window.UserEditView = Backbone.View.extend({
 		grecaptcha.render('recaptcha', {
 			'sitekey' : '6Le83QcTAAAAAIsK6kgz3-M73bODFXVqB8t-9Ul-'
 		});
+	},
+	addLanguagesWhenReady: function() {
+		if(this.listItemViewReady) {
+			this.addLanguages();
+		} else {
+			var self  = this;
+			setTimeout(function() { self.addLanguagesWhenReady(); }, 100);
+		}
+	},
+	addLanguages: function() {
+		var self  = this;
+		var languages = new Languages();
+		languages.fetch({
+			success: function(languages) {
+				_.each(languages.models, function(language) {
+					var languageSelectItemView = new LanguageSelectItemView();
+					languageSelectItemView.render({language: language, currLang: self.user ? self.user.get('language') : ''});
+					$('select[name=language]').append(languageSelectItemView.el);
+				})
+			},
+			error: function(req, resp) {
+				app.messageView.errors.push("This is not the user you're looking for.");
+				app.messageView.rerender();
+			}
+		});
 	}
+});
+
+window.LanguageSelectItemView = Backbone.View.extend({
+    render:function (options) {
+        var html = this.template(options);
+        this.setElement(html);
+//        console.log(options);
+//        console.log(this.el);
+        return this;
+    }
 });
 
 window.UserView = Backbone.View.extend({

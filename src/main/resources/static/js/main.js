@@ -1,6 +1,7 @@
 window.Router = Backbone.Router.extend({
 	user: null,
 	savedViews: {},
+	history: [],
 	
     routes: {
 		"": "books",
@@ -31,12 +32,14 @@ window.Router = Backbone.Router.extend({
 					type:'GET',
 					success:function (data, textStatus, request) {
 						self.user = eval(data);
+						self.initHistory();
 						self.initView();
 					},
 					error: function (request, textStatus, error) {
 						if($.cookie("bookshelf-username")) {
 							$.deleteCookie("bookshelf-username");
 							$.deleteCookie("bookshelf-token");
+							self.initHistory();
 							self.initView();
 							self.messageView.errors.push("Username or password are not correct");
 							self.messageView.rerender();
@@ -47,18 +50,32 @@ window.Router = Backbone.Router.extend({
 				console.log(error);
 			}
 		} else {
+			self.initHistory();
 			self.initView();
 		}
 	},
-	initView: function () {
+	initHistory: function () {
 		this.routesHit = 0;
-        this.headerView = new HeaderView();
-        this.messageView = new MessageView();
-        $('.header').html(this.headerView.render().el);
-        $('#messages').html(this.messageView.render().el);
-        
         Backbone.history.start();
-		Backbone.history.on('route', function() { this.routesHit++; }, this);
+		Backbone.history.on('route', function(router, method) {
+			this.routesHit++;
+			app.history.push({
+				method : method,
+				fragment : Backbone.history.fragment
+			});
+//			console.log(app.history); //TODO create and save route
+		}, this);
+	},
+	initView: function () {
+		var self = this;
+		viewLoader.load("HeaderView", function() {
+			self.headerView = new HeaderView();
+			$("#header").html(self.headerView.render().el);
+		});
+		viewLoader.load("MessageView", function() {
+	        self.messageView = new MessageView();
+	        $('#messages').html(self.messageView.render().el);
+		});
     },
 	clear: function () {
 		_.each(this.savedViews, function (savedViewName) {
@@ -66,7 +83,12 @@ window.Router = Backbone.Router.extend({
 		});
 		this.savedViews = {};
 		this.currentView = null;
-		this.user = null;
+		this.initView();
+	},
+	languageChanged: function() {
+		viewLoader.clear();
+		this.clear();
+//		alert('language changed!!!');
 	},
 	back: function() {
 		if(this.routesHit > 1) {
@@ -85,8 +107,9 @@ window.Router = Backbone.Router.extend({
 		if(!$.cookie("bookshelf-username")) return false;
 		return this.getUser() && this.getUser().admin === true;
 	},
-	
 	renderView : function(savedViewName, View, headerOptions, viewOptions) {
+		if(headerOptions && headerOptions.selection)
+			this.headerSelection = headerOptions.selection;
 		this.savedViews[savedViewName] = savedViewName;
 		this.currentViewName = savedViewName;
 		this.currentViewClass = View;
@@ -97,7 +120,7 @@ window.Router = Backbone.Router.extend({
 		if(this.currentViewName && this.currentViewClass) {
 			var currentView = eval("this." + this.currentViewName);
 			
-			var headerOptions = {rerender: true, selection: this.headerView.selection};
+			var headerOptions = {rerender: true};
 			currentView.reload = true;
 			this.renderCurrentView(headerOptions, currentView.lastOptions);
 		}
@@ -109,38 +132,38 @@ window.Router = Backbone.Router.extend({
 		
 		//renders the view
 		if (!currentView || currentView.reload || !currentView.newOptions || currentView.newOptions(viewOptions)) {
-			currentView = new this.currentViewClass();
-			eval("this." + this.currentViewName + " = currentView;");
-			currentView.render(viewOptions);
+			var self = this;
+			var className = this.currentViewName.charAt(0).toUpperCase() + this.currentViewName.slice(1);
+			viewLoader.load(className, function() {
+				currentView = new self.currentViewClass();
+				eval("self." + self.currentViewName + " = currentView;");
+				currentView.render(viewOptions);
+				$("#content").html(currentView.el);
+			});
 		} else {
 			currentView.delegateEvents(); // delegate events when the view is recycled
+			$("#content").html(currentView.el);
 		}
-		$("#content").html(currentView.el);
 		
 		//selects header
-		if(headerOptions && headerOptions.rerender)
-			$('.header').html(this.headerView.render().el);
-		if(headerOptions && headerOptions.selection)
-			this.headerView.select(headerOptions.selection);
+		if(this.headerView) {
+			if(headerOptions && headerOptions.rerender)
+				$("#header").html(this.headerView.render().el);
+			if(this.headerSelection)
+				this.headerView.select(this.headerSelection);
+		}
 		//renders the messages
-		if(clearMessages)
-			this.messageView.clear();
-        $('#messages').html(this.messageView.render().el);
+		if(this.messageView) {
+			if(clearMessages)
+				this.messageView.clear();
+			$('#messages').html(this.messageView.render().el);
+		}
 	},
 	
     home: function () {
-		this.renderView(function() {
-				if (!app.homeView) {
-					app.homeView = new HomeView();
-					app.homeView.render();
-				} else {
-					app.homeView.delegateEvents(); // delegate events when the view is recycled
-				}
-				$("#content").html(app.homeView.el);
-			},
-			this.homeView ? this.homeView.clearMessages : true,
-			'home-menu'
-		);
+    	var options = {};
+		this.renderView('homeView', HomeView, 
+				{rerender: true, selection: 'home-menu'}, options);
     },
 
     contact: function () {
@@ -194,15 +217,13 @@ window.Router = Backbone.Router.extend({
 	},
     editUser: function (id) {
     	var self = this;
-//    	this.getUser(function () {
-			if((!id && !self.getUser()) || (id && self.getUser() && (self.getUser().id == id || self.isAdmin()))) {
-		    	var options = {id: id};
-		    	self.renderView('userEditView', UserEditView, 
-						{rerender: true, selection: 'user-menu'}, options);
-			} else {
-				self.navigate('', {trigger:true});
-			}
-//    	});
+		if((!id && !self.getUser()) || (id && self.getUser() && (self.getUser().id == id || self.isAdmin()))) {
+	    	var options = {id: id};
+	    	self.renderView('userEditView', UserEditView, 
+					{rerender: true, selection: 'user-menu'}, options);
+		} else {
+			self.navigate('', {trigger:true});
+		}
 	},
     viewUser: function (id) {
     	var options = {id: id};
@@ -212,18 +233,17 @@ window.Router = Backbone.Router.extend({
 	
     login: function() {
     	var self = this;
-//    	this.getUser(function () {
-			if(!self.getUser()) {
-				self.renderView('loginView', LoginView, null, null);
-			} else {
-				self.navigate('', {trigger:true});
-			}
-//    	});
+		if(!self.getUser()) {
+			self.renderView('loginView', LoginView, null, null);
+		} else {
+			self.navigate('', {trigger:true});
+		}
     },
 	logout: function () {
 		$.deleteCookie("bookshelf-username");
 		$.deleteCookie("bookshelf-token");
 		this.clear();
+		this.user = null;
 		this.back();
 	},
 	denied: function () {
@@ -232,18 +252,5 @@ window.Router = Backbone.Router.extend({
 
 });
 
-window.viewList = [
-	"LoginView", "DeniedView",
-	/*"HomeView", */"ContactView", "HeaderView", "MessageView",
-	"BookListView", "BookEditView", "BookReadView", 
-	"ChapterListView", "ChapterListItemView", "ChapterEditView", "ChapterSelectItemView", "ChapterReadView",
-	"CommentListView", "CommentListItemView", "CommentEditView",
-	"UserListView", "UserListItemView", "UserEditView", "UserView"
-];
-templateLoader.load(
-	viewList,
-    function () {
-        app = new Router();
-        app.init();
-    }
-);
+app = new Router();
+app.init();

@@ -65,7 +65,27 @@ window.getAppPath = function() {
 	}
 	return '//' + window.location.host + (window.appname != null ? "/" + window.appname : "");
 };
-	
+
+window.viewLoader = {
+	loaded: {},
+	load: function(viewName, callback) {
+		if(!this.loaded[viewName]) {
+			var self = this;
+//			console.log("Load view " + viewName);
+			templateLoader.load([viewName], function() {
+				self.loaded[viewName] = viewName;
+				callback();
+			});
+		} else {
+			callback();
+		}
+	},
+	clear: function() {
+//		console.log("Cleared views");
+		this.loaded = {};
+	}
+};
+
 window.templateLoader = {
 	load: function(views, callback) {
 		var deferreds = [];
@@ -76,9 +96,10 @@ window.templateLoader = {
 				var resource = getAppPath() + '/tpl/' + view + "_" + date +'.html';
 				deferreds.push($.get(resource, function(data) {
 					try {
+//						console.log("Caricato template in vista " + view);
 						window[view].prototype.template = _.template(data);
 					} catch(e) {
-						console.error("Error loading template of view " + view);
+//						console.error("Error loading template of view " + view);
 						throw e;
 					}
 				}, 'html'));

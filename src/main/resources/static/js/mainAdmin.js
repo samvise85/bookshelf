@@ -8,7 +8,8 @@ window.AdminRouter = Backbone.Router.extend({
 		"analytics": "analytics",
         "requests": "requests",
         "request/:id": "viewRequest",
-        "labels": "labels",
+        "languages": "languages",
+        "labels/:id": "labels",
         "logout" : "logout",
 		"denied" : "denied"
     },
@@ -42,10 +43,15 @@ window.AdminRouter = Backbone.Router.extend({
 	},
 	initView: function () {
 		this.routesHit = 0;
-        this.headerView = new HeaderView();
-        this.messageView = new MessageView();
-        $('.header').html(this.headerView.render().el);
-        $('#messages').html(this.messageView.render().el);
+		var self = this;
+		viewLoader.load("HeaderView", function() {
+			self.headerView = new HeaderView();
+			$("#header").html(self.headerView.render().el);
+		});
+		viewLoader.load("MessageView", function() {
+	        self.messageView = new MessageView();
+	        $('#messages').html(self.messageView.render().el);
+		});
         
 		Backbone.history.start();
 		Backbone.history.on('route', function(router, method) {
@@ -54,7 +60,7 @@ window.AdminRouter = Backbone.Router.extend({
 				method : method,
 				fragment : Backbone.history.fragment
 			});
-			console.log(app.history);
+//			console.log(app.history);
 		}, this);
     },
 	clear: function () {
@@ -84,6 +90,8 @@ window.AdminRouter = Backbone.Router.extend({
 	},
 	
 	renderView : function(savedViewName, View, headerOptions, viewOptions) {
+		if(headerOptions && headerOptions.selection)
+			this.headerSelection = headerOptions.selection;
 		this.savedViews[savedViewName] = savedViewName;
 		this.currentViewName = savedViewName;
 		this.currentViewClass = View;
@@ -106,23 +114,32 @@ window.AdminRouter = Backbone.Router.extend({
 		
 		//renders the view
 		if (!currentView || currentView.reload || !currentView.newOptions || currentView.newOptions(viewOptions)) {
-			currentView = new this.currentViewClass();
-			eval("this." + this.currentViewName + " = currentView;");
-			currentView.render(viewOptions);
+			var self = this;
+			var className = this.currentViewName.charAt(0).toUpperCase() + this.currentViewName.slice(1);
+			viewLoader.load(className, function() {
+				currentView = new self.currentViewClass();
+				eval("self." + self.currentViewName + " = currentView;");
+				currentView.render(viewOptions);
+				$("#content").html(currentView.el);
+			});
 		} else {
 			currentView.delegateEvents(); // delegate events when the view is recycled
+			$("#content").html(currentView.el);
 		}
-		$("#content").html(currentView.el);
 		
 		//selects header
-		if(headerOptions && headerOptions.rerender)
-			$('.header').html(this.headerView.render().el);
-		if(headerOptions && headerOptions.selection)
-			this.headerView.select(headerOptions.selection);
+		if(this.headerView) {
+			if(headerOptions && headerOptions.rerender)
+				$("#header").html(this.headerView.render().el);
+			if(this.headerSelection)
+				this.headerView.select(this.headerSelection);
+		}
 		//renders the messages
-		if(clearMessages)
-			this.messageView.clear();
-        $('#messages').html(this.messageView.render().el);
+		if(this.messageView) {
+			if(clearMessages)
+				this.messageView.clear();
+			$('#messages').html(this.messageView.render().el);
+		}
 	},
 	
     admin: function () {
@@ -147,9 +164,14 @@ window.AdminRouter = Backbone.Router.extend({
 		this.renderView('requestView', RequestView, 
 				{rerender: true, selection: 'admin-menu'}, options);
 	},
-	labels: function() {
-		var options = {};
+	labels: function(id) {
+		var options = {lang: id};
 		this.renderView('labelListView', LabelListView, 
+				{rerender: true, selection: 'admin-menu'}, options);
+	},
+	languages: function() {
+		var options = {};
+		this.renderView('languageListView', LanguageListView, 
 				{rerender: true, selection: 'admin-menu'}, options);
 	},
 	logout: function () {
@@ -164,16 +186,5 @@ window.AdminRouter = Backbone.Router.extend({
 
 });
 
-window.viewList = [
-	"DeniedView", "HeaderView", "MessageView",
-	/*"AdminView", */"AnalyticsView",
-	"RequestListView", "RequestListItemView", "RequestView",
-	"ErrorView", "LabelListView", "LabelListItemView"
-];
-templateLoader.load(
-	viewList,
-    function () {
-        app = new AdminRouter();
-        app.init();
-    }
-);
+app = new AdminRouter();
+app.init();

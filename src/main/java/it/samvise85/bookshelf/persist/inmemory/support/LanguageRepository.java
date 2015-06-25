@@ -7,5 +7,5 @@ import org.springframework.data.repository.PagingAndSortingRepository;
 public interface LanguageRepository extends PagingAndSortingRepository<Language, String> {
 
 	Language findOneByDef(Boolean def);
-	
+
 }

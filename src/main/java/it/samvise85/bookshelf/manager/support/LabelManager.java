@@ -7,6 +7,6 @@ public interface LabelManager extends PersistenceUnit<Label> {
 
 	Label get(String key, String language);
 
-	Label getOrDefault(String key, String language);
+	Label getDefault(String key);
 
 }

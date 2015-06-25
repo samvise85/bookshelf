@@ -48,7 +48,9 @@ public class ChapterController extends AnalyticsAwareController {
 	private RestErrorManager errorManager;
 	
 	@RequestMapping(value="/books/{book}/chapters")
-    public Collection<Chapter> getChapterList(HttpServletRequest request, @PathVariable String book, @RequestParam(value="page", required=false) Integer page) {
+    public Collection<Chapter> getChapterList(HttpServletRequest request, 
+    		@PathVariable String book,
+    		@RequestParam(value="page", required=false) Integer page) {
 		String methodName = ControllerUtils.getMethodName();
 		return executeMethod(request, methodName, new Class<?>[] { String.class, Integer.class }, new Object[] { book, page });
 	}

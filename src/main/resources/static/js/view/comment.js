@@ -18,12 +18,15 @@ window.CommentListItemView = Backbone.View.extend({
     	if(e && e.currentTarget) { //click pulsante edit
 	    	e.preventDefault();
 	    	var oldHtml = $(e.currentTarget.parentElement).html();
-	    	var commEdit = new CommentEditView()
-	    	commEdit.render({id: this.options.comment.id, stream: this.options.comment.get('stream'), parentView: this});
-	    	$(e.currentTarget.parentElement).html(commEdit.el);
-	    	//alert('CommentListItemView::toggleEdit(' + e.currentTarget.id + ")");
+	    	var self = this;
+	    	viewLoader.load("CommentEditView", function() {
+		    	var commEdit = new CommentEditView();
+		    	commEdit.render({id: self.options.comment.id, stream: self.options.comment.get('stream'), parentView: self});
+		    	$(e.currentTarget.parentElement).html(commEdit.el);
+//		    	console.log('CommentListItemView::toggleEdit(' + e.currentTarget.id + ")");
+	    	});
     	} else { //modifica effettuata
-	    	//alert('saveComment::toggleEdit(' + e + ")");
+//	    	console.log('saveComment::toggleEdit(' + e + ")");
 	    	var oldEl = this.el;
     		this.options.comment = e;
     		this.render();
@@ -38,7 +41,13 @@ window.CommentListView = Backbone.View.extend({
 	clearMessages : true,
 	page: 1,
 	stopScroll: false,
-	
+
+	initialize: function() {
+		var self = this;
+		viewLoader.load("CommentListItemView", function() {
+			self.listItemViewReady = true;
+		});
+	},
 	newOptions: function(options) {
 		return !arraysEqual(this.lastOptions, options);
 	},
@@ -48,18 +57,27 @@ window.CommentListView = Backbone.View.extend({
 		$(this.el).html(this.template({view: this}));
 		this.append(options);
 		if(app.getUser()) {
-			commEdit = new CommentEditView().render(options);
-			$('.comment_area',this.el).html(commEdit.el);
+			var self = this;
+	    	viewLoader.load("CommentEditView", function() {
+				commEdit = new CommentEditView().render(options);
+				$('.comment_area',self.el).html(commEdit.el);
+	    	});
 		}
 	},
 	append: function (options) {
+		if(this.listItemViewReady) {
+			this.appendWhenReady(options);
+		} else {
+			var self  = this;
+			setTimeout(function() { self.append(options); }, 100);
+		}
+	},
+	appendWhenReady: function (options) {
 		if(!(this.stopScroll === true)) {
 			var self = this;
 			var comments = new Comments({stream: options.stream, page: this.page});
 			comments.fetch({
 				success: function(comments) {
-					//console.log(chapters.models.length);
-					//console.log(chapters.models.length == 0);
 					if(comments.models.length == 0) self.stopScroll = true;
 					_.each(comments.models, function (comment) {
 						$('table tbody', self.el).append(new CommentListItemView({comment: comment, parentViewName: options.parentViewName}).render().el);

@@ -11,8 +11,12 @@
 	<div class="input50p" style="float:left;width:49.5%">
 		<label>{{chapter.model.position}}</label>
 		<select name="position">
-			<option value="0">{{chapter.model.position.first}}</option>
-			<option value="1">{{chapter.model.position.last}}</option>
+			<option value="1">{{chapter.model.position.first}}</option>
+			<% if(!chapter) { %>
+			<option id="chapter-position-last" value="-1" selected="selected">{{chapter.model.position.last}}</option>
+			<% } else { %>
+			<option id="chapter-position-last" value="-1">{{chapter.model.position.last}}</option>
+			<% } %>
 		</select>
 	</div>
 	<div class="input50p" style="float:left;width:49.5%">

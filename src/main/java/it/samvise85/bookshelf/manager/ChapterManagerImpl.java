@@ -66,7 +66,7 @@ public class ChapterManagerImpl extends InMemoryPersistenceUnit<Chapter> impleme
 	@Override
 	public Chapter getChapterByBookAndPosition(String book, Integer position,
 			ProjectionClause projection) {
-		return addStream(repository.findFirstByBookAndPosition(book, position).setProjection(projection));
+		return addStream(repository.findFirstByBookAndPosition(book, position), projection);
 	}
 
 	private List<Chapter> findChapters(String book, Pageable pagination, ProjectionClause projection) {
@@ -103,7 +103,7 @@ public class ChapterManagerImpl extends InMemoryPersistenceUnit<Chapter> impleme
 			chapterToUpdate.setText(updates.getText());
 		
 		boolean last = false;
-		if(updates.getPosition() == null || updates.getPosition() == 0) {
+		if(updates.getPosition() == null || updates.getPosition() == -1) {
 			setLastChapterNumber(chapterToUpdate);
 			last = true;
 		} else {
@@ -126,7 +126,7 @@ public class ChapterManagerImpl extends InMemoryPersistenceUnit<Chapter> impleme
 		objectToSave.setText(objectToSave.getText());
 		
 		boolean updateOtherPositions = false;
-		if(objectToSave.getPosition() == null || objectToSave.getPosition() == 0)
+		if(objectToSave.getPosition() == null || objectToSave.getPosition() == -1)
 			setLastChapterNumber(objectToSave);
 		else
 			updateOtherPositions = true;
@@ -164,9 +164,11 @@ public class ChapterManagerImpl extends InMemoryPersistenceUnit<Chapter> impleme
 						currChapter = lastChapter;
 					}
 				}
-				currChapter.setPosition(++lastPosition);
-				update(currChapter, false);
-				lastChapter = currChapter;
+				if(currChapter != null) {
+					currChapter.setPosition(++lastPosition);
+					update(currChapter, false);
+					lastChapter = currChapter;
+				}
 			}
 		}
 		return chapter;
@@ -180,6 +182,15 @@ public class ChapterManagerImpl extends InMemoryPersistenceUnit<Chapter> impleme
 
 	@Transactional(value=TxType.REQUIRES_NEW)
 	private Chapter addStream(Chapter ch) {
+		return addStream(ch, null);
+	}
+
+	@Transactional(value=TxType.REQUIRES_NEW)
+	private Chapter addStream(Chapter ch, ProjectionClause projection) {
+		if(ch == null) return null;
+		
+		if(projection != null)
+			ch.setProjection(projection);
 		if(ch.getStream() == null) {
 			Stream stream = streamManager.create();
 			ch.setStream(stream.getId());

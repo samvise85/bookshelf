@@ -19,6 +19,8 @@ import org.apache.log4j.Logger;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.Sort.Direction;
 import org.springframework.data.repository.PagingAndSortingRepository;
 
 public abstract class InMemoryPersistenceUnit<T extends GenericIdentifiable<?>> implements PersistenceUnit<T> {
@@ -98,9 +100,36 @@ public abstract class InMemoryPersistenceUnit<T extends GenericIdentifiable<?>> 
 		return res;
 	}
 	
+	protected Pageable createPageable(PersistOptions options) {
+		return createPageable(options.getPagination(), options.getOrder());
+	}
+	
 	protected Pageable createPageable(PaginationClause pagination) {
+		return createPageable(pagination, null);
+	}
+	
+	protected Pageable createPageable(PaginationClause pagination, List<OrderClause> orders) {
 		if(pagination == null) return null;
-		return new PageRequest(pagination.getPage()-1, pagination.getPageSize());
+		Sort sort = createSort(orders);
+		if(sort == null)
+			return new PageRequest(pagination.getPage()-1, pagination.getPageSize());
+		return new PageRequest(pagination.getPage()-1, pagination.getPageSize(), sort);
+	}
+	
+	protected Sort createSort(List<OrderClause> orders) {
+		if(orders == null) return null;
+		List<Sort.Order> o = toOrder(orders);
+		return new Sort(o);
+	}
+	
+	protected static List<Sort.Order> toOrder(List<OrderClause> orders) {
+		if(orders == null) return null;
+		List<Sort.Order> res = new ArrayList<Sort.Order>();
+		
+		for(OrderClause o : orders)
+			res.add(new Sort.Order(o.getOrder() == Order.ASC ? Direction.ASC : Direction.DESC, o.getField()));
+		
+		return res;
 	}
 
 }

@@ -1,6 +1,8 @@
 <% if(book) { %>
   <h4 id="page-title"><%= htmlEncode(book.get('title')) %></h4>
+  <% if(book.get('author')) { %>
   <p>{{book.read.label.by}} <strong><%= htmlEncode(book.get('author')) %></strong><%= book.get('year') ? ' ('+htmlEncode(book.get('year'))+')' : '' %></p>
+  <% } %>
   <% if(book.get('synopsis')) { %>
 	<hr/>
 	<div class="synopsis"><%= htmlEncode(book.get('synopsis')) %></div>

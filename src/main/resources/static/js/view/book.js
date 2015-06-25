@@ -1,5 +1,4 @@
 
-
 window.BookListView = Backbone.View.extend({
 	reload : false,
 	clearMessages : true,
@@ -133,9 +132,12 @@ window.BookReadView = Backbone.View.extend({
 	},
 	loadChapters: function () {
 		if(!this.chapterListView) {
-			this.chapterListView = new ChapterListView();
-			this.chapterListView.render({book: this.book.get('id')});
-			$('#chapters').html(this.chapterListView.el);
+			var self = this;
+			viewLoader.load("ChapterListView", function() {
+				self.chapterListView = new ChapterListView();
+				self.chapterListView.render({book: self.book.get('id')});
+				$('#chapters').html(self.chapterListView.el);
+			});
 		} else {
 			this.chapterListView.append({book: this.book.get('id')});
 		}

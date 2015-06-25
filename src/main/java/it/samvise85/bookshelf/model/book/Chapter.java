@@ -109,6 +109,10 @@ public class Chapter extends CommentableImpl implements Commentable, Editable, S
 	public Date getLastModification() {
 		return returnNullOrValue("lastModification", super.getLastModification());
 	}
+	@Override
+	public String getStream() {
+		return returnNullOrValue("stream", super.getStream());
+	}
 	
 	@Override
 	public ProjectionClause getProjection() {

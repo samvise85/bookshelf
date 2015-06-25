@@ -1,8 +1,12 @@
 package it.samvise85.bookshelf.rest.support;
 
 import it.samvise85.bookshelf.context.ServiceLocator;
+import it.samvise85.bookshelf.manager.UserManager;
 import it.samvise85.bookshelf.manager.support.LanguageManager;
 import it.samvise85.bookshelf.model.locale.Language;
+import it.samvise85.bookshelf.model.user.User;
+import it.samvise85.bookshelf.rest.security.config.SpringSecurityConfig;
+import it.samvise85.bookshelf.utils.UserUtils;
 
 import java.util.List;
 import java.util.regex.Matcher;
@@ -16,6 +20,8 @@ import org.springframework.web.servlet.resource.ResourceResolverChain;
 
 public class InternationalizationResourceResolver extends AbstractResourceResolver {
 
+	private UserManager userManager;
+
 	@Override
 	protected Resource resolveResourceInternal(HttpServletRequest request, String requestPath, List<? extends Resource> locations,
 			ResourceResolverChain chain) {
@@ -24,6 +30,13 @@ public class InternationalizationResourceResolver extends AbstractResourceResolv
 		Matcher matcher = pattern.matcher(path);
 		if(matcher.matches()) {
 			String language = request.getLocale().getLanguage();
+			String username = request.getHeader(SpringSecurityConfig.USERNAME_PARAM_NAME);
+			if(username != null) {
+				User user = getUserManager().get(username, UserUtils.PASSWORD_PROTECTION);
+				if(user != null && user.getLanguage() != null)
+					language = user.getLanguage();
+			}
+			
 			path = createFakePath(requestPath, language);
 		}
 		Resource resource = chain.resolveResource(request, path, locations);
@@ -43,4 +56,10 @@ public class InternationalizationResourceResolver extends AbstractResourceResolv
 		return originalPath + "_" + lang.getId() + "_" + lang.getVersion();
 	}
 
+	private UserManager getUserManager() {
+		if(this.userManager == null)
+			this.userManager = ServiceLocator.getInstance().getService(UserManager.class);
+		return this.userManager;
+	}
+	
 }

@@ -2,10 +2,12 @@ package it.samvise85.bookshelf.manager.support;
 
 import it.samvise85.bookshelf.exception.BookshelfException;
 import it.samvise85.bookshelf.model.locale.Language;
+import it.samvise85.bookshelf.persist.PersistOptions;
 import it.samvise85.bookshelf.persist.inmemory.InMemoryPersistenceUnit;
 import it.samvise85.bookshelf.persist.inmemory.support.LanguageRepository;
 
 import java.io.Serializable;
+import java.util.List;
 import java.util.Locale;
 
 import javax.transaction.Transactional;
@@ -13,6 +15,8 @@ import javax.transaction.Transactional.TxType;
 
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -34,6 +38,17 @@ public class LanguageManagerImpl extends InMemoryPersistenceUnit<Language> imple
 	}
 
 	@Override
+	public List<Language> getList(PersistOptions options) {
+		Pageable pageable = createPageable(options.getPagination());
+		if(pageable != null)
+			return convertToList(repository.findAll(pageable), options.getProjection());
+		Sort sort = createSort(options.getOrder());
+		if(sort != null)
+			return convertToList(repository.findAll(sort), options.getProjection());
+		return convertToList(repository.findAll(), options.getProjection());
+	}
+
+	@Override
 	public Language getDefault() {
 		Language res = null;
 		try {
@@ -47,14 +62,18 @@ public class LanguageManagerImpl extends InMemoryPersistenceUnit<Language> imple
 	}
 
 	@Override
+	@Transactional(value=TxType.REQUIRES_NEW)
 	public Language changeDefault(String language) {
 		if(Locale.forLanguageTag(language) == null)
 			throw new BookshelfException("Language " + language + " isn't a valid language.");
 		
 		Language def = getDefault();
-				Language newdef = null;
+		if(def.getId().equals(language)) return def;
+		Language newdef = null;
 		try {
 			newdef = repository.findOne(language);
+			newdef.setDef(Boolean.TRUE);
+			repository.save(newdef);
 		} catch(Exception e) {}
 		if(newdef == null) {
 			log.warn("Language " + language + " not found. Adding " + language + " as default.");
@@ -93,6 +112,16 @@ public class LanguageManagerImpl extends InMemoryPersistenceUnit<Language> imple
 		Language language = get(lang);
 		language.setVersion(language.getVersion() + 1);
 		return update(language);
+	}
+
+	@Override
+	public Language update(Language updates) {
+		Language objectToUpdate = get(updates.getId());
+		
+		if(!objectToUpdate.getDef() && updates.getDef())
+			return changeDefault(updates.getId());
+		
+		return super.update(updates);
 	}
 
 }

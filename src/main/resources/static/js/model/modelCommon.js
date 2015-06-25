@@ -9,6 +9,14 @@ window.Users = Backbone.Collection.extend({
   }
 });
 
+window.Language = Backbone.Model.extend({
+  urlRoot: '/languages',
+});
+window.Languages = Backbone.Collection.extend({
+  url : '/languages',
+  model: Language
+});
+
 window.Messages = function Messages() {
 	this.messageCount = 0;
 	this.messages = {};

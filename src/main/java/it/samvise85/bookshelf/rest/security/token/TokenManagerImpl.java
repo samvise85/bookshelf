@@ -55,6 +55,7 @@ public class TokenManagerImpl extends TokenBasedRememberMeServices implements To
 
 	@Override
 	public boolean validate(String token, UserDetails userDetails) {
+		if(userDetails == null) return false;
 		String calculated = getToken(userDetails);
 		boolean valid = !StringUtils.isEmpty(token) && token.equals(calculated);
 		if(!valid)

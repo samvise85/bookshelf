@@ -1,0 +1,7 @@
+<td><a href="#labels/<%= language.id %>"><%= htmlEncode(language.id) %></a></td>
+<td><%= language.get('version') %></td>
+<td class="<%= language.get('def') ? 'default' : '' %>"><%= language.get('def') ? '{{language.model.default}}' : '' %></td>
+<td class="setdefault"><% if(!language.get('def')) { %>
+	<a class="btn setdefault">{{language.list.button.setdefault}}</a>
+<% } %>
+</td>

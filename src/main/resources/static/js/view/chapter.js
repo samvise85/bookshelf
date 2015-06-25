@@ -6,7 +6,6 @@ window.ChapterListItemView = Backbone.View.extend({
         this.model.bind("change", this.render, this);
         this.model.bind("destroy", this.close, this);
     },
-
     render:function () {
         $(this.el).html(this.template({chapter: this.model}));
         return this;
@@ -20,6 +19,12 @@ window.ChapterListView = Backbone.View.extend({
 	page: 1,
 	stopScroll: false,
 	
+	initialize: function() {
+		var self = this;
+		viewLoader.load("ChapterListItemView", function() {
+			self.listItemViewReady = true;
+		});
+	},
 	newOptions: function(options) {
 		return !arraysEqual(this.lastOptions, options);
 	},
@@ -30,13 +35,19 @@ window.ChapterListView = Backbone.View.extend({
 		this.append(options);
 	},
 	append: function (options) {
+		if(this.listItemViewReady) {
+			this.appendWhenReady(options);
+		} else {
+			var self  = this;
+			setTimeout(function() { self.append(options); }, 100);
+		}
+	},
+	appendWhenReady: function (options) {
 		if(!(this.stopScroll === true)) {
 			var self = this;
 			var chapters = new Chapters({book: options.book, page: this.page});
 			chapters.fetch({
 				success: function(chapters) {
-					//console.log(chapters.models.length);
-					//console.log(chapters.models.length == 0);
 					if(chapters.models.length == 0) self.stopScroll = true;
 					_.each(chapters.models, function (chapter) {
 						$('table tbody', self.el).append(new ChapterListItemView(chapter).render().el);
@@ -66,6 +77,13 @@ window.ChapterEditView = Backbone.View.extend({
 	lastOptions : null,
 	reload : false,
 	clearMessages : true,
+	
+	initialize: function() {
+		var self = this;
+		viewLoader.load("ChapterSelectItemView", function() {
+			self.listItemViewReady = true;
+		});
+	},
 	newOptions: function(options) {
 		return !arraysEqual(this.lastOptions, options);
 	},
@@ -130,13 +148,24 @@ window.ChapterEditView = Backbone.View.extend({
 		}
 	},
 	showChapterSelection: function(book) {
+		if(this.listItemViewReady) {
+			this.showChapterSelectionWhenReady(book);
+		} else {
+			var self  = this;
+			setTimeout(function() { self.showChapterSelection(book); }, 100);
+		}
+	},
+	showChapterSelectionWhenReady: function(book) {
 		var self = this;
 		var chapters = new Chapters({book: book});
 		chapters.fetch({
+//			data: $.param({"projection": "MAX"}),
 			success: function(chapters) {
 				if(chapters.models.length > 0) {
 					_.each(chapters.models, function (chapter) {
-						var selectItemView = new ChapterSelectItemView().render({chapter: chapter, current: self.chapter.id});
+						var current = null;
+						if(self.chapter) current = self.chapter.id;
+						var selectItemView = new ChapterSelectItemView().render({chapter: chapter, current: current});
 						$('select[name=position]').append(selectItemView.el);
 					});
 				}
@@ -226,9 +255,12 @@ window.ChapterReadView = Backbone.View.extend({
 	},
 	loadComments: function() {
 		if(!this.commentListView) {
-			this.commentListView = new CommentListView();
-			this.commentListView.render({stream: this.chapter.get('stream'), parentViewName: 'chapterReadView'});
-			$("#chapter"+this.chapter.get('id')+" .comments").html(this.commentListView.el);
+			var self = this;
+			viewLoader.load("CommentListView", function() {
+				self.commentListView = new CommentListView();
+				self.commentListView.render({stream: self.chapter.get('stream'), parentViewName: 'chapterReadView'});
+				$("#chapter"+self.chapter.get('id')+" .comments").html(self.commentListView.el);
+			})
 		} else {
 			this.commentListView.append({stream: this.chapter.get('stream')});
 		}

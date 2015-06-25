@@ -1,5 +1,5 @@
 <form class="edit-user-form" action="?" method="POST">
-	<legend><%= user ? '{{user.edit.pagetitle.edit}}' : '{{user.edit.pagetitle.edit}}' %></legend>
+	<legend><%= user ? '{{user.edit.pagetitle.edit}}' : '{{user.edit.pagetitle.new}}' %></legend>
 	<div>
 		<% if(user) {%>
 		<label>{{user.model.username}}</label>
@@ -33,6 +33,8 @@
 		<input name="firstname" type="text" value="<%= user ? htmlEncode(user.get('firstname')) : '' %>" />
 		<label>{{user.model.lastname}}</label>
 		<input name="lastname" type="text" value="<%= user ? htmlEncode(user.get('lastname')) : '' %>" />
+		<label>{{user.model.language}}</label>
+		<select name="language"></select>
 	</div>
 	
 	<% if(!user) {%>

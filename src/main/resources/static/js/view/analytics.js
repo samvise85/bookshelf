@@ -73,7 +73,13 @@ window.RequestListView = Backbone.View.extend({
 	page: 1,
 	stopScroll: false,
 	requests: {},
-	
+
+	initialize: function() {
+		var self = this;
+		viewLoader.load("RequestListItemView", function() {
+			self.listItemViewReady = true;
+		});
+	},
 	newOptions: function(options) {
 		return !arraysEqual(this.lastOptions, options);
 	},
@@ -84,6 +90,14 @@ window.RequestListView = Backbone.View.extend({
 		this.append(options);
 	},
 	append: function (options) {
+		if(this.listItemViewReady) {
+			this.appendWhenReady(options);
+		} else {
+			var self  = this;
+			setTimeout(function() { self.append(options); }, 100);
+		}
+	},
+	appendWhenReady: function (options) {
 		if(!(this.stopScroll === true)) {
 			var self = this;
 			var reqs = new RestRequests();
@@ -149,16 +163,17 @@ window.RequestView = Backbone.View.extend({
 	},
 	loadError: function() {
 		if(!this.errorView) {
-			this.errorView = new ErrorView();
 			var self = this;
-			this.errorView.render({
-				request: this.request.id,
-				parentViewName: 'requestView',
-				callback: function(el) {
-					$(".request-"+self.request.id+"-error").html(el);
-				}
+			viewLoader.load('ErrorView', function() {
+				self.errorView = new ErrorView();
+				self.errorView.render({
+					request: self.request.id,
+					parentViewName: 'requestView',
+					callback: function(el) {
+						$(".request-"+self.request.id+"-error").html(el);
+					}
+				});
 			});
-			
 		}
 	}
 });
