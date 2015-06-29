@@ -13,7 +13,7 @@ It uses the following technologies/frameworks:
 - Spring-security
 - JQuery
 - BackboneJs
-- H2
+- Hibernate
 - more...
 
 ============== What does it do =============
@@ -43,6 +43,18 @@ The web services are marked with @Secured annotation that indicated wich role th
 Is it safe? Of course not! Stealing the token you steal the identity like you are stealing the password. Without https the token can be stolen by anyone sniffing the messages otherwise you can always stole it from the cookies with different techniques.
 
 Can be better? Yes, using an RSA public key for example to encode the token and in other hundreds ways.
+
+
+Database:
+
+Bookshelf now runs with both MySQL and H2 datasources.
+If you want to use MySQL you just have to configure a file db.properties in your user home as follows:
+db.url=jdbc:mysql://<your-ip>:3306/<database-name>
+db.user=<username>
+db.password=<password>
+db.driver=com.mysql.jdbc.Driver
+
+If the file is not configured the Bookshelf H2 database is created/connected in your user home.
 
 
 Internationalization:
