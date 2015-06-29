@@ -1,14 +1,14 @@
 package it.samvise85.bookshelf.manager;
 
 import it.samvise85.bookshelf.model.book.Section;
-import it.samvise85.bookshelf.persist.inmemory.InMemoryPersistenceUnit;
-import it.samvise85.bookshelf.persist.inmemory.SectionRepository;
+import it.samvise85.bookshelf.persist.database.DatabasePersistenceUnit;
+import it.samvise85.bookshelf.persist.database.SectionRepository;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
-public class SectionManagerImpl extends InMemoryPersistenceUnit<Section> implements SectionManager {
+public class SectionManagerImpl extends DatabasePersistenceUnit<Section> implements SectionManager {
 	@Autowired
 	private SectionRepository repository;
 	

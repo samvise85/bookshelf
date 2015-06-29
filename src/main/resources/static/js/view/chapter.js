@@ -89,7 +89,7 @@ window.ChapterEditView = Backbone.View.extend({
 	},
 	events: {
 		'submit .edit-chapter-form': 'saveChapter',
-		'click .delete': 'deleteChapter'
+//		'click .delete': 'deleteChapter'
 	},
 	saveChapter: function (ev) {
 		var chapterDetails = $(ev.currentTarget).serializeObject();
@@ -108,20 +108,30 @@ window.ChapterEditView = Backbone.View.extend({
 		});
 		return false;
 	},
-	deleteChapters: function (ev) {
+	deleteChapter: function (callback) {
 		var book = this.chapter.get('book');
 		var title = this.chapter.get('title');
+		var self = this;
 		this.chapter.destroy({
 			success: function () {
-				if(app.bookReadView) app.bookReadView.reload = true;
-				app.navigate('book/' + book, {trigger:true});
+				self.backToBook(book);
+				if(callback) callback();
 			},
-			error: function () {
-				app.messageView.errors.push("An error occurred deleting " + htmlEncode(title));
-				app.messageView.rerender();
+			error: function (req, resp) {
+				if(resp.status == 200) {
+					self.backToBook(book);
+				} else {
+					app.messageView.errors.push("An error occurred deleting " + htmlEncode(title));
+					app.messageView.rerender();
+				}
+				if(callback) callback();
 			}
 		});
 		return false;
+	},
+	backToBook: function(book) {
+		if(app.bookReadView) app.bookReadView.reload = true;
+		app.navigate('book/' + book, {trigger:true});
 	},
 	render: function (options) {
 		lastOptions = options;
@@ -264,6 +274,5 @@ window.ChapterReadView = Backbone.View.extend({
 		} else {
 			this.commentListView.append({stream: this.chapter.get('stream')});
 		}
-		
 	}
 });

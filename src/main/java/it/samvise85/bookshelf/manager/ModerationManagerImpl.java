@@ -1,14 +1,14 @@
 package it.samvise85.bookshelf.manager;
 
 import it.samvise85.bookshelf.model.comment.Moderation;
-import it.samvise85.bookshelf.persist.inmemory.InMemoryPersistenceUnit;
-import it.samvise85.bookshelf.persist.inmemory.ModerationRepository;
+import it.samvise85.bookshelf.persist.database.DatabasePersistenceUnit;
+import it.samvise85.bookshelf.persist.database.ModerationRepository;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
-public class ModerationManagerImpl extends InMemoryPersistenceUnit<Moderation> implements ModerationManager {
+public class ModerationManagerImpl extends DatabasePersistenceUnit<Moderation> implements ModerationManager {
 	@Autowired
 	private ModerationRepository repository;
 	

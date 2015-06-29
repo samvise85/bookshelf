@@ -1,4 +1,4 @@
-package it.samvise85.bookshelf.persist.inmemory.analytics;
+package it.samvise85.bookshelf.persist.database.analytics;
 
 import it.samvise85.bookshelf.model.analytics.RestRequest;
 

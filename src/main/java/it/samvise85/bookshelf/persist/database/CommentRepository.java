@@ -1,4 +1,4 @@
-package it.samvise85.bookshelf.persist.inmemory;
+package it.samvise85.bookshelf.persist.database;
 
 import it.samvise85.bookshelf.model.comment.Comment;
 

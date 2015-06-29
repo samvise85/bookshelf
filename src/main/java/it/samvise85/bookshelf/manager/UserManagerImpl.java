@@ -3,8 +3,8 @@ package it.samvise85.bookshelf.manager;
 import it.samvise85.bookshelf.model.user.User;
 import it.samvise85.bookshelf.persist.PersistOptions;
 import it.samvise85.bookshelf.persist.clauses.ProjectionClause;
-import it.samvise85.bookshelf.persist.inmemory.InMemoryPersistenceUnit;
-import it.samvise85.bookshelf.persist.inmemory.UserRepository;
+import it.samvise85.bookshelf.persist.database.DatabasePersistenceUnit;
+import it.samvise85.bookshelf.persist.database.UserRepository;
 import it.samvise85.bookshelf.utils.UserUtils;
 
 import java.io.Serializable;
@@ -17,7 +17,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
-public final class UserManagerImpl extends InMemoryPersistenceUnit<User> implements UserManager {
+public final class UserManagerImpl extends DatabasePersistenceUnit<User> implements UserManager {
 
 	@Autowired
 	protected UserRepository repository;

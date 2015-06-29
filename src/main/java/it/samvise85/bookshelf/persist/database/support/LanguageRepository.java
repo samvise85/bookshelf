@@ -1,4 +1,4 @@
-package it.samvise85.bookshelf.persist.inmemory.support;
+package it.samvise85.bookshelf.persist.database.support;
 
 import it.samvise85.bookshelf.model.locale.Language;
 

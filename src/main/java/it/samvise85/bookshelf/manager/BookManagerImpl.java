@@ -2,8 +2,8 @@ package it.samvise85.bookshelf.manager;
 
 import it.samvise85.bookshelf.model.book.Book;
 import it.samvise85.bookshelf.persist.clauses.NoProjectionClause;
-import it.samvise85.bookshelf.persist.inmemory.BookRepository;
-import it.samvise85.bookshelf.persist.inmemory.InMemoryPersistenceUnit;
+import it.samvise85.bookshelf.persist.database.BookRepository;
+import it.samvise85.bookshelf.persist.database.DatabasePersistenceUnit;
 
 import java.util.Date;
 
@@ -12,7 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
-public class BookManagerImpl extends InMemoryPersistenceUnit<Book>  implements BookManager {
+public class BookManagerImpl extends DatabasePersistenceUnit<Book>  implements BookManager {
 	@Autowired
 	protected BookRepository repository;
 	

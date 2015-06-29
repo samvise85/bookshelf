@@ -34,32 +34,44 @@
 	<% if(chapter) { %>
 	<input type="hidden" name="id" value="<%= chapter.id %>" />
 	
-	<a class="btn btn-danger" data-toggle="modal" data-target="#chapterDelete">{{chapter.edit.button.delete}}</a>
-	<div class="modal fade" id="chapterDelete" tabindex="-1" role="dialog" aria-labelledby="chapterDeleteLabel" aria-hidden="true">
-	  <div class="modal-dialog modal-sm">
-		<div class="modal-content">
-		  <div class="modal-header">
-			<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-			<h4 class="modal-title" id="chapterDeleteLabel">{{chapter.edit.modaldelete.title}}</h4>
-		  </div>
-			<div class="modal-body">
-			  {{chapter.edit.modaldelete.message}}
-			</div>
-			<div class="modal-footer">
-			  <button type="button" class="btn btn-default" data-dismiss="modal">{{chapter.edit.modaldelete.cancel}}</button>
-			  <button type="button" data-chapter-id="<%= chapter.id %>" class="btn btn-danger delete" onclick="deleteChapter()">{{chapter.edit.modaldelete.confirm}}</button>
-		  </div>
-		</div>
-	  </div>
+	<a id="delete-button" class="btn btn-danger">{{chapter.edit.button.delete}}</a>
+	<div id="delete-dialog" title="{{chapter.edit.modaldelete.title}}">
+	  <p><span class="ui-icon ui-icon-alert" style="float:left; margin:0 7px 20px 0;"></span>{{chapter.edit.modaldelete.message}}</p>
 	</div>
 	
 	<script type="text/javascript">
-		deleteChapter = function (ev) {
-			app.chapterEditView.deleteChapters(ev);
-		}
+	$("#delete-dialog").hide();
+	$('#delete-button').click(function() {
+		$("#delete-dialog").dialog({
+			resizable: false,
+			height: 240,
+			width: 400,
+			modal: true,
+			buttons: [
+				{
+					text: "{{chapter.edit.modaldelete.confirm}}",
+					click: function() {
+						var self = this;
+						app.chapterEditView.deleteChapter(function() {
+							$(self).dialog( "close" );
+						});
+					}
+				},
+				{
+					text: "{{chapter.edit.modaldelete.cancel}}",
+					click: function() {
+						$( this ).dialog( "close" );
+					}
+				}
+			]
+		});
+	});
 	</script>
 	<% }; %>
 	<script type="text/javascript">
-		$('#text').ready(function () { tinymce.init({selector:'#text'}); });
+		$('#text').ready(function () {
+			console.log("Inizializzo tinymce");
+			tinymce.init({selector:'#text'}); 
+		});
 	</script>
 </form>

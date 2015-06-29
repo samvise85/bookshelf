@@ -212,7 +212,7 @@ window.UserEditView = Backbone.View.extend({
 			    dataType: "json",
 				success:function (data, textStatus, request) {
 					if(app.userListView) app.userListView.reload = true;
-					if(self.userj.language != self.user.get('language')) app.languageChanged();
+					if(!self.user && self.userj.language != self.user.get('language')) app.languageChanged();
 					app.navigate('users', {trigger:true});
 				},
 				error: function (req, resp) {

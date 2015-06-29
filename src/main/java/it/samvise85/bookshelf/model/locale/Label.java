@@ -13,7 +13,7 @@ public class Label implements GenericIdentifiable<String> {
 	@Id
 	private String id;
 	@Column
-	private String key;
+	private String labelKey;
 	@Column
 	private String lang;
 	@Column
@@ -25,11 +25,11 @@ public class Label implements GenericIdentifiable<String> {
 	public void setId(String id) {
 		this.id = id;
 	}
-	public String getKey() {
-		return key;
+	public String getLabelKey() {
+		return labelKey;
 	}
-	public void setKey(String key) {
-		this.key = key;
+	public void setLabelKey(String labelKey) {
+		this.labelKey = labelKey;
 	}
 	public String getLang() {
 		return lang;

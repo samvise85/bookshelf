@@ -4,6 +4,7 @@ import it.samvise85.bookshelf.manager.support.LabelManager;
 import it.samvise85.bookshelf.manager.support.LanguageManager;
 import it.samvise85.bookshelf.model.locale.Label;
 import it.samvise85.bookshelf.model.locale.Language;
+import it.samvise85.bookshelf.model.user.BookshelfRole;
 import it.samvise85.bookshelf.persist.PersistOptions;
 import it.samvise85.bookshelf.persist.clauses.NoProjectionClause;
 import it.samvise85.bookshelf.persist.clauses.Order;
@@ -20,6 +21,7 @@ import java.util.List;
 
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.annotation.Secured;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -47,6 +49,13 @@ public class LabelController {
         		Collections.singletonList(new SelectionClause("lang", Equals.getInstance(), language)),
         		Collections.singletonList(new OrderClause("key", Order.ASC)),
         		page != null ? new PaginationClause(ControllerConstants.Pagination.DEFAULT_PAGE_SIZE, page) : null));
+	}
+
+	@RequestMapping(value="/labels", method=RequestMethod.DELETE)
+	@Secured(BookshelfRole.ADMIN)
+	public Boolean clearLabels() {
+		labelManager.deleteAll();
+		return true;
 	}
 
 	@RequestMapping(value="/labels/{id}")

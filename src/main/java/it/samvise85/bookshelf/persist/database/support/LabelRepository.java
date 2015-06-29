@@ -1,4 +1,4 @@
-package it.samvise85.bookshelf.persist.inmemory.support;
+package it.samvise85.bookshelf.persist.database.support;
 
 import it.samvise85.bookshelf.model.locale.Label;
 
@@ -8,9 +8,9 @@ import org.springframework.data.repository.PagingAndSortingRepository;
 
 public interface LabelRepository extends PagingAndSortingRepository<Label, String> {
 
-	Label findOneByKeyAndLang(String key, String language);
+	Label findOneByLabelKeyAndLang(String key, String language);
 
-	Iterable<Label> findByLangOrderByKeyAsc(String language);
-	Page<Label> findByLangOrderByKeyAsc(String language, Pageable pageable);
+	Iterable<Label> findByLangOrderByLabelKeyAsc(String language);
+	Page<Label> findByLangOrderByLabelKeyAsc(String language, Pageable pageable);
 
 }

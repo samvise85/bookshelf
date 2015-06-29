@@ -14,9 +14,9 @@ public class Route implements GenericIdentifiable<Long> {
 	@GeneratedValue
 	private Long id;
 	@Column
-	private String from;
+	private String source;
 	@Column
-	private String to;
+	private String target;
 	@Column
 	private String username;
 	@Column
@@ -28,17 +28,17 @@ public class Route implements GenericIdentifiable<Long> {
 	public void setId(Long id) {
 		this.id = id;
 	}
-	public String getFrom() {
-		return from;
+	public String getSource() {
+		return source;
 	}
-	public void setFrom(String from) {
-		this.from = from;
+	public void setSource(String source) {
+		this.source = source;
 	}
-	public String getTo() {
-		return to;
+	public String getTarget() {
+		return target;
 	}
-	public void setTo(String to) {
-		this.to = to;
+	public void setTarget(String target) {
+		this.target = target;
 	}
 	public String getUsername() {
 		return username;

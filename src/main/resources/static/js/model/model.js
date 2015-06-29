@@ -40,7 +40,7 @@ window.Comment = Backbone.Model.extend({
 });
 window.Comments = Backbone.Collection.extend({
   url : null,
-  model: Chapter,
+  model: Comment,
   initialize: function(options) {
 	  this.url = '/streams/' + options.stream + '/comments' + (options.page ? '?page=' + options.page : '');
   }

@@ -3,8 +3,8 @@ package it.samvise85.bookshelf.manager.support;
 import it.samvise85.bookshelf.exception.BookshelfException;
 import it.samvise85.bookshelf.model.locale.Language;
 import it.samvise85.bookshelf.persist.PersistOptions;
-import it.samvise85.bookshelf.persist.inmemory.InMemoryPersistenceUnit;
-import it.samvise85.bookshelf.persist.inmemory.support.LanguageRepository;
+import it.samvise85.bookshelf.persist.database.DatabasePersistenceUnit;
+import it.samvise85.bookshelf.persist.database.support.LanguageRepository;
 
 import java.io.Serializable;
 import java.util.List;
@@ -20,7 +20,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 @Service
-public class LanguageManagerImpl extends InMemoryPersistenceUnit<Language> implements LanguageManager {
+public class LanguageManagerImpl extends DatabasePersistenceUnit<Language> implements LanguageManager {
 	private static final Logger log = Logger.getLogger(LanguageManagerImpl.class);
 	private static final String DEFAULT_LANGUAGE = Locale.ENGLISH.getLanguage();
 	

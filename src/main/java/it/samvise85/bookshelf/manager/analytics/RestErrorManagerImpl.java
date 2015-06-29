@@ -1,8 +1,8 @@
 package it.samvise85.bookshelf.manager.analytics;
 
 import it.samvise85.bookshelf.model.analytics.RestError;
-import it.samvise85.bookshelf.persist.inmemory.InMemoryPersistenceUnit;
-import it.samvise85.bookshelf.persist.inmemory.analytics.RestErrorRepository;
+import it.samvise85.bookshelf.persist.database.DatabasePersistenceUnit;
+import it.samvise85.bookshelf.persist.database.analytics.RestErrorRepository;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
@@ -11,7 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
-public class RestErrorManagerImpl extends InMemoryPersistenceUnit<RestError> implements RestErrorManager {
+public class RestErrorManagerImpl extends DatabasePersistenceUnit<RestError> implements RestErrorManager {
 	@Autowired
 	protected RestErrorRepository repository;
 	

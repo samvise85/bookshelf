@@ -1,4 +1,12 @@
-package it.samvise85.bookshelf.persist.inmemory.config;
+package it.samvise85.bookshelf.persist.database.config;
+
+import it.samvise85.bookshelf.exception.BookshelfException;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.util.Properties;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
@@ -9,6 +17,7 @@ import org.h2.jdbcx.JdbcDataSource;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
+import org.springframework.jdbc.datasource.DriverManagerDataSource;
 import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseBuilder;
 import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseType;
 import org.springframework.orm.hibernate4.HibernateExceptionTranslator;
@@ -26,15 +35,17 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 		entityManagerFactoryRef="bookshelfEntityManagerFactory", 
 		transactionManagerRef = "bookshelfTransactionManager")
 @EnableTransactionManagement
-public class InMemoryJPAConfig {
-	private static final Logger log = Logger.getLogger(InMemoryJPAConfig.class);
+public class DatabaseJPAConfig {
+	private static final Logger log = Logger.getLogger(DatabaseJPAConfig.class);
+	
+	private Database driver = Database.MYSQL;
 	
     @Bean
     public JpaVendorAdapter jpaVendorAdapter() {
         HibernateJpaVendorAdapter jpaVendorAdapter = new HibernateJpaVendorAdapter();
         jpaVendorAdapter.setShowSql(true);
         jpaVendorAdapter.setGenerateDdl(true);
-        jpaVendorAdapter.setDatabase(Database.H2);
+        jpaVendorAdapter.setDatabase(driver);
         return jpaVendorAdapter;
     }
 
@@ -45,23 +56,39 @@ public class InMemoryJPAConfig {
     
 	@Bean(name = "bookshelfDataSource")
 	public DataSource dataSource() {
-		
 		String dataDir = System.getenv("OPENSHIFT_DATA_DIR");
 		if(dataDir == null)
-			dataDir = "~/";
+			dataDir = System.getProperty("user.home") + File.separator;
 		log.debug("Data dir is: " + dataDir);
+		Properties props = new Properties();
+		try {
+			props.load(new FileInputStream(dataDir + "db.properties"));
+			DriverManagerDataSource ds = new DriverManagerDataSource();
+			ds.setDriverClassName(props.getProperty("db.driver"));
+			ds.setUrl(props.getProperty("db.url"));
+			ds.setUsername(props.getProperty("db.user"));
+			ds.setPassword(props.getProperty("db.password"));
+			return ds;
+		} catch(FileNotFoundException e) {
+			return getH2DataSource(dataDir);
+		} catch(IOException e) {
+			throw new BookshelfException(e.getMessage(), e);
+		}
+	}
+	
+	private DataSource getH2DataSource(String dataDir) {
 		try {
 			JdbcDataSource ds = new JdbcDataSource();
 			ds.setURL("jdbc:h2:file:" + dataDir + "Bookshelf;MODE=MYSQL");
 			ds.setUser("sa");
 			ds.setPassword("sa");
+			driver = Database.H2;
 			return ds;
 		} catch(Exception e) {
 			log.error(e.getMessage(), e);
 		}
 		log.warn("Creating an embedded database. Its state will not be saved.");
 		return new EmbeddedDatabaseBuilder().setName("bookshelfdb").setType(EmbeddedDatabaseType.H2).build();
-		
 	}
 
     @Bean(name = "bookshelfEntityManager")

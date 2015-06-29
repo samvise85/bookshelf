@@ -6,8 +6,8 @@ import it.samvise85.bookshelf.model.comment.Stream;
 import it.samvise85.bookshelf.persist.PersistOptions;
 import it.samvise85.bookshelf.persist.clauses.NoProjectionClause;
 import it.samvise85.bookshelf.persist.clauses.SelectionClause;
-import it.samvise85.bookshelf.persist.inmemory.CommentRepository;
-import it.samvise85.bookshelf.persist.inmemory.InMemoryPersistenceUnit;
+import it.samvise85.bookshelf.persist.database.CommentRepository;
+import it.samvise85.bookshelf.persist.database.DatabasePersistenceUnit;
 
 import java.util.Date;
 import java.util.List;
@@ -19,7 +19,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
-public class CommentManagerImpl extends InMemoryPersistenceUnit<Comment> implements CommentManager {
+public class CommentManagerImpl extends DatabasePersistenceUnit<Comment> implements CommentManager {
 	@Autowired
 	private CommentRepository repository;
 	@Autowired

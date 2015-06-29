@@ -62,7 +62,7 @@ public class InternationalizationTransformer {
 			//create automatically a label entry
 			label = new Label();
 			label.setId(key + "_" + language);
-			label.setKey(key);
+			label.setLabelKey(key);
 			label.setLang(language);
 			getLabelManager().create(label);
 		}

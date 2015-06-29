@@ -32,6 +32,24 @@ window.CommentListItemView = Backbone.View.extend({
     		this.render();
     		$(oldEl).replaceWith(this.el);
     	}
+    },
+    deleteComment: function(callback) {
+    	var self = this;
+    	this.options.comment.destroy({
+    		success: function() {
+    			$(self.el).remove();
+    			if(callback) callback();
+    		},
+    		error: function(req, resp) {
+				if(resp.status == 200) {
+	    			$(self.el).remove();
+				} else {
+					app.messageView.errors.push("An error occurred deleting " + htmlEncode(title));
+					app.messageView.rerender();
+				}
+				if(callback) callback();
+    		}
+    	});
     }
 });
 
@@ -41,6 +59,7 @@ window.CommentListView = Backbone.View.extend({
 	clearMessages : true,
 	page: 1,
 	stopScroll: false,
+	itemViews: {},
 
 	initialize: function() {
 		var self = this;
@@ -80,7 +99,9 @@ window.CommentListView = Backbone.View.extend({
 				success: function(comments) {
 					if(comments.models.length == 0) self.stopScroll = true;
 					_.each(comments.models, function (comment) {
-						$('table tbody', self.el).append(new CommentListItemView({comment: comment, parentViewName: options.parentViewName}).render().el);
+						var itemView = new CommentListItemView({comment: comment, parentViewName: options.parentViewName});
+						self.itemViews[comment.id] = itemView;
+						$('table tbody', self.el).append(itemView.render().el);
 					}, self);
 					return self;
 				},
@@ -95,6 +116,10 @@ window.CommentListView = Backbone.View.extend({
 	},
 	toggleEdit: function (options) {
 		alert('CommentListView::toggleEdit(' + options + ')');
+	},
+	deleteComment: function(source, callback) {
+		var itemView = this.itemViews[source.parent().attr('id').split('-')[1]];
+		if(itemView) itemView.deleteComment(callback);
 	}
 });
 

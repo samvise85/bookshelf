@@ -2,8 +2,8 @@ package it.samvise85.bookshelf.manager.analytics;
 
 import it.samvise85.bookshelf.exception.BookshelfException;
 import it.samvise85.bookshelf.model.analytics.RestRequest;
-import it.samvise85.bookshelf.persist.inmemory.InMemoryPersistenceUnit;
-import it.samvise85.bookshelf.persist.inmemory.analytics.RestRequestRepository;
+import it.samvise85.bookshelf.persist.database.DatabasePersistenceUnit;
+import it.samvise85.bookshelf.persist.database.analytics.RestRequestRepository;
 import it.samvise85.bookshelf.rest.security.config.SpringSecurityConfig;
 
 import java.util.Date;
@@ -17,7 +17,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 @Service
-public class RestRequestManagerImpl extends InMemoryPersistenceUnit<RestRequest> implements RestRequestManager {
+public class RestRequestManagerImpl extends DatabasePersistenceUnit<RestRequest> implements RestRequestManager {
 	@Autowired
 	protected RestRequestRepository repository;
 	

@@ -3,19 +3,22 @@ package it.samvise85.bookshelf.manager.support;
 import it.samvise85.bookshelf.model.locale.Label;
 import it.samvise85.bookshelf.persist.PersistOptions;
 import it.samvise85.bookshelf.persist.clauses.SelectionClause;
-import it.samvise85.bookshelf.persist.inmemory.InMemoryPersistenceUnit;
-import it.samvise85.bookshelf.persist.inmemory.support.LabelRepository;
+import it.samvise85.bookshelf.persist.database.DatabasePersistenceUnit;
+import it.samvise85.bookshelf.persist.database.support.LabelRepository;
 import it.samvise85.bookshelf.utils.MessagesUtil;
 
+import java.io.Serializable;
+import java.util.Iterator;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.stereotype.Service;
 
 @Service
-public class LabelManagerImpl extends InMemoryPersistenceUnit<Label> implements LabelManager {
+public class LabelManagerImpl extends DatabasePersistenceUnit<Label> implements LabelManager {
 	
 	@Autowired
 	protected LabelRepository repository;
@@ -51,8 +54,8 @@ public class LabelManagerImpl extends InMemoryPersistenceUnit<Label> implements 
 	private List<Label> findByLanguage(PersistOptions options, String language) {
 		Pageable pageable = createPageable(options.getPagination());
 		if(pageable != null)
-			return convertToList(repository.findByLangOrderByKeyAsc(language, pageable), options.getProjection());
-		return convertToList(repository.findByLangOrderByKeyAsc(language), options.getProjection());
+			return convertToList(repository.findByLangOrderByLabelKeyAsc(language, pageable), options.getProjection());
+		return convertToList(repository.findByLangOrderByLabelKeyAsc(language), options.getProjection());
 	}
 
 	private List<Label> findAll(PersistOptions options) {
@@ -67,13 +70,13 @@ public class LabelManagerImpl extends InMemoryPersistenceUnit<Label> implements 
 
 	@Override
 	public Label get(String key, String language) {
-		return repository.findOneByKeyAndLang(key, language);
+		return repository.findOneByLabelKeyAndLang(key, language);
 	}
 
 	@Override
 	public Label getDefault(String key) {
 		Label label = new Label();
-		label.setKey(key);
+		label.setLabelKey(key);
 		label.setLang(MessagesUtil.getDefaulBundleLanguage().toLanguageTag());
 		label.setLabel(MessagesUtil.getMessageOrNull(key));
 		return label;
@@ -84,6 +87,15 @@ public class LabelManagerImpl extends InMemoryPersistenceUnit<Label> implements 
 		Label label = super.update(objectToUpdate);
 		languageManager.increaseVersion(label.getLang());
 		return label;
+	}
+
+	@Override
+	public void deleteAll() {
+		Iterable<Label> findAll = repository.findAll();
+		Iterator<Label> iterator = findAll.iterator();
+		while(iterator.hasNext()) {
+			repository.delete(iterator.next());
+		}
 	}
 
 }

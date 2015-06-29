@@ -10,25 +10,58 @@
 	<input name="genre" type="text" value="<%= book ? htmlEncode(book.get('genre')) : '' %>">
 	<hr />
    <button type="submit" class="btn"><%= book ? '{{book.edit.button.update}}' : '{{book.edit.button.create}}' %></button>
+   
    <% if(book) { %>
 	<input type="hidden" name="id" value="<%= book.id %>" />
-	<a class="btn btn-danger" data-toggle="modal" data-target="#myModal">{{book.edit.button.delete}}</a>
-	<div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
-	  <div class="modal-dialog modal-sm">
-		<div class="modal-content">
-		  <div class="modal-header">
-			<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-			<h4 class="modal-title" id="myModalLabel">{{book.edit.modaldelete.title}}</h4>
-		  </div>
-			<div class="modal-body">
-			  {{book.edit.modaldelete.message}}
-			</div>
-			<div class="modal-footer">
-			  <button type="button" class="btn btn-default cancel" data-dismiss="modal">{{book.edit.modaldelete.cancel}}</button>
-			  <button type="button" data-book-id="<%= book.id %>" class="btn btn-danger delete">{{book.edit.modaldelete.confirm}}</button>
-		  </div>
-		</div>
-	  </div>
+	<a id="delete-button" class="btn btn-danger" >{{book.edit.button.delete}}</a>
+	
+	<div id="delete-dialog" title="{{book.edit.modaldelete.title}}">
+	  <p><span class="ui-icon ui-icon-alert" style="float:left; margin:0 7px 20px 0;"></span>{{book.edit.modaldelete.message}}</p>
 	</div>
+	<script>
+	$("#delete-dialog").hide();
+	$('#delete-button').click(function() {
+		$("#delete-dialog").dialog({
+			resizable: false,
+			height: 240,
+			width: 400,
+			modal: true,
+			buttons: [
+				{
+					text: "{{book.edit.modaldelete.confirm}}",
+					click: function() {
+						var self = this;
+						app.bookEditView.deleteBook(function() {
+							$(self).dialog( "close" );
+						});
+					}
+				},
+				{
+					text: "{{book.edit.modaldelete.cancel}}",
+					click: function() {
+						$( this ).dialog( "close" );
+					}
+				}
+			]
+		});
+	});
+	</script>
+<!-- 	<div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true"> -->
+<!-- 	  <div class="modal-dialog modal-sm"> -->
+<!-- 		<div class="modal-content"> -->
+<!-- 		  <div class="modal-header"> -->
+<!-- 			<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button> -->
+<!-- 			<h4 class="modal-title" id="myModalLabel">{{book.edit.modaldelete.title}}</h4> -->
+<!-- 		  </div> -->
+<!-- 			<div class="modal-body"> -->
+<!-- 			  {{book.edit.modaldelete.message}} -->
+<!-- 			</div> -->
+<!-- 			<div class="modal-footer"> -->
+<!-- 			  <button type="button" class="btn btn-default cancel" data-dismiss="modal"></button> -->
+<!-- 			  <button type="button" data-book-id="<%= book.id %>" class="btn btn-danger delete">{{book.edit.modaldelete.confirm}}</button> -->
+<!-- 		  </div> -->
+<!-- 		</div> -->
+<!-- 	  </div> -->
+<!-- 	</div> -->
    <% }; %>
 </form>

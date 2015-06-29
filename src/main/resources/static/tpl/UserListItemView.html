@@ -2,5 +2,5 @@
 <td><%= htmlEncode(user.get('firstname')) %></td>
 <td><%= htmlEncode(user.get('lastname')) %></td>
 <% if(app.isAdmin() === true) {%>
-<td><a class="btn" href="#user/<%= user.id %>/edit">{{user.list.button.edit}}</a></td>
+<td class="user-options" style="width:200px;text-align:right;"><a class="btn" href="#user/<%= user.id %>/edit">{{user.list.button.edit}}</a></td>
 <% } %>

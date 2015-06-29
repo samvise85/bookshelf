@@ -1,4 +1,4 @@
-package it.samvise85.bookshelf.persist.inmemory;
+package it.samvise85.bookshelf.persist.database;
 
 import it.samvise85.bookshelf.model.GenericIdentifiable;
 import it.samvise85.bookshelf.model.Projectable;
@@ -16,6 +16,7 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.apache.log4j.Logger;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -23,12 +24,12 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.data.repository.PagingAndSortingRepository;
 
-public abstract class InMemoryPersistenceUnit<T extends GenericIdentifiable<?>> implements PersistenceUnit<T> {
+public abstract class DatabasePersistenceUnit<T extends GenericIdentifiable<?>> implements PersistenceUnit<T> {
 	protected Class<T> registeredClass;
 	protected static final List<OrderClause> DEFAULT_ORDER = Collections.singletonList(new OrderClause("id", Order.ASC));
-	protected static final Logger log = Logger.getLogger(InMemoryPersistenceUnit.class);
+	protected static final Logger log = Logger.getLogger(DatabasePersistenceUnit.class);
 	
-	public InMemoryPersistenceUnit(Class<T> clazz) {
+	public DatabasePersistenceUnit(Class<T> clazz) {
 		registerClass(clazz);
 	}
 
@@ -42,10 +43,14 @@ public abstract class InMemoryPersistenceUnit<T extends GenericIdentifiable<?>> 
 
 	@Override
 	public T get(Serializable id, ProjectionClause projection) {
-		T entity = getRepository().findOne(id);
-		if(entity instanceof Projectable)
-			if(entity != null) ((Projectable) entity).setProjection(projection);
-		return entity;
+		try {
+			T entity = getRepository().findOne(id);
+			if(entity instanceof Projectable)
+				if(entity != null) ((Projectable) entity).setProjection(projection);
+			return entity;
+		} catch(EmptyResultDataAccessException e) {
+			return null;
+		}
 	}
 
 	@Override

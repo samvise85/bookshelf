@@ -6,8 +6,8 @@ import it.samvise85.bookshelf.persist.PersistOptions;
 import it.samvise85.bookshelf.persist.clauses.NoProjectionClause;
 import it.samvise85.bookshelf.persist.clauses.ProjectionClause;
 import it.samvise85.bookshelf.persist.clauses.SimpleProjectionClause;
-import it.samvise85.bookshelf.persist.inmemory.ChapterRepository;
-import it.samvise85.bookshelf.persist.inmemory.InMemoryPersistenceUnit;
+import it.samvise85.bookshelf.persist.database.ChapterRepository;
+import it.samvise85.bookshelf.persist.database.DatabasePersistenceUnit;
 
 import java.io.Serializable;
 import java.util.Date;
@@ -23,7 +23,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 @Service
-public class ChapterManagerImpl extends InMemoryPersistenceUnit<Chapter> implements ChapterManager {
+public class ChapterManagerImpl extends DatabasePersistenceUnit<Chapter> implements ChapterManager {
 	private static final SimpleProjectionClause BASIC_PROJECTION = new SimpleProjectionClause("id", "position", "book");
 
 	private static final Logger log = Logger.getLogger(ChapterManagerImpl.class);

@@ -9,16 +9,40 @@
 <% if(app.getUser() && app.getUser().username === comment.get('user')) {%>
 	<a class="btn btn-primary edit">{{comment.list.button.edit}}</a>
 	<a class="btn btn-danger delete">{{comment.list.button.delete}}</a>
-<% } %>
-</div>
-
-<% if(app.getUser() && app.getUser().username === comment.get('user')) {%>
+	<div id="delete-dialog-<%= comment.id %>" title="{{comment.edit.modaldelete.title}}">
+	  <p><span class="ui-icon ui-icon-alert" style="float:left; margin:0 7px 20px 0;"></span>{{comment.edit.modaldelete.message}}</p>
+	</div>
+	
 	<script type="text/javascript">
-		
-		$('#comment-<%=comment.id%> .delete').click(function (e) {
-			e.preventDefault();
-			alert('delete: #comment<%=comment.id%> .delete');
+	$("#delete-dialog-<%= comment.id %>").hide();
+	$('#comment-<%= comment.id %> .delete').click(function(ev) {
+		console.log(ev);
+		console.log(ev.target);
+		$("#delete-dialog-<%= comment.id %>").dialog({
+			resizable: false,
+			height: 240,
+			width: 400,
+			modal: true,
+			buttons: [
+				{
+					text: "{{comment.edit.modaldelete.confirm}}",
+					click: function() {
+						var self = this;
+						app.chapterReadView.commentListView.deleteComment($(ev.target), function() {
+							$(self).dialog( "close" );
+						});
+					}
+				},
+				{
+					text: "{{comment.edit.modaldelete.cancel}}",
+					click: function() {
+						$( this ).dialog( "close" );
+					}
+				}
+			]
 		});
+	});
 	</script>
 <% } %>
+</div>
 </td>

@@ -27,7 +27,7 @@ window.BookEditView = Backbone.View.extend({
 	},
 	events: {
 		'submit .edit-book-form': 'saveBook',
-		'click .delete': 'deleteBook'
+//		'click .delete': 'deleteBook'
 	},
 	saveBook: function (ev) {
 		var bookDetails = $(ev.currentTarget).serializeObject();
@@ -49,12 +49,13 @@ window.BookEditView = Backbone.View.extend({
 		});
 		return false;
 	},
-	deleteBook: function (ev) {
+	deleteBook: function (callback) {
 		var self = this;
 		this.book.destroy({
 			success: function () {
 				if(app.bookListView) app.bookListView.reload = true;
 				app.navigate('books', {trigger:true});
+				if(callback) callback();
 			},
 			error: function (req, resp) {
 				if(resp.status == 200) {
@@ -62,8 +63,8 @@ window.BookEditView = Backbone.View.extend({
 				} else {
 					app.messageView.errors.push("An error occurred deleting of " + self.book.id);
 					app.messageView.rerender();
-					$('button.cancel').click();
 				}
+				if(callback) callback();
 			}
 		});
 		return false;
