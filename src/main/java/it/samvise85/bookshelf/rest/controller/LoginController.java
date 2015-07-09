@@ -1,7 +1,5 @@
 package it.samvise85.bookshelf.rest.controller;
 
-import javax.servlet.http.HttpServletRequest;
-
 import it.samvise85.bookshelf.manager.UserManager;
 import it.samvise85.bookshelf.manager.analytics.RestErrorManager;
 import it.samvise85.bookshelf.manager.analytics.RestRequestManager;
@@ -9,7 +7,8 @@ import it.samvise85.bookshelf.model.user.BookshelfRole;
 import it.samvise85.bookshelf.model.user.User;
 import it.samvise85.bookshelf.rest.security.config.SpringSecurityConfig;
 import it.samvise85.bookshelf.utils.ControllerUtils;
-import it.samvise85.bookshelf.utils.UserUtils;
+
+import javax.servlet.http.HttpServletRequest;
 
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,7 +39,7 @@ public class LoginController extends AnalyticsAwareController {
 	}
 	
 	protected User login(String username) {
-		return userManager.get(username, UserUtils.PASSWORD_PROTECTION);
+		return userManager.login(username);
 	}
 
 	@Override

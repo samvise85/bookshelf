@@ -10,6 +10,7 @@ import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -49,8 +50,8 @@ public class BookshelfTokenFilter extends GenericFilterBean {
                 authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails((HttpServletRequest) request));
                 // set the authentication into the SecurityContext
                 SecurityContextHolder.getContext().setAuthentication(authManager.authenticate(authentication));         
-//            } else {
-//            	((HttpServletResponse)response).sendError(HttpServletResponse.SC_UNAUTHORIZED, "Unauthorized!!!");
+            } else {
+            	((HttpServletResponse)response).sendError(HttpServletResponse.SC_UNAUTHORIZED, "Unauthorized!!!");
             }
         }
         // continue thru the filter chain

@@ -1,7 +1,7 @@
 
 window.BookListView = Backbone.View.extend({
 	reload : false,
-	clearMessages : true,
+	clearMessages : false,
 	render: function () {
 		var self = this;
 		var books = new Books();
@@ -12,7 +12,7 @@ window.BookListView = Backbone.View.extend({
 				return self;
 			},
 			error: function () {
-				app.messageView.errors.push("An error occurred loading book list");
+				app.pushMessageAndNavigate("error", "{{generic.js.error}}".format("{{generic.js.loading}}", "{{generic.js.booklist}}"));
 			}
 		});
 	}
@@ -40,10 +40,11 @@ window.BookEditView = Backbone.View.extend({
 			},
 			error: function () {
 				if(resp.status == 200) {
-					app.messageView.errors.push("An error occurred " + (book.id ? "updating " + book.id : "saving"));
 					if(app.bookListView) app.bookListView.clearMessages = false;
 					if(app.bookReadView) app.bookReadView.clearMessages = false;
 					app.navigate('books', {trigger:true});
+				} else {
+					app.pushMessageAndNavigate("error", "{{generic.js.error}}".format("{{generic.js.saving}}"));
 				}
 			}
 		});
@@ -58,12 +59,10 @@ window.BookEditView = Backbone.View.extend({
 				if(callback) callback();
 			},
 			error: function (req, resp) {
-				if(resp.status == 200) {
-					app.navigate('books', {trigger:true});
-				} else {
-					app.messageView.errors.push("An error occurred deleting of " + self.book.id);
-					app.messageView.rerender();
-				}
+				if(resp.status == 200)
+					app.pushMessageAndNavigate("message", "{{book.js.deleted}}".format(self.book.id), "books");
+				else
+					app.pushMessageAndNavigate("error", "{{generic.js.error}}".format("{{generis.js.deleting}}", self.book.id));
 				if(callback) callback();
 			}
 		});
@@ -80,8 +79,7 @@ window.BookEditView = Backbone.View.extend({
 					return self;
 				},
 				error: function () {
-					app.messageView.errors.push("An error occurred loading " + self.book.id);
-					app.messageView.rerender();
+					app.pushMessageAndNavigate("error", "{{generic.js.error}}".format("{{generic.js.loading}}", self.book.id));
 				}
 			});
 		} else {
@@ -98,8 +96,7 @@ window.BookReadView = Backbone.View.extend({
 	clearMessages : true,
 	
 	events: {
-		'click .next': 'loadChapters',
-		'scroll .chapters-table': 'scroll'
+		'click .next': 'loadChapters'
 	},
 	newOptions: function(options) {
 		return !arraysEqual(this.lastOptions, options);
@@ -117,18 +114,11 @@ window.BookReadView = Backbone.View.extend({
 					return self;  
 				},
 				error: function () {
-					app.messageView.errors.push("This is not the book you're looking for");
-					app.messageView.rerender();
+					app.pushMessageAndNavigate("error", "{{generic.js.notfound}}".format("{{generic.js.thebook}}"));
 				}
 			});
 		} else {
-			app.messageView.errors.push("This is not the book you're looking for");
-			app.messageView.rerender();
-		}
-	},
-	scroll: function (e) {
-		if ($('.chapters-table').offset().top + $('.chapters-table').scrollTop() >= $('.chapters-table')[0].scrollHeight) {
-			this.loadChapters();
+			app.pushMessageAndNavigate("error", "{{generic.js.notfound}}".format("{{generic.js.thebook}}"));
 		}
 	},
 	loadChapters: function () {
@@ -136,8 +126,8 @@ window.BookReadView = Backbone.View.extend({
 			var self = this;
 			viewLoader.load("ChapterListView", function() {
 				self.chapterListView = new ChapterListView();
-				self.chapterListView.render({book: self.book.get('id')});
-				$('#chapters').html(self.chapterListView.el);
+				self.chapterListView.render({book: self.book.get('id'), parentElement: $('#chapters')});
+//				$('#chapters').html(self.chapterListView.el); //only for this time
 			});
 		} else {
 			this.chapterListView.append({book: this.book.get('id')});

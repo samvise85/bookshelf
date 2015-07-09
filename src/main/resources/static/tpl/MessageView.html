@@ -1,6 +1,6 @@
-<div id="alert" class="alert alert-<%= type %> alert-dismissible fade in" role="alert">
-	<button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">×</span></button>
-	<ul>
+<div id="messages-<%= type %>" class="alert alert-<%= type %>">
+	<button type="button" class="close" onclick="javascript:$(this).parent().hide( 'drop', {}, 500, null);"><span aria-hidden="true">x</span></button>
+	<ul style="margin-bottom:0;">
 	<% _.each(messages, function(message) { %>
 		<li><%= htmlEncode(message) %></li>
 	<% }); %>

@@ -27,6 +27,18 @@
 		<label>{{chapter.model.text}}</label>
 		<textarea id="text" name="text" style="width:100%;height:300px"><%= chapter ? chapter.get('text') : '' %></textarea>
 	</div>
+	<div class="input100p" style="clear:both;">
+		<label style="display:inline;">{{chapter.edit.wordcount}}</label>
+		<span id="word-count"></span>
+	</div>
+	<div class="input100p" style="clear:both;">
+		<label style="display:inline;">{{chapter.edit.charcount}}</label>
+		<span id="char-count"></span>
+	</div>
+	<div class="input100p" style="clear:both;">
+		<label style="display:inline;">{{chapter.edit.charnospacecount}}</label>
+		<span id="nospace-count"></span>
+	</div>
 	<input type="hidden" name="book" value="<%= book %>" />
 	<hr />
 	<button type="submit" class="btn"><%= chapter ? '{{chapter.edit.button.update}}' : '{{chapter.edit.button.create}}' %></button>
@@ -69,9 +81,26 @@
 	</script>
 	<% }; %>
 	<script type="text/javascript">
+		function counter(decoded) {
+			$('#word-count').html("" + decoded.trim().replace(/\s+/g, ' ').split(" ").length);
+			$('#char-count').html("" + decoded.length);
+			$('#nospace-count').html("" + decoded.replace(/\s+/g, '').length);
+		}
 		$('#text').ready(function () {
-			console.log("Inizializzo tinymce");
-			tinymce.init({selector:'#text'}); 
+ 			if(tinymce.editors && tinymce.editors.length > 0)
+ 				tinyMCE.editors = [];
+ 			tinymce.init({
+ 				selector:'#text',
+ 				setup: function(editor) {
+ 		 			setTimeout(function() { counter(editor.getContent({ format: 'text' })) }, 1000);
+ 					editor.on('change', function(e) {
+	 		        	counter(editor.getContent({ format: 'text' }));
+	 		        });
+ 					editor.on('keyup', function(e) {
+	 		        	counter(editor.getContent({ format: 'text' }));
+	 		        });
+ 				}
+ 		    });
 		});
 	</script>
 </form>

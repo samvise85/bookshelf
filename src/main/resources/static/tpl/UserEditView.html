@@ -39,13 +39,14 @@
 	
 	<% if(!user) {%>
 	<div id="recaptcha"></div>
+	<div><span id="captcha_err" class="error"></span></div>
 	<div class="legend">
 		<span>* {{user.edit.legend.requiredfields}}</span>
 	</div>
 	<% } %>
 	<% } 
 	if(user && app.isAdmin()) { %>
-	<div class="btn-group user_type" data-toggle="buttons-radio">
+	<div class="btn-group user_type buttons-radio" data-toggle="buttons-radio">
 	  <button type="button" class="btn btn-primary <%= user.get('admin') ? 'active' : ''%>">{{user.model.type.admin}}</button>
 	  <button type="button" class="btn btn-primary <%= user.get('admin') ? '' : 'active'%>">{{user.model.type.normal}}</button>
 	</div>

@@ -5,6 +5,7 @@ import it.samvise85.bookshelf.persist.PersistOptions;
 import it.samvise85.bookshelf.persist.clauses.ProjectionClause;
 import it.samvise85.bookshelf.persist.database.DatabasePersistenceUnit;
 import it.samvise85.bookshelf.persist.database.UserRepository;
+import it.samvise85.bookshelf.utils.SHA1Digester;
 import it.samvise85.bookshelf.utils.UserUtils;
 
 import java.io.Serializable;
@@ -19,6 +20,7 @@ import org.springframework.stereotype.Service;
 @Service
 public final class UserManagerImpl extends DatabasePersistenceUnit<User> implements UserManager {
 
+	private static final String ACTIVATION_KEY = "activationkey";
 	@Autowired
 	protected UserRepository repository;
 	
@@ -91,8 +93,12 @@ public final class UserManagerImpl extends DatabasePersistenceUnit<User> impleme
 	public User create(User objectToSave) {
 		if(objectToSave.getId() == null)
 			objectToSave.setId(objectToSave.getUsername().replaceAll("\\W+", "_"));
+		
+		String data = objectToSave.getUsername() + ":" + new Date().getTime() + ":" + ACTIVATION_KEY;
+		objectToSave.setActivationCode(SHA1Digester.digest(data));
+		
 		super.create(objectToSave);
-		return get(objectToSave.getId());
+		return get(objectToSave.getId(), UserUtils.NO_PROTECTION);
 	}
 
 	@Override
@@ -130,5 +136,24 @@ public final class UserManagerImpl extends DatabasePersistenceUnit<User> impleme
 	public Long countUsers() {
 		return repository.count();
 	}
-	
+
+	@Override
+	public User login(String username) {
+		String id = username.replaceAll("\\W+", "_");
+		User user = get(id, UserUtils.NO_PROTECTION);
+		if(user != null && user.getActivationCode() == null)
+			return user.setProjection(UserUtils.PASSWORD_PROTECTION);
+		return null;
+	}
+
+	@Override
+	public User activate(String code) {
+		User user = repository.findOneByActivationCode(code);
+		if(user == null) return null;
+		
+		user.setActivationCode(null);
+		repository.save(user);
+		return user.setProjection(UserUtils.TOTAL_PROTECTION);
+	}
+
 }

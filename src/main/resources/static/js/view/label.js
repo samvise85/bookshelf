@@ -70,7 +70,7 @@ window.LanguageListItemView = Backbone.View.extend({
 			error: function (req, resp) {
 				if(resp.status != 200) {
 					app.messageView.errors.push("An error occurred updating " + self.model.id);
-					app.messageView.rerender();
+					app.rerenderMessages();
 					self.render();
 				} else {
 					self.render(true);
@@ -184,7 +184,7 @@ window.LabelListItemView = Backbone.View.extend({
 			error: function (req, resp) {
 				if(resp.status != 200) {
 					app.messageView.errors.push("An error occurred updating " + self.model.id);
-					app.messageView.rerender();
+					app.rerenderMessages();
 					self.render();
 				} else {
 					self.render();

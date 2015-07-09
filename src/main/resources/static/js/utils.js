@@ -116,9 +116,21 @@ window.arraysEqual = function (a1,a2) {
     return JSON.stringify(a1)==JSON.stringify(a2);
 }
 
-String.prototype.isEmpty = function() {
-    return (this.length === 0 || !this.trim());
-};
+
+if (!String.prototype.isEmpty) {
+	String.prototype.isEmpty = function() {
+	    return (this.length === 0 || !this.trim());
+	};
+}
+
+if (!String.prototype.format) {
+	String.prototype.format = function() {
+		var args = arguments;
+		return this.replace(/{(\d+)}/g, function(match, number) { 
+			return typeof args[number] != 'undefined' ? args[number] : match;
+		});
+	};
+}
 
 window.validateEmail = function (str) {
 	var re = /^([\w-]+(?:\.[\w-]+)*)@((?:[\w-]+\.)*\w[\w-]{0,66})\.([a-z]{2,6}(?:\.[a-z]{2})?)$/i;

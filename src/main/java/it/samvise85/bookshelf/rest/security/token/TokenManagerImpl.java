@@ -1,5 +1,7 @@
 package it.samvise85.bookshelf.rest.security.token;
 
+import it.samvise85.bookshelf.utils.SHA1Digester;
+
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
@@ -80,14 +82,7 @@ public class TokenManagerImpl extends TokenBasedRememberMeServices implements To
      */
     protected String makeTokenSignature(long tokenExpiryTime, String username, String password) {
         String data = username + ":" + tokenExpiryTime + ":" + password + ":" + getKey();
-        MessageDigest digest;
-        try {
-            digest = MessageDigest.getInstance("SHA-1");
-        } catch (NoSuchAlgorithmException e) {
-            throw new IllegalStateException("No SHA-1 algorithm available!");
-        }
-
-        return new String(Hex.encode(digest.digest(data.getBytes())));
+        return SHA1Digester.digest(data);
     }
 
 }

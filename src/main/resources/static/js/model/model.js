@@ -15,7 +15,7 @@ window.Books = Backbone.Collection.extend({
 window.ChapterByPosition = Backbone.Model.extend({
   url: null,
   initialize: function(options) {
-	this.url = '/books/' + options.book + '/chapters' + (options.position ? '?position=' + options.position : '');
+	this.url = '/books/' + options.book + '/chapters';// + (options.position ? '?position=' + options.position : '');
   }
 });
 window.Chapter = Backbone.Model.extend({
@@ -28,7 +28,7 @@ window.Chapters = Backbone.Collection.extend({
   url : null,
   model: Chapter,
   initialize: function(options) {
-	  this.url = '/books/' + options.book + '/chapters' + (options.page ? '?page=' + options.page : '');
+	  this.url = '/books/' + options.book + '/chapters';// + (options.page ? '?page=' + options.page : '');
   }
 });
 

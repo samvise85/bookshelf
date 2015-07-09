@@ -8,5 +8,9 @@ public interface UserManager extends PersistenceUnit<User> {
 	User resetPassword(String id);
 
 	Long countUsers();
+
+	User login(String username);
+
+	User activate(String code);
 	
 }

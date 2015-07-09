@@ -39,12 +39,12 @@ public class ChapterManagerImpl extends DatabasePersistenceUnit<Chapter> impleme
 
 	@Override
 	public Chapter get(Serializable id) {
-		return addStream(super.get(id));
+		return super.get(id);
 	}
 
 	@Override
 	public Chapter get(Serializable id, ProjectionClause projection) {
-		return addStream(super.get(id, projection));
+		return super.get(id, projection);
 	}
 
 	@Override
@@ -66,17 +66,19 @@ public class ChapterManagerImpl extends DatabasePersistenceUnit<Chapter> impleme
 	@Override
 	public Chapter getChapterByBookAndPosition(String book, Integer position,
 			ProjectionClause projection) {
-		return addStream(repository.findFirstByBookAndPosition(book, position), projection);
+		Chapter chapter = repository.findFirstByBookAndPosition(book, position);
+		if(chapter == null) return null;
+		return chapter.setProjection(projection);
 	}
 
 	private List<Chapter> findChapters(String book, Pageable pagination, ProjectionClause projection) {
 		if(pagination == null)
-			return addStream(convertToList(repository.findByBookOrderByPositionAsc(book), projection));
-		return addStream(convertToList(repository.findByBookOrderByPositionAsc(book, pagination), projection));
+			return convertToList(repository.findByBookOrderByPositionAsc(book), projection);
+		return convertToList(repository.findByBookOrderByPositionAsc(book, pagination), projection);
 	}
 	
 	private Chapter findLastChapter(String book, ProjectionClause projection) {
-		return addStream(repository.findFirstByBookOrderByPositionDesc(book));
+		return repository.findFirstByBookOrderByPositionDesc(book);
 	}
 
 	@Override
@@ -145,6 +147,18 @@ public class ChapterManagerImpl extends DatabasePersistenceUnit<Chapter> impleme
 			position = chap.getPosition()+1;
 		chapter.setPosition(position);
 	}
+
+	@Transactional(value=TxType.REQUIRES_NEW)
+	private Chapter addStream(Chapter ch) {
+		if(ch == null) return null;
+		
+		if(ch.getStream() == null) {
+			Stream stream = streamManager.create();
+			ch.setStream(stream.getId());
+			super.update(ch);
+		}
+		return ch;
+	}
 	
 	private Chapter updateChaptersPosition(Chapter chapter, boolean last) {
 		log.debug("Updating other chapters position");
@@ -178,30 +192,5 @@ public class ChapterManagerImpl extends DatabasePersistenceUnit<Chapter> impleme
 	@Override
 	public ChapterRepository getRepository() {
 		return repository;
-	}
-
-	@Transactional(value=TxType.REQUIRES_NEW)
-	private Chapter addStream(Chapter ch) {
-		return addStream(ch, null);
-	}
-
-	@Transactional(value=TxType.REQUIRES_NEW)
-	private Chapter addStream(Chapter ch, ProjectionClause projection) {
-		if(ch == null) return null;
-		
-		if(projection != null)
-			ch.setProjection(projection);
-		if(ch.getStream() == null) {
-			Stream stream = streamManager.create();
-			ch.setStream(stream.getId());
-			super.update(ch);
-		}
-		return ch;
-	}
-
-	private List<Chapter> addStream(List<Chapter> l) {
-		for(Chapter ch : l)
-			addStream(ch);
-		return l;
 	}
 }

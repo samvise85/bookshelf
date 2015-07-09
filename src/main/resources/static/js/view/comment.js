@@ -44,8 +44,7 @@ window.CommentListItemView = Backbone.View.extend({
 				if(resp.status == 200) {
 	    			$(self.el).remove();
 				} else {
-					app.messageView.errors.push("An error occurred deleting " + htmlEncode(title));
-					app.messageView.rerender();
+					app.pushMessageAndNavigate("error", "{{generic.js.error}}".format("{{generis.js.deleting}}", "{{generic.js.thecomment}}"));
 				}
 				if(callback) callback();
     		}
@@ -164,8 +163,7 @@ window.CommentEditView = Backbone.View.extend({
 					return self;
 				},
 				error: function () {
-					app.messageView.errors.push("This is not the comment you're looking for.");
-					app.messageView.rerender();
+					app.pushMessageAndNavigate("error", "{{generic.js.notfound}}".format("{{generic.js.thecomment}}"));
 				}
 			});
 		} else {

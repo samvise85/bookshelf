@@ -17,6 +17,7 @@ window.ChapterListView = Backbone.View.extend({
 	reload : false,
 	clearMessages : true,
 	page: 1,
+	num: null,
 	stopScroll: false,
 	
 	initialize: function() {
@@ -32,6 +33,15 @@ window.ChapterListView = Backbone.View.extend({
 		this.lastOptions = options;
 		$(this.el).empty();
 		$(this.el).html(this.template({view: this}));
+		if(options.parentElement)
+			options.parentElement.html(this.el);
+		pageHeight = $(window).height();
+//		console.log("pageHeight: " + pageHeight);
+//		console.log("offset: " + $(this.el).find('.chapters_table').offset().top);
+		maxh = pageHeight- $(this.el).find('.chapters_table').offset().top;
+		
+		$(this.el).find('.chapters_table').css("max-height", maxh + "px");
+		this.num = parseInt(parseInt(maxh)/(app.isAdmin() ? 47 : 37)) + 5;
 		this.append(options);
 	},
 	append: function (options) {
@@ -45,10 +55,11 @@ window.ChapterListView = Backbone.View.extend({
 	appendWhenReady: function (options) {
 		if(!(this.stopScroll === true)) {
 			var self = this;
-			var chapters = new Chapters({book: options.book, page: this.page});
+			var chapters = new Chapters({book: options.book});
 			chapters.fetch({
+				data: $.param({"page": self.page, "num": self.num}),
 				success: function(chapters) {
-					if(chapters.models.length == 0) self.stopScroll = true;
+					if(chapters.models.length == 0 || chapters.models.length < self.num) self.stopScroll = true;
 					_.each(chapters.models, function (chapter) {
 						$('table tbody', self.el).append(new ChapterListItemView(chapter).render().el);
 					}, self);
@@ -114,24 +125,22 @@ window.ChapterEditView = Backbone.View.extend({
 		var self = this;
 		this.chapter.destroy({
 			success: function () {
-				self.backToBook(book);
+				self.backToBook(title, book);
 				if(callback) callback();
 			},
 			error: function (req, resp) {
-				if(resp.status == 200) {
+				if(resp.status == 200)
 					self.backToBook(book);
-				} else {
-					app.messageView.errors.push("An error occurred deleting " + htmlEncode(title));
-					app.messageView.rerender();
-				}
+				else
+					app.pushMessageAndNavigate("error", "{{generic.js.error}}".format("{{generis.js.deleting}}", htmlEncode(title)));
 				if(callback) callback();
 			}
 		});
 		return false;
 	},
-	backToBook: function(book) {
+	backToBook: function(title, book) {
 		if(app.bookReadView) app.bookReadView.reload = true;
-		app.navigate('book/' + book, {trigger:true});
+		app.pushMessageAndNavigate("message", "{{chapter.js.deleted}}".format(title), "book/" + book);
 	},
 	render: function (options) {
 		lastOptions = options;
@@ -146,8 +155,7 @@ window.ChapterEditView = Backbone.View.extend({
 					return self;
 				},
 				error: function () {
-					app.messageView.errors.push("This is not the chapter you're looking for.");
-					app.messageView.rerender();
+					app.pushMessageAndNavigate("error", "{{generic.js.notfound}}".format("{{generic.js.thechapter}}"));
 				}
 			});
 		} else {
@@ -208,13 +216,13 @@ window.ChapterReadView = Backbone.View.extend({
 					return self;
 				},
 				error: function () {
-					app.messageView.errors.push("This is not the chapter you're looking for.");
-					app.messageView.rerender();
+					app.pushMessageAndNavigate("error", "{{generic.js.notfound}}".format("{{generic.js.thechapter}}"));
 				}
 			});
 		} else if(options.position) {
 			self.chapter = new ChapterByPosition(options);
 			self.chapter.fetch({
+				data: $.param({"position": options.position}),
 				success: function (chapter) {
 					$(self.el).empty();
 					$(self.el).html(self.template({book: options.book, chapter: chapter}));
@@ -222,13 +230,11 @@ window.ChapterReadView = Backbone.View.extend({
 					return self;
 				},
 				error: function () {
-					app.messageView.errors.push("This is not the chapter you're looking for.");
-					app.messageView.rerender();
+					app.pushMessageAndNavigate("error", "{{generic.js.notfound}}".format("{{generic.js.thechapter}}"));
 				}
 			});
 		} else {
-			app.messageView.errors.push("This is not the chapter you're looking for.");
-			app.messageView.rerender();
+			app.pushMessageAndNavigate("error", "{{generic.js.notfound}}".format("{{generic.js.thechapter}}"));
 		}
 	},
 	prev: function () {
@@ -238,8 +244,7 @@ window.ChapterReadView = Backbone.View.extend({
 		if(position > 0) {
 			this.navToChapterPosition(position ? position : null);
 		} else {
-			app.messageView.errors.push("Previously on " + this.chapter.get('book') + '... Nothing happened.');
-			app.messageView.rerender();
+			app.pushMessageAndNavigate("error", "{{chapter.js.noprev}}".format(this.chapter.get('book')));
 		}
 	},
 	scroll: function () {
@@ -259,8 +264,7 @@ window.ChapterReadView = Backbone.View.extend({
 		if(this.chapter && position && position != null) {
 			app.navigate('book/' + this.chapter.get('book') + '/chapter?position=' + position, {trigger:true});
 		} else {
-			app.messageView.errors.push("1-1-3-7-... what was that again... ?");
-			app.messageView.rerender();
+			app.pushMessageAndNavigate("error", "{{chapter.js.noposition}}");
 		}
 	},
 	loadComments: function() {

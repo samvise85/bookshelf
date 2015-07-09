@@ -35,8 +35,7 @@ window.UserListView = Backbone.View.extend({
 			$(this.el).html(this.template({view: this}));
 			this.append(options);
 		} else {
-			app.messageView.errors.push("You can't edit this profile!");
-			app.messageView.rerender();
+			app.pushMessageAndNavigate("error", "{{user.js.cantedit}}");
 		}
 	},
 	append: function (options) {
@@ -94,19 +93,20 @@ window.UserEditView = Backbone.View.extend({
 		'blur #email': 'validateMail',
 		'blur #check_email': 'validateCheckEmail',
 		'blur #newpassword': 'validateNewPassword',
-		'blur #check_password': 'validateCheckPassword'
+		'blur #check_password': 'validateCheckPassword',
+		'click .buttons-radio .btn': 'changeType'
 	},
 	validateUsername: function() {
 		if(!$('#id') || $('#id').size() == 0) {
 			var self = this;
 			var username = $('#username').val();
 			if(username == null || username.isEmpty()) {
-				this.messages.add("username_err", "Select a username");
+				this.messages.add("username_err", "{{user.js.usernameerr}}");
 			} else {
 				var userExists = new User({id: username});
 				userExists.fetch({
 					success: function (user) {
-						self.messages.add("username_err", "Username is not available");
+						self.messages.add("username_err", "{{user.js.usernamenotavailable}}");
 					},
 					error: function () {
 						self.messages.remove("username_err");
@@ -119,7 +119,7 @@ window.UserEditView = Backbone.View.extend({
 		if(!$('#id') || $('#id').size() == 0) {
 			var email = $('#email').val();
 			if(email == null || email.isEmpty() || !validateEmail(email)) {
-				this.messages.add("email_err", "Not a valid e-mail");
+				this.messages.add("email_err", "{{user.js.emailerr}}");
 			} else {
 				this.messages.remove("email_err");
 			}
@@ -130,7 +130,7 @@ window.UserEditView = Backbone.View.extend({
 			var email = $('#email').val();
 			var check = $('#check_email').val();
 			if(((email != null && !email.isEmpty()) && (check == null || check.isEmpty())) || check != email) {
-				this.messages.add("check_email_err", "E-mail doesn't match");
+				this.messages.add("check_email_err", "{{user.js.checkemailerr}}");
 			} else {
 				this.messages.remove("check_email_err");
 			}
@@ -143,7 +143,7 @@ window.UserEditView = Backbone.View.extend({
 			var username = $('#username').val();
 			var token = createToken(username, oldpassword);
 			if(token != $.cookie("bookshelf-token")) {
-				this.messages.add("oldpassword_err", "Wrong password!");
+				this.messages.add("oldpassword_err", "{{user.js.oldpassworderr}}");
 			} else {
 				this.messages.remove("oldpassword_err");
 			}
@@ -151,11 +151,11 @@ window.UserEditView = Backbone.View.extend({
 	},
 	validateNewPassword: function() {
 		var newpassword = $('#newpassword').val();
-		var a = newpassword == null || newpassword.isEmpty(); //no password
-		var b = !$('#id') || $('#id').size() == 0; //no id
-		var c = !validatePassword(newpassword); //non valid
-		if(c && (b || !a)) {
-			this.messages.add("newpassword_err", "Password must contain at least 8 character");
+		var a = newpassword != null && !newpassword.isEmpty(); //password valued
+		var b = $('#id') && $('#id').size() == 1; //id
+		var c = validatePassword(newpassword); //valid
+		if(!((b || a) && c)) {
+			this.messages.add("newpassword_err", "{{user.js.newpassworderr}}");
 		} else {
 			this.messages.remove("newpassword_err");
 		}
@@ -164,7 +164,7 @@ window.UserEditView = Backbone.View.extend({
 		var newpassword = $('#newpassword').val();
 		var check = $('#check_password').val();
 		if(((newpassword != null && !newpassword.isEmpty()) && (check == null || check.isEmpty())) || check != newpassword) {
-			this.messages.add("check_password_err", "Password doesn't match");
+			this.messages.add("check_password_err", "{{user.js.checkpassworderr}}");
 		} else {
 			this.messages.remove("check_password_err");
 		}
@@ -172,10 +172,22 @@ window.UserEditView = Backbone.View.extend({
 	validateAdmin: function() {
 		
 	},
-	validate: function() {
-		if(app.isAdmin()) {
-			this.validateAdmin()
+	validateRecaptcha: function() {
+		this.code = grecaptcha.getResponse();
+		if(this.code) {
+			console.log(this.code);
+//			$.ajax({url: '/login',
+//				type: this.user ? 'PUT' : 'POST',
+//				url: "/users" + (this.user ? "/" + this.user.id : ""),
+//			});
+			this.messages.remove("captcha_err");
+		} else {
+			this.messages.add("captcha_err", "{{user.js.captchaerr}}");
 		}
+	},
+	validate: function() {
+		if(app.isAdmin())
+			this.validateAdmin()
 		this.validateUsername();
 		this.validateMail();
 		this.validateCheckEmail();
@@ -183,6 +195,12 @@ window.UserEditView = Backbone.View.extend({
 			this.validateOldPassword();
 		this.validateNewPassword();
 		this.validateCheckPassword();
+		if(!app.getUser())
+			this.validateRecaptcha();
+	},
+	changeType: function(ev) {
+		$(ev.target.parentElement).find('.active').removeClass('active');
+		$(ev.target).addClass('active');
 	},
 	updateMessages: function(messages) {
 		for (id in messages) {
@@ -200,7 +218,7 @@ window.UserEditView = Backbone.View.extend({
 				"password" : CryptoJS.SHA1($('#newpassword').val()).toString(CryptoJS.enc.Hex),
 				"firstname" : $('[name=firstname]').val(),
 				"lastname" : $('[name=lastname]').val(),
-				"admin" : app.isAdmin() ? $('.user_type .active').html() == 'Administrator' : null,
+				"admin" : app.isAdmin() ? $('.user_type .active').html() == '{{user.model.type.admin}}' : null,
 				"language" : $('[name=language]').val()
 			};
 			var self = this;
@@ -210,18 +228,18 @@ window.UserEditView = Backbone.View.extend({
 			    data: JSON.stringify(self.userj),
 			    contentType: "application/json; charset=utf-8",
 			    dataType: "json",
-				success:function (data, textStatus, request) {
+				success:function (data) {
 					if(app.userListView) app.userListView.reload = true;
-					if(!self.user && self.userj.language != self.user.get('language')) app.languageChanged();
-					app.navigate('users', {trigger:true});
+					if(self.user && self.userj.language != self.user.get('language')) app.languageChanged();
+					
+					app.pushMessageAndNavigate("message", self.user ? "{{user.js.usermodified}}" : "{{user.js.usercreated}}", "users");
 				},
 				error: function (req, resp) {
 					if(resp.status == 500) {
-						app.messageView.errors.push("An error occurred saving " + htmlEncode(self.userj.username));
-						app.messageView.rerender();
+						app.pushMessageAndNavigate("error", "{{generic.js.error}}".format("{{generic.js.saving}}", htmlEncode(self.userj.username)));
 					} else if(resp.status != 403) {
 						if(app.userListView) app.userListView.reload = true;
-						app.navigate('users', {trigger:true});
+						app.pushMessageAndNavigate("message", self.user ? "{{user.js.usermodified}}" : "{{user.js.usercreated}}", "users");
 					}
 				}
 			});
@@ -233,11 +251,15 @@ window.UserEditView = Backbone.View.extend({
 		this.user.destroy({
 			success: function () {
 				if(app.userListView) app.userListView.reload = true;
-				router.navigate('users/', {trigger:true});
+				app.pushMessageAndNavigate("message", "{{user.js.userdeleted}}".format(self.user.id), "users");
 			},
-			error: function (request, textStatus, error) {
-				app.messageView.errors.push("An error occurred deleting " + htmlEncode(self.user.id));
-				app.messageView.rerender();
+			error: function (req, resp, error) {
+				if(resp.status == 500) {
+					app.pushMessageAndNavigate("error", "{{generic.js.error}}".format("{{generic.js.deleting}}", htmlEncode(self.user.id))); 
+				} else if(resp.status != 403) {
+					if(app.userListView) app.userListView.reload = true;
+					app.pushMessageAndNavigate("message", "{{user.js.userdeleted}}".format(self.user.id), "users");
+				}
 			}
 		});
 		return false;
@@ -256,17 +278,16 @@ window.UserEditView = Backbone.View.extend({
 						return self;
 					},
 					error: function () {
-						app.messageView.errors.push("This is not the user you're looking for.");
-						app.messageView.rerender();
+						app.pushMessageAndNavigate("error", "{{generic.js.notfound}}".format("user"));
 					}
 				});
 			} else {
-				app.messageView.errors.push("You can't edit this profile!");
-				app.messageView.rerender();
+				app.pushMessageAndNavigate("error", "{{user.js.cantedit}}");
 			}
 		} else {
 			$(self.el).empty();
 			$(self.el).html(self.template({user: null}));
+			self.addLanguagesWhenReady();
 			return self;
 		}
 	},
@@ -274,12 +295,18 @@ window.UserEditView = Backbone.View.extend({
 		var self = this;
 		grecaptcha.render('recaptcha', {
 			'sitekey' : '6Le83QcTAAAAAIsK6kgz3-M73bODFXVqB8t-9Ul-'
+//			'callback': function(code) {
+//				alert("AAAA");
+//				self.code = code;
+//			}
 		});
 	},
 	addLanguagesWhenReady: function() {
 		if(this.listItemViewReady) {
+//			console.log("Pronto");
 			this.addLanguages();
 		} else {
+//			console.log("Non è pronto");
 			var self  = this;
 			setTimeout(function() { self.addLanguagesWhenReady(); }, 100);
 		}
@@ -289,6 +316,7 @@ window.UserEditView = Backbone.View.extend({
 		var languages = new Languages();
 		languages.fetch({
 			success: function(languages) {
+//				console.log("Trovate "  + languages.length + " lingue");
 				_.each(languages.models, function(language) {
 					var languageSelectItemView = new LanguageSelectItemView();
 					languageSelectItemView.render({language: language, currLang: self.user ? self.user.get('language') : ''});
@@ -296,8 +324,7 @@ window.UserEditView = Backbone.View.extend({
 				})
 			},
 			error: function(req, resp) {
-				app.messageView.errors.push("This is not the user you're looking for.");
-				app.messageView.rerender();
+				app.pushMessageAndNavigate("error", "{{generic.js.notfound}}".format("user"));
 			}
 		});
 	}
@@ -307,8 +334,6 @@ window.LanguageSelectItemView = Backbone.View.extend({
     render:function (options) {
         var html = this.template(options);
         this.setElement(html);
-//        console.log(options);
-//        console.log(this.el);
         return this;
     }
 });
@@ -329,16 +354,41 @@ window.UserView = Backbone.View.extend({
 				success: function (user) {
 					$(self.el).empty();
 					$(self.el).html(self.template({user: user}));
-					return self;
 				},
 				error: function () {
-					app.messageView.errors.push("This is not the user you're looking for.");
-					app.messageView.rerender();
+					app.pushMessageAndNavigate("error", "{{generic.js.notfound}}".format("user"));
 				}
 			});
 		} else {
-			app.messageView.errors.push("This is not the user you're looking for.");
-			app.messageView.rerender();
+			app.pushMessageAndNavigate("error", "{{generic.js.notfound}}".format("user"));
+		}
+	}
+});
+
+window.UserActivateView = Backbone.View.extend({
+	reload : true,
+	clearMessages : true,
+	newOptions: function(options) {
+		return true;
+	},
+	render: function (options) {
+		var self = this;
+		if(options.id) {
+			$.ajax({url: '/activationCode/' + options.code,
+				type:'PUT',
+				success:function (data, textStatus, request) {
+					user = eval(data);
+					if(!user)
+						app.pushMessageAndNavigate("error", "{{generic.js.error}}".format("{{user.js.activating}}", "{{generic.js.theuser}}"), "");
+					else
+						app.pushMessageAndNavigate("message", "{{user.js.accountactivated}}".format(user.username), "");
+				},
+				error: function (request, textStatus, error) {
+					app.pushMessageAndNavigate("error", "{{generic.js.error}}".format("{{user.js.activating}}", "{{generic.js.theuser}}"), "");
+				}
+			});
+		} else {
+			app.pushMessageAndNavigate("error", "{{generic.js.notfound}}".format("{{generic.js.theuser}}"), "");
 		}
 	}
 });

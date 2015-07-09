@@ -2,13 +2,13 @@
     <div class="navbar-inner">
         <div class="container">
 
-            <a class="brand" href="#">Bookshelf</a>
+            <a class="brand" href="<%= getAppPath() %>/#">Bookshelf</a>
 
             <div class="nav-collapse">
                 <ul class="nav">
-                    <li class="home-menu active"><a href="<%= getAppPath() %>/#">{{header.menu.home}}</a></li>
-                    <li class="contact-menu"><a href="<%= getAppPath() %>/#contact">{{header.menu.contact}}</a></li>
+<!--                     <li class="home-menu active"><a href="<%= getAppPath() %>/#">{{header.menu.home}}</a></li> -->
                     <li class="book-menu"><a href="<%= getAppPath() %>/#books">{{header.menu.books}}</a></li>
+                    <li class="contact-menu"><a href="<%= getAppPath() %>/#contact">{{header.menu.contact}}</a></li>
                     <% if(app.isAdmin()) { %>
                     <li class="user-menu"><a href="<%= getAppPath() %>/#users">{{header.menu.people}}</a></li>
                     <li class="admin-menu"><a href="admin.html">{{header.menu.administration}}</a></li>
@@ -24,7 +24,7 @@
 				<%
 					if(app.getUser() != null) {%>
 						<li class="logged-menu"><a href="<%= getAppPath() %>/#user/<%= app.getUser().id %>"><%= app.getUser().firstname %> <%= app.getUser().lastname %>
-						<%= !app.getUser().firstname && !app.getUser().lastname ? app.getUser().id : "" %></a></li>
+						<%= !app.getUser().firstname && !app.getUser().lastname ? app.getUser().username : "" %></a></li>
 						<li class="logout-menu"><a href="#logout">{{header.menu.logout}}</a></li>
 					<%} else {%>
 						<li class="login-menu"><a href="<%= getAppPath() %>/#login">{{header.menu.login}}</a></li>

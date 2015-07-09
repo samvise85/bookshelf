@@ -50,17 +50,18 @@ public class ChapterController extends AnalyticsAwareController {
 	@RequestMapping(value="/books/{book}/chapters")
     public Collection<Chapter> getChapterList(HttpServletRequest request, 
     		@PathVariable String book,
-    		@RequestParam(value="page", required=false) Integer page) {
+    		@RequestParam(value="page", required=false) Integer page,
+    		@RequestParam(value="num", required=false) Integer num) {
 		String methodName = ControllerUtils.getMethodName();
-		return executeMethod(request, methodName, new Class<?>[] { String.class, Integer.class }, new Object[] { book, page });
+		return executeMethod(request, methodName, new Class<?>[] { String.class, Integer.class, Integer.class }, new Object[] { book, page, num });
 	}
 	
-    protected Collection<Chapter> getChapterList(String book, Integer page) {
+    protected Collection<Chapter> getChapterList(String book, Integer page, Integer num) {
         return chapterManager.getList(new PersistOptions(
         		new SimpleProjectionClause("id", "position", "number", "title", "book"),
         		Collections.singletonList(new SelectionClause("book", Equals.getInstance(), book)), 
         		Arrays.asList(new OrderClause[] {new OrderClause("position", Order.ASC), new OrderClause("number", Order.ASC)}),
-        		page != null ? new PaginationClause(ControllerConstants.Pagination.DEFAULT_PAGE_SIZE, page) : null));
+        		page != null ? new PaginationClause(num != null ? num : ControllerConstants.Pagination.DEFAULT_PAGE_SIZE, page) : null));
     }
 	
 	@RequestMapping("/books/{book}/chapters/{id}")

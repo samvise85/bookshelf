@@ -151,13 +151,13 @@ window.RequestView = Backbone.View.extend({
 					},
 					error: function (req, resp) {
 						app.messageView.errors.push("This is not the request you're looking for.");
-						app.messageView.rerender();
+						app.rerenderMessages();
 					}
 				});
 			}
 		} else {
 			app.messageView.errors.push("This is not the request you're looking for.");
-			app.messageView.rerender();
+			app.rerenderMessages();
 		}
 		return this;
 	},
@@ -208,7 +208,7 @@ window.ErrorView = Backbone.View.extend({
 			});
 		} else {
 			app.messageView.errors.push("This is not the error you're looking for.");
-			app.messageView.rerender();
+			app.rerenderMessages();
 		}
 		return this;
 	}

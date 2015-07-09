@@ -4,26 +4,28 @@ window.MessageView = Backbone.View.extend({
 	errors : [],
 	warnings : [],
 
-    render: function () {
+	render: function() {
 		html = '';
-		if(this.messages.length > 0) {
+//		console.log("Messages: " +this.messages.length);
+		if(this.messages.length > 0)
 			html += this.template({type: 'success', messages:this.messages});
-		}
-		if(this.warnings.length > 0) {
+//		console.log("Warnings: " +this.warnings.length);
+		if(this.warnings.length > 0)
 			html += this.template({type: 'warning', messages:this.warnings});
-		}
-		if(this.errors.length > 0) {
+//		console.log("Errors: " +this.errors.length);
+		if(this.errors.length > 0)
 			html += this.template({type: 'danger', messages:this.errors});
-		}
+		
 		$(this.el).html(html);
 		this.clear();
         return this;
     },
-	rerender : function () {
-		$('#messages').html(this.render().el);
-	},
+//	rerender : function() {
+//		$('#messages').html(this.render().el);
+//	},
 	
-	clear : function () {
+	clear : function() {
+//		console.log("message clear");
 		this.messages = [];
 		this.warnings = [];
 		this.errors = [];

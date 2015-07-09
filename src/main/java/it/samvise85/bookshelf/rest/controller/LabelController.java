@@ -41,14 +41,16 @@ public class LabelController {
 
 	@RequestMapping(value="/labels")
 //	@Secured(BookshelfRole.ADMIN)
-	public Collection<Label> getLabelList(@RequestParam(value="page", required=false) Integer page, @RequestParam(value="language", required=false) String language) {
+	public Collection<Label> getLabelList(@RequestParam(value="language", required=false) String language,
+			@RequestParam(value="page", required=false) Integer page,
+    		@RequestParam(value="num", required=false) Integer num) {
 		String methodName = ControllerUtils.getMethodName();
 		log.info(methodName);
 		return labelManager.getList(new PersistOptions(
         		NoProjectionClause.NO_PROJECTION,
         		Collections.singletonList(new SelectionClause("lang", Equals.getInstance(), language)),
         		Collections.singletonList(new OrderClause("key", Order.ASC)),
-        		page != null ? new PaginationClause(ControllerConstants.Pagination.DEFAULT_PAGE_SIZE, page) : null));
+        		page != null ? new PaginationClause(num != null ? num : ControllerConstants.Pagination.DEFAULT_PAGE_SIZE, page) : null));
 	}
 
 	@RequestMapping(value="/labels", method=RequestMethod.DELETE)

@@ -47,17 +47,19 @@ public class CommentController extends AnalyticsAwareController {
 	private RestErrorManager errorManager;
 
 	@RequestMapping(value="/streams/{stream}/comments")
-    public Collection<Comment> getCommentList(HttpServletRequest request, @PathVariable String stream, @RequestParam(value="page", required=false) Integer page) {
+    public Collection<Comment> getCommentList(HttpServletRequest request, @PathVariable String stream,
+    		@RequestParam(value="page", required=false) Integer page,
+    		@RequestParam(value="num", required=false) Integer num) {
 		String methodName = ControllerUtils.getMethodName();
-		return executeMethod(request, methodName, new Class<?>[] { String.class, Integer.class }, new Object[] { stream, page });
+		return executeMethod(request, methodName, new Class<?>[] { String.class, Integer.class, Integer.class }, new Object[] { stream, page, num });
 	}
 	
-    protected Collection<Comment> getCommentList(String stream, Integer page) {
+    protected Collection<Comment> getCommentList(String stream, Integer page, Integer num) {
         return commentManager.getList(new PersistOptions(
         		NoProjectionClause.NO_PROJECTION,
         		Collections.singletonList(new SelectionClause("parentStream", Equals.getInstance(), stream)),
         		Collections.singletonList(OrderClause.DESC("creation")),
-        		page != null ? new PaginationClause(ControllerConstants.Pagination.DEFAULT_PAGE_SIZE, page) : null));
+        		page != null ? new PaginationClause(num != null ? num : ControllerConstants.Pagination.DEFAULT_PAGE_SIZE, page) : null));
     }
 	
 	@RequestMapping("/streams/{stream}/comments/{id}")

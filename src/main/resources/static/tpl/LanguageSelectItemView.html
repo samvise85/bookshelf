@@ -1,4 +1,4 @@
-<% if(currLang && language.id == currLang) { %>
+<% if(language.id == currLang || (!currLang && language.get('def'))) { %>
 <option value="<%= language.id %>" selected="selected"><%=language.id %></option>
 <% } else { %>
 <option value="<%= language.id %>"><%= language.id %></option>

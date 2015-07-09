@@ -18,7 +18,12 @@ window.Languages = Backbone.Collection.extend({
 });
 
 window.Messages = function Messages() {
-	this.messageCount = 0;
+	this.messageCount = function() {
+		count = 0;
+		for (key in this.messages)
+			if(this.messages[key] != "") count++;
+		return count;
+	};
 	this.messages = {};
 	this.refreshView = false;
 	this.initialize = function(refreshView) {
@@ -27,19 +32,21 @@ window.Messages = function Messages() {
 	this.add = function(key, message) {
 		eval('this.messages.' + key + ' = "' + message + '";');
 		this.refresh(key);
-		this.messageCount++;
+//		this.messageCount++;
 	};
 	this.get = function(key) {
 		eval('var message = this.messages.' + key + ';');
 		return message;
 	};
 	this.remove = function(key) {
-		eval('this.messages.' + key + ' = "";');
-		this.refresh(key);
-		if(this.messageCount > 0) this.messageCount--;
+		if(eval('this.messages.' + key + ';')) {
+			eval('this.messages.' + key + ' = "";');
+			this.refresh(key);
+//			if(this.messageCount > 0) this.messageCount--;
+		}
 	};
 	this.isEmpty = function() {
-		return this.messageCount === 0;
+		return this.messageCount() === 0;
 	};
 	this.refresh = function(key) {
 		if($('#'+key)) {
