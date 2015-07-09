@@ -40,7 +40,7 @@ public class LabelController {
 	private LanguageManager languageManager;
 
 	@RequestMapping(value="/labels")
-//	@Secured(BookshelfRole.ADMIN)
+	@Secured(BookshelfRole.ADMIN)
 	public Collection<Label> getLabelList(@RequestParam(value="language", required=false) String language,
 			@RequestParam(value="page", required=false) Integer page,
     		@RequestParam(value="num", required=false) Integer num) {
@@ -61,7 +61,7 @@ public class LabelController {
 	}
 
 	@RequestMapping(value="/labels/{id}")
-//	@Secured(BookshelfRole.ADMIN)
+	@Secured(BookshelfRole.ADMIN)
     public Label getLabel(@PathVariable String id,
     		@RequestParam(value="language", required=false) String language,
     		@RequestParam(value="default", required=false) Boolean bundleLabel) {
@@ -73,7 +73,7 @@ public class LabelController {
     }
 
 	@RequestMapping(value="/labels/{id}", method=RequestMethod.PUT)
-//	@Secured(BookshelfRole.ADMIN)
+	@Secured(BookshelfRole.ADMIN)
     public Label updateLabel(@PathVariable String id, @RequestBody Label label) {
 		log.info(ControllerUtils.getMethodName() + ": id = " + id);
 		labelManager.update(label);
@@ -81,7 +81,6 @@ public class LabelController {
     }
 
 	@RequestMapping(value="/languages")
-//	@Secured(BookshelfRole.ADMIN)
 	public List<Language> getLanguageList(@RequestParam(value="page", required=false) Integer page) {
 		String methodName = ControllerUtils.getMethodName();
 		log.info(methodName);
@@ -91,7 +90,7 @@ public class LabelController {
 	}
 
 	@RequestMapping(value="/languages/{id}", method=RequestMethod.PUT)
-//	@Secured(BookshelfRole.ADMIN)
+	@Secured(BookshelfRole.ADMIN)
     public Language updateLanguage(@PathVariable String id, @RequestBody Language language) {
 		log.info(ControllerUtils.getMethodName() + ": id = " + id);
 		return languageManager.update(language);

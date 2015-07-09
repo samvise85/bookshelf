@@ -45,7 +45,7 @@ public class AnalyticsController {
 	private RouteManager routeManager;
 
 	@RequestMapping(value="/analytics/requests")
-//	@Secured(BookshelfRole.ADMIN)
+	@Secured(BookshelfRole.ADMIN)
 	public Collection<RestRequest> getRequestList(@RequestParam(value="page", required=false) Integer page) {
 		String methodName = ControllerUtils.getMethodName();
 		log.info(methodName);
@@ -55,14 +55,14 @@ public class AnalyticsController {
 	}
 
 	@RequestMapping(value="/analytics/requests/{id}")
-//	@Secured(BookshelfRole.ADMIN)
+	@Secured(BookshelfRole.ADMIN)
     public RestRequest getRequest(@PathVariable String id) {
 		log.info(ControllerUtils.getMethodName() + ": id = " + id);
 		return requestManager.get(Long.parseLong(id));
     }
 
 	@RequestMapping(value="/analytics/requests/{id}", method=RequestMethod.DELETE)
-//	@Secured(BookshelfRole.ADMIN)
+	@Secured(BookshelfRole.ADMIN)
     public RestRequest deleteRequest(@PathVariable String id) {
 		log.info(ControllerUtils.getMethodName() + ": id = " + id);
 		requestManager.delete(Long.parseLong(id));
@@ -70,7 +70,7 @@ public class AnalyticsController {
     }
 
 	@RequestMapping(value="/analytics/requests", method=RequestMethod.DELETE)
-//	@Secured(BookshelfRole.ADMIN)
+	@Secured(BookshelfRole.ADMIN)
     public int clearRequests() {
 		log.info(ControllerUtils.getMethodName());
 		List<RestRequest> list = requestManager.getList(null);
@@ -80,7 +80,7 @@ public class AnalyticsController {
     }
 
 	@RequestMapping("/analytics/errors")
-//	@Secured(BookshelfRole.ADMIN)
+	@Secured(BookshelfRole.ADMIN)
 	public Collection<RestError> getErrorList(@RequestParam(value="request", required=false) Long request) {
 		String methodName = ControllerUtils.getMethodName();
 		log.info(methodName);
@@ -94,7 +94,7 @@ public class AnalyticsController {
 	}
 
 	@RequestMapping(value="/analytics/errors/{id}", method=RequestMethod.DELETE)
-//	@Secured(BookshelfRole.ADMIN)
+	@Secured(BookshelfRole.ADMIN)
     public RestError deleteError(@PathVariable Long id) {
 		log.info(ControllerUtils.getMethodName() + ": id = " + id);
         errorManager.delete(id);
@@ -102,7 +102,7 @@ public class AnalyticsController {
     }
 
 	@RequestMapping(value="/analytics/errors", method=RequestMethod.DELETE)
-//	@Secured(BookshelfRole.ADMIN)
+	@Secured(BookshelfRole.ADMIN)
     public int clearErrors() {
 		log.info(ControllerUtils.getMethodName());
 		List<RestRequest> list = requestManager.getList(null);
@@ -112,7 +112,7 @@ public class AnalyticsController {
     }
 
 	@RequestMapping("/analytics/routes")
-//	@Secured(BookshelfRole.ADMIN)
+	@Secured(BookshelfRole.ADMIN)
 	public Collection<Route> getRouteList() {
 		String methodName = ControllerUtils.getMethodName();
 		log.info(methodName);
@@ -127,7 +127,7 @@ public class AnalyticsController {
     }
 
 	@RequestMapping(value="/analytics/routes/{id}", method=RequestMethod.DELETE)
-//	@Secured(BookshelfRole.ADMIN)
+	@Secured(BookshelfRole.ADMIN)
     public Route deleteRoute(@PathVariable Long id) {
 		log.info(ControllerUtils.getMethodName() + ": id = " + id);
         routeManager.delete(id);
@@ -135,7 +135,7 @@ public class AnalyticsController {
     }
 
 	@RequestMapping(value="/analytics/routes", method=RequestMethod.DELETE)
-//	@Secured(BookshelfRole.ADMIN)
+	@Secured(BookshelfRole.ADMIN)
     public int clearRoutes() {
 		log.info(ControllerUtils.getMethodName());
 		List<RestRequest> list = requestManager.getList(null);
