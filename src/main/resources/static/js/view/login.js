@@ -18,16 +18,12 @@ window.LoginView = Backbone.View.extend({
         if(app.messageView)
         	app.messageView.clear();
 		
-        //console.log('Loggin in... ');
 		var username = $('#username').val();
 		
-		console.log($.cookie("bookshelf-token"));
-		console.log($('#password').val());
 		var token = createToken(username, $('#password').val());
 		$.cookie("bookshelf-username", username);
 		$.cookie("bookshelf-token", token);
-		console.log($.cookie("bookshelf-token"));
-		return;
+		
 		$.ajax({url: '/login',
 			type:'GET',
 			success:function (data, textStatus, request) {
