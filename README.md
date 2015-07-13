@@ -86,6 +86,51 @@ TODO:
 - add user setting (where a user can decide which information to display)
 - add new profiles (eg. author)
 
+Database:
+
+Bookshelf now runs with both MySQL and H2 datasources.
+If you want to use MySQL you just have to configure a file db.properties in your user home as follows:
+db.url=jdbc:mysql://<your-ip>:3306/<database-name>
+db.user=<username>
+db.password=<password>
+db.driver=com.mysql.jdbc.Driver
+
+If the file is not configured the Bookshelf H2 database is created/connected in your user home.
+
+
+Internationalization:
+
+A chain of ResourceResolver is configured in WebMvcConfig.java. It permits to template-ize all text resources (html, js, css).
+When a resource is requested:
+- TimestampResourceResolver parse the requested path to find a version number into the file name and erase it (this version is needed to bypass server and client caches, see index.html to understand how is used).
+- InternationalizationResourceResolver append to the requested path: language code and version o language (everytime a label is updated, language version is incremented)
+- CachingResourceResolver (Spring standard) caches all the requests resolved by InternationalizationResourceResolver
+- InternationalizationTemplateResourceResolver gets the requested path and retrieve the right resource then it passes the resource to InternationalizationTransformer that gets the user language and substitutes all the keys in the files (surrounded by double brackets "{{key}}") with the label. If the language is not supported labels are chosen by the default language and if a label of a supported language does not exists it creates a new empty one and returns the missing key surrounded by question marks.
+ 
+For example, if /tpl/HeaderView_1434550070203.html is requested, the request path is manipulated as follows:
+- TimestampResourceResolver transform it to /tpl/HeaderView.html and passes forward
+- InternationalizationResourceResolver transform it to /tpl/HeaderView_en_102.html and passes forward
+- CachingResourceResolver checks if the respource is in the cache, if not passes forward
+- InternationalizationTemplateResourceResolver transforms the path again to /tpl/HeaderView.html, gets the resource and translate it then returns it back.
+
+A view in the newly administration menu permits to view all the labels stored into the application and modify them. After the modification it's simply necessarly to refresh the page (maybe Ctrl+Shift+R).
+
+TODO:
+- manage languages and default language (services are ready)
+- manage label each language in a single page with default language label as example
+
+
+User management:
+
+Now a user can register (recaptcha is included into the page).
+A user can edit its information (not username or mail).
+An admin can see the user list (but not the informations) and can change user type (eg. make a user an admin and viceversa).
+
+TODO:
+- add other informations
+- add user setting (where a user can decide which information to display)
+- add new profiles (eg. author)
+
 ========== Installation and usage ==========
 
 How to install:
