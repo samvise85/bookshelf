@@ -1,6 +1,5 @@
 window.Router = Backbone.Router.extend({
 	user: null,
-	savedViews: {},
 	history: [],
 	clearMessages: true,
 	
@@ -8,19 +7,22 @@ window.Router = Backbone.Router.extend({
 		"": "books",
 		"contact": "contact",
         "books": "books",
+        "books?*querystring": "books",
         "books/new": "editBook",
 		"book/:id/edit": "editBook",
         "book/:id": "viewBook",
-        "book/:book/chapters": "chapters",
+//        "book/:book/chapters": "chapters",
         "book/:book/chapters/new": "editChapter",
-        "book/:book/chapter/:id/edit": "editChapter",
-        "book/:book/chapter/:id": "viewChapter",
+        "book/:book/edit/:chapter": "editChapter",
+        "book/:book/:position/:chapter": "viewChapter3",
         "book/:book/chapter?position=:position": "viewChapterByPosition",
 		"users": "users",
 		"user/:id/edit": "editUser",
 		"user/:id/activate/:code": "activateUser",
 		"user/:id": "viewUser",
 		"register": "editUser",
+		"forgot": "forgot",
+		"reset/:code": "resetPassword",
         "login" : "login",
         "logout" : "logout",
 		"denied" : "denied"
@@ -89,10 +91,6 @@ window.Router = Backbone.Router.extend({
 		});
     },
 	clear: function () {
-		_.each(this.savedViews, function (savedViewName) {
-			eval('app.' + savedViewName + ' = null');
-		});
-		this.savedViews = {};
 		this.currentView = null;
 		this.initView();
 	},
@@ -118,45 +116,24 @@ window.Router = Backbone.Router.extend({
 		if(!$.cookie("bookshelf-username")) return false;
 		return this.getUser() && this.getUser().admin === true;
 	},
-	renderView : function(savedViewName, View, headerOptions, viewOptions) {
+	renderView : function(viewName, View, headerOptions, viewOptions) {
 		if(headerOptions)
 			this.headerSelection = headerOptions.selection;
-		this.savedViews[savedViewName] = savedViewName;
-		this.currentViewName = savedViewName;
+		
+		//clear current view
+		if(this.currentView) this.currentView.close();
+		this.currentViewName = viewName;
 		this.currentViewClass = View;
 		
-		this.renderCurrentView(headerOptions, viewOptions);
-	},
-	rerenderView : function() {
-		if(this.currentViewName && this.currentViewClass) {
-			var currentView = eval("this." + this.currentViewName);
-			
-			var headerOptions = {rerender: true};
-			reload = currentView.reload;
-			currentView.reload = true;
-			this.renderCurrentView(headerOptions, currentView.lastOptions);
-			currentView.reload = reload; //reset reload status to original value
-		}
-	},
-	renderCurrentView : function(headerOptions, viewOptions) {
-		eval("var currentView = this." + this.currentViewName + ";");
-		
 		//renders the view
-		if (!currentView || currentView.reload || !currentView.newOptions || currentView.newOptions(viewOptions)) {
-			var self = this;
-			var className = this.currentViewName.charAt(0).toUpperCase() + this.currentViewName.slice(1);
-			viewLoader.load(className, function() {
-				if(!currentView) {
-					currentView = new self.currentViewClass();
-					eval("self." + self.currentViewName + " = currentView;");
-				}
-				currentView.render(viewOptions);
-				$("#content").html(currentView.el);
-			});
-		} else {
-			currentView.delegateEvents(); // delegate events when the view is recycled
-			$("#content").html(currentView.el);
-		}
+		var self = this;
+		var className = viewName.charAt(0).toUpperCase() + viewName.slice(1);
+		viewLoader.load(className, function() {
+			self.currentView = new self.currentViewClass();
+			self.currentView.render(viewOptions);
+			$("#content").html(self.currentView.el);
+			self.currentView.delegateEvents();
+		});
 		
 		//selects header
 		if(this.headerView) {
@@ -168,6 +145,12 @@ window.Router = Backbone.Router.extend({
 			$('#messages').html(this.messageView.render().el);
 		} else {
 			this.clearMessages = true;
+		}
+	},
+	rerenderView : function() {
+		if(this.currentView) {
+			var headerOptions = {rerender: true};
+			this.renderView(this.currentViewName, this.currentViewClass, headerOptions, currentView.lastOptions);
 		}
 	},
 	pushMessageAndNavigate: function(messageType, message, route) {
@@ -192,9 +175,11 @@ window.Router = Backbone.Router.extend({
 		this.renderView('contactView', ContactView, 
 				{selection: 'contact-menu'}, options);
     },
-    books: function () {
+    books: function (querystring) {
+    	options = null;
+    	if(querystring) options = {queryparams: parseQueryString(querystring)}; 
 		this.renderView('bookListView', BookListView, 
-				{selection: 'book-menu'}, null);
+				{selection: 'book-menu'}, options);
 	},
     editBook: function (id) {
 		var options = {id: id};
@@ -211,13 +196,18 @@ window.Router = Backbone.Router.extend({
 		this.renderView('chapterListView', ChapterListView, 
 				{selection: 'book-menu'}, options);
 	},
-    editChapter: function (book, id) {
-		var options = {book: book, id: id};
+    editChapter: function (book, chapter) {
+		var options = {book: book, id: chapter};
 		this.renderView('chapterEditView', ChapterEditView,
 				{selection: 'book-menu'}, options);
 	},
     viewChapter: function (book, id) {
 		var options = {book: book, id: id};
+		this.renderView('chapterReadView', ChapterReadView, 
+				{selection: 'book-menu'}, options);
+	},
+    viewChapter3: function (book, position, chapter) {
+		var options = {book: book, title: decodeURI(chapter), position:position};
 		this.renderView('chapterReadView', ChapterReadView, 
 				{selection: 'book-menu'}, options);
 	},
@@ -264,6 +254,23 @@ window.Router = Backbone.Router.extend({
     	if(this.isAdmin() || (this.user && this.user.id != id)) selectedMenu = 'user-menu';
     	this.renderView('userView', UserView, 
 				{selection: selectedMenu}, options);
+	},
+	forgot: function() {
+		if(!this.getUser()) {
+			this.renderView('forgotView', ForgotView, 
+					{selection: null}, null);
+		} else {
+			this.navigate('', {trigger:true});
+		}
+	},
+	resetPassword: function(code) {
+		if(!this.getUser()) {
+	    	var options = {code: code};
+			this.renderView('resetView', ResetView, 
+					{selection: null}, options);
+		} else {
+			this.navigate('', {trigger:true});
+		}
 	},
 	
     login: function() {

@@ -7,6 +7,10 @@ import java.util.Set;
 public class NoProjectionClause extends ProjectionClause {
 	public static final ProjectionClause NO_PROJECTION = new NoProjectionClause();
 	
+	private NoProjectionClause() {
+		super(ProjectionType.NO_PROJECTION);
+	}
+
 	@Override
 	public Set<String> getFields() {
 		return Collections.emptySet();

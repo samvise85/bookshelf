@@ -1,8 +1,8 @@
 package it.samvise85.bookshelf.manager;
 
 import it.samvise85.bookshelf.model.comment.Moderation;
-import it.samvise85.bookshelf.persist.database.DatabasePersistenceUnit;
-import it.samvise85.bookshelf.persist.database.ModerationRepository;
+import it.samvise85.bookshelf.persist.repository.DatabasePersistenceUnit;
+import it.samvise85.bookshelf.persist.repository.ModerationRepository;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;

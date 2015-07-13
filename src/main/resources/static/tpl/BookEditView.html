@@ -1,17 +1,28 @@
 <form class="edit-book-form">
   <legend id="page-title"><%= book ? '{{book.edit.pagetitle.edit}}' : '{{book.edit.pagetitle.new}}' %></legend>
-	<label>{{book.model.title}}</label>
-	<input name="title" type="text" value="<%= book ? htmlEncode(book.get('title')) : '' %>">
-	<label>{{book.model.year}}</label>
-	<input name="year" type="text" value="<%= book ? htmlEncode(book.get('year')) : '' %>">
-	<label>{{book.model.author}}</label>
-	<input name="author" type="text" value="<%= book ? htmlEncode(book.get('author')) : '' %>">
-	<label>{{book.model.genre}}</label>
-	<input name="genre" type="text" value="<%= book ? htmlEncode(book.get('genre')) : '' %>">
+	<div class="input100p">
+		<label>{{book.model.title}}</label>
+		<input name="title" type="text" class="title-input" style="max-width:928px;width:100%;height:1.4em;font-size:2.0em;font-weight:bold;" value="<%= book ? htmlEncode(book.get('title')) : '' %>">
+		<div id="title_err" class="error"></div>
+	</div>
+	
+	<div class="input100p">
+		<label>{{book.model.year}}</label>
+		<input name="year" type="text" value="<%= book ? htmlEncode(book.get('year')) : '' %>"> <span id="year_err" class="error"></span>
+	</div>
+	<div class="input100p">
+		<label>{{book.model.author}}</label>
+		<input name="author" type="text" value="<%= book ? htmlEncode(book.get('author')) : app.getUser().username %>" readonly="readonly">
+	</div>
+	<div class="input100p">
+		<label>{{book.model.genre}}</label>
+		<input name="genre" type="text" value="<%= book ? htmlEncode(book.get('genre')) : '' %>">
+	</div>
 	<hr />
-   <button type="submit" class="btn"><%= book ? '{{book.edit.button.update}}' : '{{book.edit.button.create}}' %></button>
+	
+	<button type="submit" class="btn"><%= book ? '{{book.edit.button.update}}' : '{{book.edit.button.create}}' %></button>
    
-   <% if(book) { %>
+	<% if(book) { %>
 	<input type="hidden" name="id" value="<%= book.id %>" />
 	<a id="delete-button" class="btn btn-danger" >{{book.edit.button.delete}}</a>
 	

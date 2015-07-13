@@ -11,7 +11,7 @@ import it.samvise85.bookshelf.persist.clauses.Order;
 import it.samvise85.bookshelf.persist.clauses.OrderClause;
 import it.samvise85.bookshelf.persist.clauses.PaginationClause;
 import it.samvise85.bookshelf.persist.clauses.SelectionClause;
-import it.samvise85.bookshelf.persist.selection.Equals;
+import it.samvise85.bookshelf.persist.clauses.SelectionOperation;
 import it.samvise85.bookshelf.utils.ControllerConstants;
 import it.samvise85.bookshelf.utils.ControllerUtils;
 
@@ -48,7 +48,7 @@ public class LabelController {
 		log.info(methodName);
 		return labelManager.getList(new PersistOptions(
         		NoProjectionClause.NO_PROJECTION,
-        		Collections.singletonList(new SelectionClause("lang", Equals.getInstance(), language)),
+        		Collections.singletonList(new SelectionClause("lang", SelectionOperation.EQUALS, language)),
         		Collections.singletonList(new OrderClause("key", Order.ASC)),
         		page != null ? new PaginationClause(num != null ? num : ControllerConstants.Pagination.DEFAULT_PAGE_SIZE, page) : null));
 	}

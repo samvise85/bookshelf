@@ -9,6 +9,10 @@ window.CommentListItemView = Backbone.View.extend({
         this.options.comment.bind("change", this.render, this);
         this.options.comment.bind("destroy", this.close, this);
     },
+    onClose: function(){
+    	this.options.comment.unbind("change", this.render);
+        this.options.comment.unbind("destroy", this.close);
+    },
 
     render:function () {
         $(this.el).html(this.template(this.options));

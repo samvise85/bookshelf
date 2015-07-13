@@ -1,0 +1,15 @@
+<form class="edit-user-form" action="?" method="POST">
+	<legend>{{user.forgot.pagetitle}}</legend>
+	<div>
+		<label>{{user.model.usernameormail}}</label>
+		<input id="username" name="username" type="text" /> <span id="username_err" class="error"></span>
+	</div>
+	
+	<div id="recaptcha"></div>
+	<div><span id="captcha_err" class="error"></span></div>
+	<hr />
+	
+	<a class="btn save">{{user.forgot.button.sendmail}}</a>
+	
+	<script src="//www.google.com/recaptcha/api.js?onload=onloadCallback&render=explicit" async defer></script>
+</form>

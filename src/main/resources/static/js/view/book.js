@@ -2,10 +2,11 @@
 window.BookListView = Backbone.View.extend({
 	reload : false,
 	clearMessages : false,
-	render: function () {
+	render: function (options) {
 		var self = this;
 		var books = new Books();
 		books.fetch({
+			data: options && options.queryparams ? $.param(options.queryparams) : null,
 			success: function(books) {
 				$(self.el).empty();
 				$(self.el).html(self.template({books: books.models}));
@@ -20,34 +21,70 @@ window.BookListView = Backbone.View.extend({
 
 window.BookEditView = Backbone.View.extend({
 	lastOptions : null,
-	reload : false,
+	reload : true,
 	clearMessages : true,
+	messages: new Messages(true),
+	
 	newOptions: function(options) {
 		return !arraysEqual(this.lastOptions, options);
 	},
 	events: {
 		'submit .edit-book-form': 'saveBook',
-//		'click .delete': 'deleteBook'
+		'blur [name=title]': 'validateTitle',
+		'blur [name=year]': 'validateYear',
+	},
+	validateTitle: function() {
+		this.messages.remove("title_err");
+		var title = $('[name=title]').val();
+		if(title == null || title.isEmpty())
+			this.messages.add("title_err", "{{book.js.titleerr}}");
+	},
+	validateYear: function() {
+		$("#year_err").removeClass("warn");
+		$('#year_err').addClass("error");
+		$("#year_err").empty();
+		this.messages.remove("year_err");
+		
+		var year = $('[name=year]').val();
+		if(year != null && !year.isEmpty()) {
+			var y = parseInt(year);
+			console.log(y > new Date().getFullYear());
+			if(isNaN(y))
+				this.messages.add("year_err", "{{book.js.yearnan}}");
+			else if(y > new Date().getFullYear()) {
+				$("#year_err").html("{{book.js.yearfuture}}");
+				$("#year_err").removeClass("error");
+				$('#year_err').addClass("warn");
+			}
+		}
+	},
+	validate: function() {
+		this.validateTitle();
+		this.validateYear();
 	},
 	saveBook: function (ev) {
-		var bookDetails = $(ev.currentTarget).serializeObject();
-		var book = new Book();
-		book.save(bookDetails, {
-			success: function (book) {
-				if(app.bookListView) app.bookListView.reload = true;
-				if(app.bookReadView) app.bookReadView.reload = true;
-				app.navigate('books', {trigger:true});
-			},
-			error: function () {
-				if(resp.status == 200) {
-					if(app.bookListView) app.bookListView.clearMessages = false;
-					if(app.bookReadView) app.bookReadView.clearMessages = false;
+		this.validate();
+//		console.log("messages empty: " + this.messages.isEmpty());
+		if(this.messages.isEmpty()) {
+			var bookDetails = $(ev.currentTarget).serializeObject();
+			var book = new Book();
+			book.save(bookDetails, {
+				success: function (book) {
+					if(app.bookListView) app.bookListView.reload = true;
+					if(app.bookReadView) app.bookReadView.reload = true;
 					app.navigate('books', {trigger:true});
-				} else {
-					app.pushMessageAndNavigate("error", "{{generic.js.error}}".format("{{generic.js.saving}}"));
+				},
+				error: function () {
+					if(resp.status == 200) {
+						if(app.bookListView) app.bookListView.clearMessages = false;
+						if(app.bookReadView) app.bookReadView.clearMessages = false;
+						app.navigate('books', {trigger:true});
+					} else {
+						app.pushMessageAndNavigate("error", "{{generic.js.error}}".format("{{generic.js.saving}}"));
+					}
 				}
-			}
-		});
+			});
+		}
 		return false;
 	},
 	deleteBook: function (callback) {

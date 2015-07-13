@@ -1,5 +1,6 @@
 package it.samvise85.bookshelf.persist.clauses;
 
+
 public class OrderClause {
 	private String field;
 	private Order order;
@@ -34,4 +35,14 @@ public class OrderClause {
 		return new OrderClause(field, Order.DESC);
 	}
 	
+	public org.hibernate.criterion.Order toOrder() {
+		switch (getOrder()) {
+		case ASC:
+			return org.hibernate.criterion.Order.asc(getField());
+		case DESC:
+			return org.hibernate.criterion.Order.asc(getField());
+			default:
+			return null;
+		}
+	}
 }

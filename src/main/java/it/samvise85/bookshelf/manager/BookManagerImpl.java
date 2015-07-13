@@ -1,11 +1,17 @@
 package it.samvise85.bookshelf.manager;
 
 import it.samvise85.bookshelf.model.book.Book;
+import it.samvise85.bookshelf.model.user.User;
+import it.samvise85.bookshelf.persist.PersistOptions;
 import it.samvise85.bookshelf.persist.clauses.NoProjectionClause;
-import it.samvise85.bookshelf.persist.database.BookRepository;
-import it.samvise85.bookshelf.persist.database.DatabasePersistenceUnit;
+import it.samvise85.bookshelf.persist.clauses.ProjectionClause;
+import it.samvise85.bookshelf.persist.repository.BookRepository;
+import it.samvise85.bookshelf.persist.repository.DatabasePersistenceUnit;
 
+import java.io.Serializable;
+import java.util.Collections;
 import java.util.Date;
+import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,6 +21,9 @@ import org.springframework.stereotype.Service;
 public class BookManagerImpl extends DatabasePersistenceUnit<Book>  implements BookManager {
 	@Autowired
 	protected BookRepository repository;
+	
+	@Autowired
+	protected UserManager userManager;
 	
 	public BookManagerImpl() {
 		super(Book.class);
@@ -55,4 +64,36 @@ public class BookManagerImpl extends DatabasePersistenceUnit<Book>  implements B
 	public BookRepository getRepository() {
 		return repository;
 	}
+
+	@Override
+	public Book get(Serializable id, ProjectionClause projection) {
+		Book book = super.get(id, projection);
+		setAuthorname(book);
+		return book;
+	}
+
+	@Override
+	public List<Book> getList(PersistOptions options) {
+		List<Book> list = Collections.emptyList();
+		if(options == null) list = super.getList(options);
+		else {
+			list = repository.search(options);
+		}
+		
+		for(Book book : list)
+			setAuthorname(book);
+		return list;
+	}
+
+	private void setAuthorname(Book book) {
+		String author = book.getAuthor();
+		if(author != null) {
+			User user = userManager.get(author);
+			if(user == null)
+				user = userManager.getByUsername(author, null);
+			if(user != null)
+				book.setAuthorname(user.getUsername());
+		}
+	}
+	
 }

@@ -1,4 +1,4 @@
-package it.samvise85.bookshelf.persist.database;
+package it.samvise85.bookshelf.persist.repository;
 
 import it.samvise85.bookshelf.model.book.Section;
 

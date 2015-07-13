@@ -2,8 +2,8 @@ package it.samvise85.bookshelf.manager.analytics;
 
 import it.samvise85.bookshelf.exception.BookshelfException;
 import it.samvise85.bookshelf.model.analytics.RestRequest;
-import it.samvise85.bookshelf.persist.database.DatabasePersistenceUnit;
 import it.samvise85.bookshelf.persist.database.analytics.RestRequestRepository;
+import it.samvise85.bookshelf.persist.repository.DatabasePersistenceUnit;
 import it.samvise85.bookshelf.rest.security.config.SpringSecurityConfig;
 
 import java.util.Date;

@@ -5,10 +5,13 @@ import it.samvise85.bookshelf.manager.analytics.RestErrorManager;
 import it.samvise85.bookshelf.manager.analytics.RestRequestManager;
 import it.samvise85.bookshelf.model.book.Book;
 import it.samvise85.bookshelf.model.user.BookshelfRole;
+import it.samvise85.bookshelf.persist.PersistOptions;
+import it.samvise85.bookshelf.persist.clauses.NoProjectionClause;
 import it.samvise85.bookshelf.utils.ControllerUtils;
 
 import java.util.Collection;
 import java.util.Date;
+import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -37,13 +40,18 @@ public class BookController extends AnalyticsAwareController {
 	@RequestMapping("/books")
     public Collection<Book> getBookList(HttpServletRequest request) {
 		String methodName = ControllerUtils.getMethodName();
-		return executeMethod(request, methodName);
+		
+		return executeMethod(request, methodName, new Class<?>[] { Map.class }, new Object[] { request.getParameterMap() });
     }
 
-	protected Collection<Book> getBookList() {
-		return bookManager.getList(null);
+	protected Collection<Book> getBookList(Map<String, String[]> queryParams) {
+		if(queryParams == null || queryParams.isEmpty())
+			return bookManager.getList(null);
+		return bookManager.getList(new PersistOptions(NoProjectionClause.NO_PROJECTION, 
+				getSelectionFromParameterMap(queryParams), 
+				null));
 	}
-	
+
 	@RequestMapping("/books/{id}")
     public Book getBook(HttpServletRequest request, @PathVariable String id) {
 		String methodName = ControllerUtils.getMethodName();

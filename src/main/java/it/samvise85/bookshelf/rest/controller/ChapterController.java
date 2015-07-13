@@ -12,15 +12,17 @@ import it.samvise85.bookshelf.persist.clauses.Order;
 import it.samvise85.bookshelf.persist.clauses.OrderClause;
 import it.samvise85.bookshelf.persist.clauses.PaginationClause;
 import it.samvise85.bookshelf.persist.clauses.SelectionClause;
+import it.samvise85.bookshelf.persist.clauses.SelectionOperation;
 import it.samvise85.bookshelf.persist.clauses.SimpleProjectionClause;
-import it.samvise85.bookshelf.persist.selection.Equals;
 import it.samvise85.bookshelf.utils.ControllerConstants;
 import it.samvise85.bookshelf.utils.ControllerUtils;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
+import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -59,7 +61,7 @@ public class ChapterController extends AnalyticsAwareController {
     protected Collection<Chapter> getChapterList(String book, Integer page, Integer num) {
         return chapterManager.getList(new PersistOptions(
         		new SimpleProjectionClause("id", "position", "number", "title", "book"),
-        		Collections.singletonList(new SelectionClause("book", Equals.getInstance(), book)), 
+        		Collections.singletonList(new SelectionClause("book", SelectionOperation.EQUALS, book)), 
         		Arrays.asList(new OrderClause[] {new OrderClause("position", Order.ASC), new OrderClause("number", Order.ASC)}),
         		page != null ? new PaginationClause(num != null ? num : ControllerConstants.Pagination.DEFAULT_PAGE_SIZE, page) : null));
     }
@@ -75,7 +77,7 @@ public class ChapterController extends AnalyticsAwareController {
     }
 	
 	@RequestMapping(value="/books/{book}/chapters", params={"position"})
-    public Chapter getChapterByPosition(HttpServletRequest request, @PathVariable String book, @RequestParam(value="position", required=false) Integer position) {
+    public Chapter getChapterByPosition(HttpServletRequest request, @PathVariable String book, @RequestParam(value="position", required=true) Integer position) {
 		String methodName = ControllerUtils.getMethodName();
 		return executeMethod(request, methodName, new Class<?>[] { String.class, Integer.class }, new Object[] { book, position });
 	}
@@ -83,6 +85,30 @@ public class ChapterController extends AnalyticsAwareController {
     protected Chapter getChapterByPosition(String book, Integer position) {
 		Chapter chapter = chapterManager.getChapterByBookAndPosition(book, position, NoProjectionClause.NO_PROJECTION);
         return chapter;
+    }
+	
+	@RequestMapping(value="/books/{book}/chapters", params={"title"})
+    public Chapter getChapterByTitle(HttpServletRequest request,
+    		@PathVariable String book,
+    		@RequestParam(value="title", required=true) String title,
+    		@RequestParam(value="pos", required=false) Integer position) {
+		String methodName = ControllerUtils.getMethodName();
+		return executeMethod(request, methodName, new Class<?>[] { String.class, String.class, Integer.class }, new Object[] { book, title, position });
+	}
+	
+	protected Chapter getChapterByTitle(String book, String title, Integer position) {
+		title = decodeParam(title);
+		List<SelectionClause> selection = new ArrayList<SelectionClause>();
+		selection.add(new SelectionClause("title", SelectionOperation.EQUALS, title));
+		selection.add(new SelectionClause("book", SelectionOperation.EQUALS, book));
+		if(position != null)
+			selection.add(new SelectionClause("position", SelectionOperation.EQUALS, position));
+		
+		List<Chapter> list = chapterManager.getList(new PersistOptions(NoProjectionClause.NO_PROJECTION, selection, null));
+		
+    	if(list == null || list.isEmpty()) return null;
+    	if(list.size() > 1) log.warn("MORE THAN A CHAPTER FOUND BY TITLE " + title + " IN THE BOOK " + book);
+    	return list.get(0);
     }
 
 	@RequestMapping(value="/books/{book}/chapters", method=RequestMethod.POST)

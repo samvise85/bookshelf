@@ -88,6 +88,7 @@ window.ChapterEditView = Backbone.View.extend({
 	lastOptions : null,
 	reload : false,
 	clearMessages : true,
+	messages: new Messages(true),
 	
 	initialize: function() {
 		var self = this;
@@ -100,23 +101,44 @@ window.ChapterEditView = Backbone.View.extend({
 	},
 	events: {
 		'submit .edit-chapter-form': 'saveChapter',
-//		'click .delete': 'deleteChapter'
+		'blur [name=title]': 'validateTitle',
+		'blur [name=number]': 'validateNumber',
+	},
+	validateTitle: function() {
+		this.messages.remove("title_err");
+		var title = $('[name=title]').val();
+		if(title == null || title.isEmpty())
+			this.messages.add("title_err", "{{chapter.js.titleerr}}");
+	},
+	validateNumber: function() {
+		this.messages.remove("number_err");
+		var number = $('[name=number]').val();
+		if(number == null || number.isEmpty())
+			this.messages.add("number_err", "{{chapter.js.numbererr}}");
+	},
+	validate: function() {
+		this.validateTitle();
+		this.validateNumber();
 	},
 	saveChapter: function (ev) {
-		var chapterDetails = $(ev.currentTarget).serializeObject();
-		var chapter = new Chapter({book:chapterDetails.book});
-		chapter.save(chapterDetails, {
-			success: function (chapter) {
-				if(app.bookReadView) app.bookReadView.reload = true;
-				app.navigate('book/' + chapter.get('book'), {trigger:true});
-			},
-			error: function (req, resp) {
-				if(resp.status == 200) {
+		this.validate();
+//		console.log("messages empty: " + this.messages.isEmpty());
+		if(this.messages.isEmpty()) {
+			var chapterDetails = $(ev.currentTarget).serializeObject();
+			var chapter = new Chapter({book:chapterDetails.book});
+			chapter.save(chapterDetails, {
+				success: function (chapter) {
 					if(app.bookReadView) app.bookReadView.reload = true;
-					app.navigate('book/' + chapter.get('book'), {trigger:true, reload:true});
+					app.navigate('book/' + chapter.get('book'), {trigger:true});
+				},
+				error: function (req, resp) {
+					if(resp.status == 200) {
+						if(app.bookReadView) app.bookReadView.reload = true;
+						app.navigate('book/' + chapter.get('book'), {trigger:true, reload:true});
+					}
 				}
-			}
-		});
+			});
+		}
 		return false;
 	},
 	deleteChapter: function (callback) {
@@ -209,6 +231,20 @@ window.ChapterReadView = Backbone.View.extend({
 		if(options.id) {
 			self.chapter = new Chapter(options);
 			self.chapter.fetch({
+				success: function (chapter) {
+					$(self.el).empty();
+					$(self.el).html(self.template({book: options.book, chapter: chapter}));
+					self.loadComments();
+					return self;
+				},
+				error: function () {
+					app.pushMessageAndNavigate("error", "{{generic.js.notfound}}".format("{{generic.js.thechapter}}"));
+				}
+			});
+		} else if(options.title) {
+			self.chapter = new Chapter(options);
+			self.chapter.fetch({
+				data: $.param({"title":options.title, "pos":options.position}),
 				success: function (chapter) {
 					$(self.el).empty();
 					$(self.el).html(self.template({book: options.book, chapter: chapter}));

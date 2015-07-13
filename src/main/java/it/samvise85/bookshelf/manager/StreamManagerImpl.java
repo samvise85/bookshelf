@@ -1,8 +1,8 @@
 package it.samvise85.bookshelf.manager;
 
 import it.samvise85.bookshelf.model.comment.Stream;
-import it.samvise85.bookshelf.persist.database.DatabasePersistenceUnit;
-import it.samvise85.bookshelf.persist.database.StreamRepository;
+import it.samvise85.bookshelf.persist.repository.DatabasePersistenceUnit;
+import it.samvise85.bookshelf.persist.repository.StreamRepository;
 
 import java.util.Date;
 

@@ -6,10 +6,11 @@ import it.samvise85.bookshelf.persist.PersistOptions;
 import it.samvise85.bookshelf.persist.clauses.NoProjectionClause;
 import it.samvise85.bookshelf.persist.clauses.ProjectionClause;
 import it.samvise85.bookshelf.persist.clauses.SimpleProjectionClause;
-import it.samvise85.bookshelf.persist.database.ChapterRepository;
-import it.samvise85.bookshelf.persist.database.DatabasePersistenceUnit;
+import it.samvise85.bookshelf.persist.repository.ChapterRepository;
+import it.samvise85.bookshelf.persist.repository.DatabasePersistenceUnit;
 
 import java.io.Serializable;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
@@ -49,18 +50,25 @@ public class ChapterManagerImpl extends DatabasePersistenceUnit<Chapter> impleme
 
 	@Override
 	public List<Chapter> getList(PersistOptions options) {
-		if(options != null) {
-			String book = null;
-			Pageable pagination = null;
-			if(options.getSelection() != null && options.getSelection().size() == 1 &&
-					options.getSelection().get(0).getField().equals("book"))
-				book = (String) options.getSelection().get(0).getValue();
-			if(options.getPagination() != null)
-				pagination = createPageable(options.getPagination());
-			if(book != null)
-				return findChapters(book, pagination, options.getProjection());
+		List<Chapter> list = Collections.emptyList();
+		if(options == null) list = super.getList(options);
+		else {
+			list = repository.search(options);
 		}
-		return super.getList(options);
+		return list;
+		
+//		if(options != null) {
+//			String book = null;
+//			Pageable pagination = null;
+//			if(options.getSelection() != null && options.getSelection().size() == 1 &&
+//					options.getSelection().get(0).getField().equals("book"))
+//				book = (String) options.getSelection().get(0).getValue();
+//			if(options.getPagination() != null)
+//				pagination = createPageable(options.getPagination());
+//			if(book != null)
+//				return findChapters(book, pagination, options.getProjection());
+//		}
+//		return super.getList(options);
 	}
 
 	@Override

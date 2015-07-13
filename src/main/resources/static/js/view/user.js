@@ -175,11 +175,6 @@ window.UserEditView = Backbone.View.extend({
 	validateRecaptcha: function() {
 		this.code = grecaptcha.getResponse();
 		if(this.code) {
-			console.log(this.code);
-//			$.ajax({url: '/login',
-//				type: this.user ? 'PUT' : 'POST',
-//				url: "/users" + (this.user ? "/" + this.user.id : ""),
-//			});
 			this.messages.remove("captcha_err");
 		} else {
 			this.messages.add("captcha_err", "{{user.js.captchaerr}}");
@@ -389,6 +384,141 @@ window.UserActivateView = Backbone.View.extend({
 			});
 		} else {
 			app.pushMessageAndNavigate("error", "{{generic.js.notfound}}".format("{{generic.js.theuser}}"), "");
+		}
+	}
+});
+
+window.ForgotView = Backbone.View.extend({
+	reload : true,
+	clearMessages : true,
+	messages: new Messages(true),
+	newOptions: function(options) {
+		return true;
+	},
+	
+	events: {
+		'click .edit-user-form .save': 'sendMail',
+		'blur #username': 'validateUsernameOrMail'
+	},
+	validateUsernameOrMail: function() {
+		this.messages.remove("username_err");
+		var username = $('#username').val();
+		if(username == null || username.isEmpty())
+			this.messages.add("username_err", "{{user.js.usernameormailerr}}");
+	},
+	validateRecaptcha: function() {
+		this.messages.remove("captcha_err");
+		this.code = grecaptcha.getResponse();
+		if(!this.code)
+			this.messages.add("captcha_err", "{{user.js.captchaerr}}");
+	},
+	validate: function() {
+		this.validateUsernameOrMail();
+		this.validateRecaptcha();
+	},
+	render: function () {
+		$(this.el).empty();
+		$(this.el).html(this.template());
+		return this;
+	},
+	sendMail: function() {
+		this.validate();
+		if(this.messages.isEmpty()) {
+			this.userj = {
+				"username" : $('#username').val()
+			};
+			var self = this;
+			$.ajax({
+				type: 'PUT',
+				url: '/forgot',
+			    data: JSON.stringify(self.userj),
+			    contentType: "application/json; charset=utf-8",
+			    dataType: "json",
+				success:function (data) {
+					app.pushMessageAndNavigate("message", "{{user.js.forgotmailsent}}", "");
+				},
+				error: function (req, resp) {
+					if(resp.status == 500) {
+						app.pushMessageAndNavigate("error", "{{generic.js.error}}".format("{{generic.js.resetting}}", "{{generic.js.theuser}}"));
+					} else if(resp.status == 200) {
+						app.pushMessageAndNavigate("message", "{{user.js.forgotmailsent}}", "");
+					}
+				}
+			});
+		}
+	}
+});
+
+window.ResetView = Backbone.View.extend({
+	reload : true,
+	clearMessages : true,
+	messages: new Messages(true),
+	newOptions: function(options) {
+		return true;
+	},
+	
+	events: {
+		'click .edit-user-form .save': 'sendMail',
+		'blur #newpassword': 'validateNewPassword',
+		'blur #check_password': 'validateCheckPassword'
+	},
+	validateNewPassword: function() {
+		this.messages.remove("newpassword_err");
+		
+		var newpassword = $('#newpassword').val();
+		var a = newpassword != null && !newpassword.isEmpty(); //password valued
+		var c = validatePassword(newpassword); //valid
+		if(!(a && c))
+			this.messages.add("newpassword_err", "{{user.js.newpassworderr}}");
+	},
+	validateCheckPassword: function() {
+		this.messages.remove("check_password_err");
+		
+		var newpassword = $('#newpassword').val();
+		var check = $('#check_password').val();
+		if(((newpassword != null && !newpassword.isEmpty()) && (check == null || check.isEmpty())) || check != newpassword)
+			this.messages.add("check_password_err", "{{user.js.checkpassworderr}}");
+	},
+	validate: function() {
+		this.validateNewPassword();
+		this.validateCheckPassword();
+	},
+	render: function (options) {
+		this.lastOptions = options;
+		$(this.el).empty();
+		$(this.el).html(this.template());
+		return this;
+	},
+	sendMail: function() {
+		this.validate();
+		if(this.messages.isEmpty()) {
+			this.userj = {
+				"password" : CryptoJS.SHA1($('#newpassword').val()).toString(CryptoJS.enc.Hex)
+			};
+			var self = this;
+			$.ajax({
+				type: 'PUT',
+				url: '/resetCode/' + this.lastOptions.code,
+			    data: JSON.stringify(self.userj),
+			    contentType: "application/json; charset=utf-8",
+			    dataType: "json",
+				success:function (data) {
+					if(data == null)
+						app.pushMessageAndNavigate("error", "{{user.js.resetko}}", "");
+					else
+						app.pushMessageAndNavigate("message", "{{user.js.resetok}}", "");
+				},
+				error: function (req, resp) {
+					if(resp.status == 500) {
+						app.pushMessageAndNavigate("error", "{{generic.js.error}}".format("{{generic.js.resetting}}", "{{generic.js.theuser}}"));
+					} else if(resp.status == 200) {
+						if(data == null)
+							app.pushMessageAndNavigate("error", "{{user.js.resetko}}", "");
+						else
+							app.pushMessageAndNavigate("message", "{{user.js.resetok}}", "");
+					}
+				}
+			});
 		}
 	}
 });

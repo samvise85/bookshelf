@@ -3,18 +3,16 @@ package it.samvise85.bookshelf.manager.support;
 import it.samvise85.bookshelf.model.locale.Label;
 import it.samvise85.bookshelf.persist.PersistOptions;
 import it.samvise85.bookshelf.persist.clauses.SelectionClause;
-import it.samvise85.bookshelf.persist.database.DatabasePersistenceUnit;
 import it.samvise85.bookshelf.persist.database.support.LabelRepository;
+import it.samvise85.bookshelf.persist.repository.DatabasePersistenceUnit;
 import it.samvise85.bookshelf.utils.MessagesUtil;
 
-import java.io.Serializable;
 import java.util.Iterator;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
-import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.stereotype.Service;
 
 @Service

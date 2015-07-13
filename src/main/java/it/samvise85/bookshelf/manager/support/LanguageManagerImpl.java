@@ -3,8 +3,8 @@ package it.samvise85.bookshelf.manager.support;
 import it.samvise85.bookshelf.exception.BookshelfException;
 import it.samvise85.bookshelf.model.locale.Language;
 import it.samvise85.bookshelf.persist.PersistOptions;
-import it.samvise85.bookshelf.persist.database.DatabasePersistenceUnit;
 import it.samvise85.bookshelf.persist.database.support.LanguageRepository;
+import it.samvise85.bookshelf.persist.repository.DatabasePersistenceUnit;
 
 import java.io.Serializable;
 import java.util.List;

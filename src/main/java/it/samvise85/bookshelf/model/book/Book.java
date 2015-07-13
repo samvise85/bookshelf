@@ -1,7 +1,5 @@
 package it.samvise85.bookshelf.model.book;
 
-import java.util.Date;
-
 import it.samvise85.bookshelf.model.Commentable;
 import it.samvise85.bookshelf.model.CommentableImpl;
 import it.samvise85.bookshelf.model.Editable;
@@ -10,9 +8,10 @@ import it.samvise85.bookshelf.model.StringIdentifiable;
 import it.samvise85.bookshelf.persist.clauses.ProjectionClause;
 import it.samvise85.bookshelf.utils.ProjectableUtils;
 
+import java.util.Date;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.Transient;
 
@@ -25,9 +24,6 @@ import com.fasterxml.jackson.annotation.JsonInclude.Include;
 public class Book extends CommentableImpl implements Commentable, Editable, StringIdentifiable, Projectable {
 	//internal attributes
 
-	@Column
-	@GeneratedValue
-	private Long generatedId;
 	@Id
 	private String id;
 	@Column
@@ -42,6 +38,9 @@ public class Book extends CommentableImpl implements Commentable, Editable, Stri
 	private String author;
 	
 	@Transient
+	private String authorname;
+	
+	@Transient
 	@JsonIgnore
 	private ProjectionClause projection;
 	
@@ -52,12 +51,6 @@ public class Book extends CommentableImpl implements Commentable, Editable, Stri
 		this.author = author;
 	}
 	
-	public Long getGeneratedId() {
-		return generatedId;
-	}
-	public void setGeneratedId(Long generatedId) {
-		this.generatedId = generatedId;
-	}
 	public String getId() {
 		return id;
 	}
@@ -103,6 +96,13 @@ public class Book extends CommentableImpl implements Commentable, Editable, Stri
 		return returnNullOrValue("lastModification", super.getLastModification());
 	}
 
+	public String getAuthorname() {
+		if(authorname != null) return authorname;
+		else return author;
+	}
+	public void setAuthorname(String authorname) {
+		this.authorname = authorname;
+	}
 	@Override
 	public ProjectionClause getProjection() {
 		return projection;

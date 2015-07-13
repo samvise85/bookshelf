@@ -1,12 +1,11 @@
-package it.samvise85.bookshelf.persist.database;
+package it.samvise85.bookshelf.persist.repository;
 
 import it.samvise85.bookshelf.model.book.Chapter;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.repository.PagingAndSortingRepository;
 
-public interface ChapterRepository extends PagingAndSortingRepository<Chapter, String> {
+public interface ChapterRepository extends SearchRepository<Chapter, String> {
  
 	public Iterable<Chapter> findByBookOrderByPositionAsc(String book);
 

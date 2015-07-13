@@ -18,9 +18,9 @@
 	<% _.each(books, function(book) { %>
 		<tr>
 			<td><a href="#book/<%= book.id %>"><%= htmlEncode(book.get('title')) %></a></td>
-			<td><%= htmlEncode(book.get('year')) %></td>
-			<td><%= htmlEncode(book.get('author')) %></td>
-			<td><%= htmlEncode(book.get('genre')) %></td>
+			<td><a href="#books?year=<%= book.get('year') %>"><%= htmlEncode(book.get('year')) %></a></td>
+			<td><a href="#user/<%= book.get('author') %>"><%= htmlEncode(book.get('authorname')) %></a></td>
+			<td><a href="#books?genre=<%= book.get('genre') %>"><%= htmlEncode(book.get('genre')) %></a></td>
 			<% if(app.isAdmin() === true) {%>
 			<td class="book-options" style="width:200px;text-align:right;"><a class="btn" href="#book/<%= book.id %>/edit">{{book.list.button.edit}}</a></td>
 			<% } %>

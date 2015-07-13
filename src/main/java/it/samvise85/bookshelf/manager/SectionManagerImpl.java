@@ -1,8 +1,8 @@
 package it.samvise85.bookshelf.manager;
 
 import it.samvise85.bookshelf.model.book.Section;
-import it.samvise85.bookshelf.persist.database.DatabasePersistenceUnit;
-import it.samvise85.bookshelf.persist.database.SectionRepository;
+import it.samvise85.bookshelf.persist.repository.DatabasePersistenceUnit;
+import it.samvise85.bookshelf.persist.repository.SectionRepository;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;

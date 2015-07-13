@@ -28,7 +28,7 @@ public class BookshelfUserDetailsService implements UserDetailsService, Initiali
 		username = username.toLowerCase();
 		User user = null;
 		try {
-			user = userManager.get(username, UserUtils.AUTHENTICATION_PROTECTION);
+			user = userManager.getByUsername(username, UserUtils.AUTHENTICATION_PROTECTION);
 		} catch(PersistException e) {
 			return null;
 		}

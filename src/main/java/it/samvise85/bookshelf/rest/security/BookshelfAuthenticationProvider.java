@@ -28,7 +28,7 @@ public class BookshelfAuthenticationProvider implements AuthenticationProvider {
         String name = authentication.getName();
         String password = authentication.getCredentials().toString();
         try {
-        	User user = userManager.get(name, UserUtils.AUTHENTICATION_PROTECTION);
+        	User user = userManager.getByUsername(name, UserUtils.AUTHENTICATION_PROTECTION);
         	if(user.getPassword() != null && user.getPassword().equals(password)) {
         		List<GrantedAuthority> grantedAuths = BookshelfSecurityUtils.getGrantedAuthorities(user);
         		return new UsernamePasswordAuthenticationToken(name, password, grantedAuths);

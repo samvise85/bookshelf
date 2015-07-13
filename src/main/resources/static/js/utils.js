@@ -1,3 +1,23 @@
+
+window.createToken = function (username, password) {
+//	return CryptoJS.SHA1(username + ":-1:" + password + ":bookshelf by Samvise85!").toString(CryptoJS.enc.Hex);
+	return CryptoJS.SHA1(username + ":-1:" + CryptoJS.SHA1(password).toString(CryptoJS.enc.Hex) + ":bookshelf by Samvise85!").toString(CryptoJS.enc.Hex);
+}
+
+$.getToken = function () {
+	if($.cookie('bookshelf-username') && $.cookie('bookshelf-token'))
+		return {'bookshelf-username': $.cookie('bookshelf-username'), 'bookshelf-token': $.cookie('bookshelf-token')};
+	return {};
+}
+window.getAppPath = function() {
+	if(!window.appname) {
+		var name = window.location.pathname.split("/")[1];
+		window.appname = name.toLowerCase().indexOf("bookshelf") >= 0 ? name : null;
+		
+	}
+	return '//' + window.location.host + (window.appname != null ? "/" + window.appname : "");
+};
+
 $.ajaxSetup({
     statusCode: {
         401: function(){
@@ -13,15 +33,6 @@ $.ajaxSetup({
     }
 });
 
-window.createToken = function (username, password) {
-//	return CryptoJS.SHA1(username + ":-1:" + password + ":bookshelf by Samvise85!").toString(CryptoJS.enc.Hex);
-	return CryptoJS.SHA1(username + ":-1:" + CryptoJS.SHA1(password).toString(CryptoJS.enc.Hex) + ":bookshelf by Samvise85!").toString(CryptoJS.enc.Hex);
-}
-$.getToken = function () {
-	if($.cookie('bookshelf-username') && $.cookie('bookshelf-token'))
-		return {'bookshelf-username': $.cookie('bookshelf-username'), 'bookshelf-token': $.cookie('bookshelf-token')};
-	return {};
-}
 $.ajaxPrefilter( function( options, originalOptions, jqXHR ) {
 	if(options.url.indexOf('http') != 0)
 		options.url = getAppPath() + options.url;
@@ -56,15 +67,6 @@ $.urlParam = function(name){
        return results[1] || 0;
     }
 }
-
-window.getAppPath = function() {
-	if(!window.appname) {
-		var name = window.location.pathname.split("/")[1];
-		window.appname = name.toLowerCase().indexOf("bookshelf") >= 0 ? name : null;
-		
-	}
-	return '//' + window.location.host + (window.appname != null ? "/" + window.appname : "");
-};
 
 window.viewLoader = {
 	loaded: {},
@@ -176,4 +178,37 @@ window.onloadCallback = function() {
 
 window.nl2br = function(string) {
 	return string.replace(/\n/g, '<br/>').replace(/\t/g, '&nbsp;&nbsp;&nbsp;&nbsp;');
+}
+
+window.parseQueryString = function(queryString) {
+	var params = {};
+    if(queryString){
+        _.each(
+            _.map(decodeURI(queryString).split(/&/g),function(el,i){
+                var aux = el.split('='), o = {};
+                if(aux.length >= 1){
+                    var val = undefined;
+                    if(aux.length == 2)
+                        val = aux[1];
+                    o[aux[0]] = val;
+                }
+                return o;
+            }),
+            function(o){
+                _.extend(params,o);
+            }
+        );
+    }
+    return params;
+}
+
+Backbone.View.prototype.close = function(){
+	//important!!! This should be always called when changing view
+	//but actually i don't know which one of these is really necessary
+	this.undelegateEvents();
+	this.remove();
+	this.unbind();
+	this.off();
+	if (this.onClose)
+		this.onClose(); //defie this function to unbind specific model bindings
 }

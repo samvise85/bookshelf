@@ -1,6 +1,5 @@
 package it.samvise85.bookshelf.rest.controller;
 
-import it.samvise85.bookshelf.exception.BookshelfException;
 import it.samvise85.bookshelf.exception.BookshelfSecurityException;
 import it.samvise85.bookshelf.manager.UserManager;
 import it.samvise85.bookshelf.manager.analytics.RestErrorManager;
@@ -11,21 +10,13 @@ import it.samvise85.bookshelf.rest.security.config.SpringSecurityConfig;
 import it.samvise85.bookshelf.utils.ControllerUtils;
 import it.samvise85.bookshelf.utils.UserUtils;
 
-import java.io.UnsupportedEncodingException;
 import java.util.Collection;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
-import javax.mail.Message;
-import javax.mail.MessagingException;
-import javax.mail.internet.InternetAddress;
-import javax.mail.internet.MimeMessage;
 import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.mail.javamail.JavaMailSenderImpl;
 import org.springframework.security.access.annotation.Secured;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -46,9 +37,6 @@ public class UserController extends AnalyticsAwareController {
 
 	@Autowired
 	private RestErrorManager errorManager;
-	
-	@Autowired
-	private JavaMailSenderImpl mailSender;
 	
 	@RequestMapping("/users")
 	@Secured(BookshelfRole.ANYONE)
@@ -76,35 +64,14 @@ public class UserController extends AnalyticsAwareController {
     public User createUser(HttpServletRequest request, @RequestBody User user,
     		@RequestHeader(value=SpringSecurityConfig.USERNAME_PARAM_NAME, required = false) String requestingUser) {
 		String methodName = ControllerUtils.getMethodName();
-		String requestUrl = request.getRequestURL().toString();
-		Pattern p = Pattern.compile("(http[s]?:\\/\\/[^\\/]+(\\/bookshelf)?)");
-
-		Matcher m = p.matcher(requestUrl);
-		String requestApp = null;
-		if(m.find())
-			requestApp = m.group(1);
-		return executeMethod(request, methodName, new Class<?>[] { User.class, String.class, String.class }, new Object[] { user, requestingUser, requestApp }, user);
+		
+		return executeMethod(request, methodName, new Class<?>[] { User.class, String.class }, new Object[] { user, requestingUser }, user);
 	}
 	
-    protected User createUser(User request, String requestingUser, String requestApp) {
+    protected User createUser(User request, String requestingUser) {
 		if(StringUtils.isEmpty(requestingUser)) {
 			User newuser = userManager.create(request);
-			MimeMessage mmessage = new MimeMessage(mailSender.getSession());
-			try {
-				mmessage.setFrom(new InternetAddress("no-reply@bookshelf-samvise85.rhcloud.com", "Bookshelf no-reply"));
-		        mmessage.setRecipient(Message.RecipientType.TO, new InternetAddress(newuser.getEmail()));
-		        mmessage.setSubject("Bookshelf - Thanks for subscription");
-		        mmessage.setContent("Thanks for Subscription!<br/>Activate your account by clicking this link (or copy and paste in a browser)<br/>"
-		        		+ "<a href=\"" + requestApp + "/#user/" + newuser.getId() + "/activate/" + newuser.getActivationCode() + "\">"
-	        			+ requestApp + "/#user/" + newuser.getId() + "/activate/" + newuser.getActivationCode()
-	        			+ "</a>", "text/html");
-		        log.debug("Sending mail to " + newuser.getEmail());
-		        mailSender.send(mmessage);
-			} catch(UnsupportedEncodingException e) {
-				throw new BookshelfException(e.getMessage(), e);
-			} catch(MessagingException e) {
-				throw new BookshelfException(e.getMessage(), e);
-			}
+			mailSender.sendSubscriptionMail(newuser);
 	        return userManager.get(newuser.getId());
 		} else {
 			log.warn("A user cannot access this service");
@@ -154,7 +121,7 @@ public class UserController extends AnalyticsAwareController {
 	}
 	
     protected User resetPassword(String id) {
-        return userManager.resetPassword(id);
+        return userManager.forgotPassword(id);
     }
 
 	@RequestMapping(value="/activationCode/{code}", method=RequestMethod.PUT)
@@ -165,6 +132,30 @@ public class UserController extends AnalyticsAwareController {
 	
     protected User activate(String code) {
         return userManager.activate(code);
+    }
+
+	@RequestMapping(value="/forgot", method=RequestMethod.PUT)
+    public User forgot(HttpServletRequest request, @RequestBody User user) {
+		String methodName = ControllerUtils.getMethodName();
+		String usernameormail = user.getUsername();
+		return executeMethod(request, methodName, new Class<?>[] { String.class }, new Object[] { usernameormail });
+	}
+	
+	public User forgot(String usernameormail) {
+		User user = userManager.forgotPassword(usernameormail);
+		mailSender.sendResetMail(user);
+        return userManager.get(user.getId());
+	}
+
+	@RequestMapping(value="/resetCode/{code}", method=RequestMethod.PUT)
+    public User reset(HttpServletRequest request, @PathVariable String code, @RequestBody User user) {
+		String methodName = ControllerUtils.getMethodName();
+		String password = user.getPassword();
+		return executeMethod(request, methodName, new Class<?>[] { String.class, String.class }, new Object[] { code, password });
+	}
+	
+    protected User reset(String code, String password) {
+        return userManager.resetPassword(code, password);
     }
 	
 	private boolean checkUser(String requestedUser, String username) {

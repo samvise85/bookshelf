@@ -12,7 +12,7 @@ import it.samvise85.bookshelf.persist.clauses.NoProjectionClause;
 import it.samvise85.bookshelf.persist.clauses.OrderClause;
 import it.samvise85.bookshelf.persist.clauses.PaginationClause;
 import it.samvise85.bookshelf.persist.clauses.SelectionClause;
-import it.samvise85.bookshelf.persist.selection.Equals;
+import it.samvise85.bookshelf.persist.clauses.SelectionOperation;
 import it.samvise85.bookshelf.rest.security.config.SpringSecurityConfig;
 import it.samvise85.bookshelf.utils.ControllerConstants;
 import it.samvise85.bookshelf.utils.ControllerUtils;
@@ -57,7 +57,7 @@ public class CommentController extends AnalyticsAwareController {
     protected Collection<Comment> getCommentList(String stream, Integer page, Integer num) {
         return commentManager.getList(new PersistOptions(
         		NoProjectionClause.NO_PROJECTION,
-        		Collections.singletonList(new SelectionClause("parentStream", Equals.getInstance(), stream)),
+        		Collections.singletonList(new SelectionClause("parentStream", SelectionOperation.EQUALS, stream)),
         		Collections.singletonList(OrderClause.DESC("creation")),
         		page != null ? new PaginationClause(num != null ? num : ControllerConstants.Pagination.DEFAULT_PAGE_SIZE, page) : null));
     }

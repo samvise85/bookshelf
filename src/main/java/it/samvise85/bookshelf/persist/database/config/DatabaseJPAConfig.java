@@ -1,6 +1,7 @@
 package it.samvise85.bookshelf.persist.database.config;
 
 import it.samvise85.bookshelf.exception.BookshelfException;
+import it.samvise85.bookshelf.persist.repository.BookshelfRepositoryFactoryBean;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -32,6 +33,8 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 @Configuration
 @EnableJpaRepositories(
 		basePackages={"it.samvise85.bookshelf"}, 
+//		repositoryImplementationPostfix="CustomImpl", 
+		repositoryFactoryBeanClass=BookshelfRepositoryFactoryBean.class,
 		entityManagerFactoryRef="bookshelfEntityManagerFactory", 
 		transactionManagerRef = "bookshelfTransactionManager")
 @EnableTransactionManagement

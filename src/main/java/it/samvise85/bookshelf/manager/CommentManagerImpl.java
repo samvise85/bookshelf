@@ -6,8 +6,8 @@ import it.samvise85.bookshelf.model.comment.Stream;
 import it.samvise85.bookshelf.persist.PersistOptions;
 import it.samvise85.bookshelf.persist.clauses.NoProjectionClause;
 import it.samvise85.bookshelf.persist.clauses.SelectionClause;
-import it.samvise85.bookshelf.persist.database.CommentRepository;
-import it.samvise85.bookshelf.persist.database.DatabasePersistenceUnit;
+import it.samvise85.bookshelf.persist.repository.CommentRepository;
+import it.samvise85.bookshelf.persist.repository.DatabasePersistenceUnit;
 
 import java.util.Date;
 import java.util.List;
