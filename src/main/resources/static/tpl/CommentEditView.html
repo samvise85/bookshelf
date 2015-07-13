@@ -1,0 +1,10 @@
+<form class="edit-comment-form">
+	<textarea name="comment" rows="3"><%= comment ? comment.get('comment') : '' %></textarea>
+	<input type="hidden" name="parentStream" value="<%= stream %>" />
+	<input type="hidden" name="user" value="<%= app.getUser().id %>" />
+	
+	<% if(comment) { %>
+	<input type="hidden" name="id" value="<%= comment.id %>" />
+	<% } %>
+	<button type="submit" class="btn">{{comment.edit.button.update}}</button>
+</form>

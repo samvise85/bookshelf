@@ -1,0 +1,28 @@
+<h1>{{login.title}}</h1>
+<form class="form-horizontal">
+	<div class="control-group">
+		<label class="control-label" for="username">{{user.model.username}}</label>
+		<div class="controls">
+			<input type="text" id="username" placeholder="{{user.model.username}}">
+		</div>
+	</div>
+	<div class="control-group">
+		<label class="control-label" for="password">{{user.model.password}}</label>
+		<div class="controls">
+			<input type="password" id="password" placeholder="{{user.model.password}}">
+		</div>
+	</div>
+	<div class="control-group">
+		<div class="controls">
+			<button type="submit" class="btn btn-primary" id="loginButton">{{login.button.login}}</button>
+		</div>
+	</div>
+	<div class="control-group">
+		<div class="controls register" style="float:left;">
+			<a href="#register" id="register">{{login.link.register}}</a>
+		</div>
+		<div class="forgot" style="float:left;margin-left:60px;">
+			<a href="#forgot" id="forgot">{{login.link.forgot}}</a>
+		</div>
+	</div>
+</form>

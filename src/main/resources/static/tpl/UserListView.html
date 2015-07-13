@@ -1,0 +1,29 @@
+<% if(app.isAdmin() === true) {%>
+<div class="user_menu" style="margin-bottom:20px">
+	<a href="<%= window.location.href %>/new" class="btn btn-primary">{{user.list.button.create}}</a>
+	<hr/>
+</div>
+<% } %>
+<div class="users_table" style="max-height:300px;overflow-y:auto;">
+	<table class="table striped">
+	<thead>
+		<tr>
+			<th>{{user.model.username}}</th>
+			<th>{{user.model.firstname}}</th>
+			<th>{{user.model.lastname}}</th>
+			<th></th>
+		</tr>
+	</thead>
+	<tbody>
+	</tbody>
+</table>
+</div>
+
+<script>
+	$('.users_table').scroll(function(e) {
+		if($('.users_table').scrollTop() + $(".users_table").height() >= $(".users_table").prop('scrollHeight') - 50) {
+			if(app.userListView)
+				app.userListView.append(app.userListView.lastOptions);
+		}
+	});
+</script>

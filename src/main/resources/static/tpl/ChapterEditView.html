@@ -1,0 +1,109 @@
+<form class="edit-chapter-form">
+	<legend id="page-title"><%= chapter ? '{{chapter.edit.pagetitle.edit}}' : '{{chapter.edit.pagetitle.new}}' %></legend>
+	<div class="input100p">
+		<label>{{chapter.model.title}}</label>
+		<input name="title" type="text" class="title-input" style="max-width:928px;width:100%;height:1.4em;font-size:2.0em;font-weight:bold;" value="<%= chapter ? htmlEncode(chapter.get('title')) : '' %>">
+		<div id="title_err" class="error"></div>
+	</div>
+	<div class="input50p" style="float:left;width:49.5%">
+		<label>{{chapter.model.number}}</label>
+		<input name="number" type="text" value="<%= chapter ? htmlEncode(chapter.get('number')) : '' %>">
+		<div id="number_err" class="error"></div>
+	</div>
+	<div class="input50p" style="float:left;width:49.5%;">
+		<label>{{chapter.model.position}}</label>
+		<select name="position">
+			<option value="1">{{chapter.model.position.first}}</option>
+			<% if(!chapter) { %>
+			<option id="chapter-position-last" value="-1" selected="selected">{{chapter.model.position.last}}</option>
+			<% } else { %>
+			<option id="chapter-position-last" value="-1">{{chapter.model.position.last}}</option>
+			<% } %>
+		</select>
+	</div>
+	<div class="input50p clear" style="float:left;width:49.5%;clear:left;">
+		<label>{{chapter.model.section}}</label>
+		<input name="section" type="text" value="<%= chapter ? htmlEncode(chapter.get('section')) : '' %>">
+	</div>
+	<div class="input100p" style="clear:both;">
+		<label>{{chapter.model.text}}</label>
+		<textarea id="text" name="text" style="width:100%;height:300px"><%= chapter ? chapter.get('text') : '' %></textarea>
+	</div>
+	<div class="input100p" style="clear:both;">
+		<label style="display:inline;">{{chapter.edit.wordcount}}</label>
+		<span id="word-count" class="label"></span>
+	</div>
+	<div class="input100p" style="clear:both;">
+		<label style="display:inline;">{{chapter.edit.charcount}}</label>
+		<span id="char-count" class="label"></span>
+	</div>
+	<div class="input100p" style="clear:both;">
+		<label style="display:inline;">{{chapter.edit.charnospacecount}}</label>
+		<span id="nospace-count" class="label"></span>
+	</div>
+	<input type="hidden" name="book" value="<%= book %>" />
+	<hr />
+	
+	<button type="submit" class="btn"><%= chapter ? '{{chapter.edit.button.update}}' : '{{chapter.edit.button.create}}' %></button>
+	
+	<% if(chapter) { %>
+	<input type="hidden" name="id" value="<%= chapter.id %>" />
+	
+	<a id="delete-button" class="btn btn-danger">{{chapter.edit.button.delete}}</a>
+	<div id="delete-dialog" title="{{chapter.edit.modaldelete.title}}">
+	  <p><span class="ui-icon ui-icon-alert" style="float:left; margin:0 7px 20px 0;"></span>{{chapter.edit.modaldelete.message}}</p>
+	</div>
+	
+	<script type="text/javascript">
+	$("#delete-dialog").hide();
+	$('#delete-button').click(function() {
+		$("#delete-dialog").dialog({
+			resizable: false,
+			height: 240,
+			width: 400,
+			modal: true,
+			buttons: [
+				{
+					text: "{{chapter.edit.modaldelete.confirm}}",
+					click: function() {
+						var self = this;
+						app.chapterEditView.deleteChapter(function() {
+							$(self).dialog( "close" );
+						});
+					}
+				},
+				{
+					text: "{{chapter.edit.modaldelete.cancel}}",
+					click: function() {
+						$( this ).dialog( "close" );
+					}
+				}
+			]
+		});
+	});
+	</script>
+	<% }; %>
+	<script type="text/javascript">
+		function counter(decoded) {
+			$('#word-count').html("" + decoded.trim().replace(/\s+/g, ' ').split(" ").length);
+			$('#char-count').html("" + decoded.length);
+			$('#nospace-count').html("" + decoded.replace(/\s+/g, '').length);
+		}
+		$('#text').ready(function () {
+ 			if(tinymce.editors && tinymce.editors.length > 0)
+ 				tinyMCE.editors = [];
+ 			tinymce.init({
+ 				selector:'#text',
+ 				setup: function(editor) {
+ 		 			setTimeout(function() { counter(editor.getContent({ format: 'text' })) }, 1000);
+ 					editor.on('change', function(e) {
+	 		        	counter(editor.getContent({ format: 'text' }));
+	 		        });
+ 					editor.on('keyup', function(e) {
+	 		        	counter(editor.getContent({ format: 'text' }));
+	 		        });
+ 				}
+ 		    });
+		});
+	</script>
+</form>

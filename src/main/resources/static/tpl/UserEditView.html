@@ -1,0 +1,64 @@
+<form class="edit-user-form" action="?" method="POST">
+	<legend><%= user ? '{{user.edit.pagetitle.edit}}' : '{{user.edit.pagetitle.new}}' %></legend>
+	<div>
+		<% if(user) {%>
+		<label>{{user.model.username}}</label>
+		<input name="username" type="text" value="<%=htmlEncode(user.get('username')) %>" readonly="readonly" />
+		<label>{{user.model.email}}</label>
+		<input name="email" type="text" value="<%= htmlEncode(user.get('email')) %>" readonly="readonly"/>
+		<% } else {%>
+		<label>{{user.model.username}}</label>
+		<input id="username" name="username" type="text" />* <span id="username_err" class="error"></span>
+		<label>{{user.model.email}}</label>
+		<input id="email" name="email" type="text" />* <span id="email_err" class="error"></span>
+		<label>{{user.model.checkemail}}</label>
+		<input id="check_email" type="text" />* <span id="check_email_err" class="error"></span>
+		<% } %>
+	</div>
+	
+	<% if(!app.isAdmin() || !user || user.id == app.getUser().username) { %>
+	<div>
+		<% if(user) {%>
+		<label>{{user.model.oldpassword}}</label>
+		<input id="oldpassword" type="password" /> <span id="oldpassword_err" class="error"></span>
+		<% } %>
+		<label><%= user ? '{{user.model.newpassword}}' : '{{user.model.password}}' %></label>
+		<input id="newpassword" name="password" type="password" /><%= user ? '': '*' %> <span id="newpassword_err" class="error"></span>
+		<label>{{user.model.checkpassword}}</label>
+		<input id="check_password" type="password" /><%= user ? '': '*' %> <span id="check_password_err" class="error"></span>
+	</div>
+	
+	<div>
+		<label>{{user.model.firstname}}</label>
+		<input name="firstname" type="text" value="<%= user ? htmlEncode(user.get('firstname')) : '' %>" />
+		<label>{{user.model.lastname}}</label>
+		<input name="lastname" type="text" value="<%= user ? htmlEncode(user.get('lastname')) : '' %>" />
+		<label>{{user.model.language}}</label>
+		<select name="language"></select>
+	</div>
+	
+	<% if(!user) {%>
+	<div id="recaptcha"></div>
+	<div><span id="captcha_err" class="error"></span></div>
+	<div class="legend">
+		<span>* {{user.edit.legend.requiredfields}}</span>
+	</div>
+	<% } %>
+	<% } 
+	if(user && app.isAdmin()) { %>
+	<div class="btn-group user_type buttons-radio" data-toggle="buttons-radio">
+	  <button type="button" class="btn btn-primary <%= user.get('admin') ? 'active' : ''%>">{{user.model.type.admin}}</button>
+	  <button type="button" class="btn btn-primary <%= user.get('admin') ? '' : 'active'%>">{{user.model.type.normal}}</button>
+	</div>
+	<% }%>
+	<hr />
+	
+	<a class="btn save"><%= user ? '{{user.edit.button.update}}' : '{{user.edit.button.create}}' %></a>
+<!-- 	<button type="submit" class="btn save"><%= user ? 'Save changes' : 'Register' %></button> -->
+	<% if(user) { %>
+	<input type="hidden" id="id" name="id" value="<%= user.id %>" />
+	<button data-user-id="<%= user.id %>" class="btn btn-danger delete">{{user.edit.button.delete}}</button>
+	<% } else { %>
+		<script src="//www.google.com/recaptcha/api.js?onload=onloadCallback&render=explicit" async defer></script>
+	<% } %>
+</form>

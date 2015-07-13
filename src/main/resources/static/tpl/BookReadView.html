@@ -1,0 +1,15 @@
+<% if(book) { %>
+<h4 id="page-title"><%= htmlEncode(book.get('title')) %></h4>
+<% if(book.get('author')) { %>
+<p>{{book.read.label.by}} 
+	<strong><a href="#user/<%= book.get('author') %>"><%= htmlEncode(book.get('authorname')) %></a></strong>
+	<%= book.get('year') ? '(' + htmlEncode(book.get('year')) + ')' : '' %>
+</p>
+<% } %>
+<% if(book.get('synopsis')) { %>
+<hr/>
+<div class="synopsis"><%= htmlEncode(book.get('synopsis')) %></div>
+<% } %>
+<div id="chapters"></div>
+<div class="comments"></div>
+<% } %>
