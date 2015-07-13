@@ -1,0 +1,23 @@
+<% if(chapter) { %>
+<div id="chapter<%= chapter.id %>" class="chapter">
+	<div class="header">
+		<h4 style="float:left;">
+			<%= htmlEncode(chapter.get('number')) %> - <%= htmlEncode(chapter.get('title')) %>
+			<% if(chapter.get('section')) { %>
+			<i style="font-size:0.9em;"><%= htmlEncode(chapter.get('section')) %></i>
+			<% } %>
+		</h4>
+		
+		<div class="pull-right">
+			<% if(chapter.get('position') && parseInt(chapter.get('position')) > 1) { %>
+			<div class="inline" style="display:inline;"><a class="btn prev">&lt;</a></div>
+			<% } %>
+			<div class="inline" style="display:inline;"><a class="btn next">&gt;</a></div>
+		</div>
+	</div>
+	
+	<div class="chapter_text" style="clear:both;"><%= chapter.get('text') %></div>
+	
+	<div class="comments"></div>
+</div>
+<% } %>

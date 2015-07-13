@@ -1,0 +1,11 @@
+<td><a id="request-<%= request.id %>" href="#request/<%= request.id %>" class="request"><%
+	var url = request.get('requestURL');
+	var newurl = url.replace(/:\/\/[^\/]*\/(bookshelf)?/i, "://...");
+%><%=newurl%></a></td>
+<td class="<%= request.get('httpMethod') %>"><%= request.get('httpMethod') %></td>
+<td><%
+	var d = new Date(parseInt(request.get('date')));
+	var format = $.datepicker.formatDate("yy-mm-dd", d) + " " + (d.getHours() < 10 ? '0':'') + d.getHours() + ":" + (d.getMinutes() < 10 ? '0':'') + d.getMinutes() +":" + (d.getSeconds() < 10 ? '0':'') + d.getSeconds();
+%><%=format%></td>
+<td><%= request.get('ip') %></td>
+<td class="request-<%= request.id %>-error loading"><img src="img/loading.gif"/></td>

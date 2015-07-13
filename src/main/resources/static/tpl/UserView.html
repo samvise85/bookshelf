@@ -1,0 +1,6 @@
+<h4><%= user.get('username') %></h4>
+<% if(app.getUser() && (app.getUser().id == user.id || app.isAdmin())) { %>
+<a href="#user/<%=user.id%>/edit" class="btn edit">{{user.view.button.edit}}</a>
+<% } %>
+<h4>Book List</h4>
+<p>I'm working on it</p>

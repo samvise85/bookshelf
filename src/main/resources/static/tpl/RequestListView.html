@@ -1,0 +1,35 @@
+<table class="table striped" style="margin-bottom:0;width:923px">
+	<thead>
+		<tr>
+			<th>{{request.model.request}}</th>
+			<th width="60" style="max-width:60px">{{request.model.method}}</th>
+			<th width="140" style="max-width:140px">{{request.model.date}}</th>
+			<th width="110" style="max-width:110px">{{request.model.ip}}</th>
+			<th width="45" style="max-width:45px">{{request.model.status}}</th>
+		</tr>
+	</thead>
+</table>
+<div class="requests_table" style="max-height:300px;overflow-y:auto;">
+	<table class="table striped" style="margin-bottom:0;">
+		<thead>
+			<tr>
+				<th style="padding-top:0;padding-bottom:0;"></th>
+				<th width="60" style="padding-top:0;padding-bottom:0;max-width:60px"></th>
+				<th width="140" style="padding-top:0;padding-bottom:0;max-width:140px"></th>
+				<th width="110" style="padding-top:0;padding-bottom:0;max-width:110px"></th>
+				<th width="45" style="padding-top:0;padding-bottom:0;max-width:45px"></th>
+			</tr>
+		</thead>
+		<tbody>
+		</tbody>
+	</table>
+</div>
+
+<script>
+	$('.requests_table').scroll(function(e) {
+		if($('.requests_table').scrollTop() + $(".requests_table").height() >= $(".requests_table").prop('scrollHeight') - 50) {
+			if(app.requestListView && app.requestListView)
+				app.requestListView.append(app.requestListView.lastOptions);
+		}
+	});
+</script>

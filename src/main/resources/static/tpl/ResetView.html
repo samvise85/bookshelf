@@ -1,0 +1,12 @@
+<form class="edit-user-form" action="?" method="POST">
+	<legend>{{user.reset.pagetitle}}</legend>
+	<div>
+		<label>{{user.model.password}}</label>
+		<input id="newpassword" name="password" type="password" /> <span id="newpassword_err" class="error"></span>
+		<label>{{user.model.checkpassword}}</label>
+		<input id="check_password" type="password" /> <span id="check_password_err" class="error"></span>
+	</div>
+	<hr />
+	
+	<a class="btn save">{{user.reset.button.save}}</a>
+</form>
