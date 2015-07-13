@@ -40,9 +40,9 @@ When the sever receives the username and the token can verify the token (it can 
 
 The web services are marked with @Secured annotation that indicated wich role the user must possess (NOTE: roles are required to start with the prefix "ROLE_").
 
-Is it safe? Of course not! Stealing the token you steal the identity like you are stealing the password. Without https the token can be stolen by anyone sniffing the messages otherwise you can always stole it from the cookies with different techniques.
+Is it safe? Of course not! Nothing is secure without SSL (maybe even with)
 
-Can be better? Yes, using an RSA public key for example to encode the token and in other hundreds ways.
+Can be better? Sure, now steling the token is like stealing the password. Expiring token and hashing the request can improve security.
 
 
 Database:
@@ -73,10 +73,6 @@ For example, if /tpl/HeaderView_1434550070203.html is requested, the request pat
 - InternationalizationTemplateResourceResolver transforms the path again to /tpl/HeaderView.html, gets the resource and translate it then returns it back.
 
 A view in the newly administration menu permits to view all the labels stored into the application and modify them. After the modification it's simply necessarly to refresh the page (maybe Ctrl+Shift+R).
-
-TODO:
-- manage languages and default language (services are ready)
-- manage label each language in a single page with default language label as example
 
 
 User management:
@@ -124,7 +120,6 @@ Frontend:
 
 - OAuth2 support (FB, Google, Twitter)
 - Separate the views of anonimous user, logged user and administrator (similarly to the internationalization).
-- Security based on RSA keys to prevent the stealing of the token to be fatal (or simply hash the content of the request).
 - Web services of the classes: Moderation, Section.
 
 ================ One Last Note ==============
