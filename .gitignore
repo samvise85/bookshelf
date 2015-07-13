@@ -3,3 +3,6 @@
 .classpath
 .project
 .openshift
+/webapps/
+/src/main/webapp/images/
+/src/main/webapp/snoop.jsp
