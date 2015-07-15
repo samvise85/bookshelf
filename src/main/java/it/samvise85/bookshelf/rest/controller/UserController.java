@@ -1,14 +1,14 @@
 package it.samvise85.bookshelf.rest.controller;
 
 import it.samvise85.bookshelf.exception.BookshelfSecurityException;
+import it.samvise85.bookshelf.manager.RestErrorManager;
+import it.samvise85.bookshelf.manager.RestRequestManager;
 import it.samvise85.bookshelf.manager.UserManager;
-import it.samvise85.bookshelf.manager.analytics.RestErrorManager;
-import it.samvise85.bookshelf.manager.analytics.RestRequestManager;
-import it.samvise85.bookshelf.model.user.BookshelfRole;
-import it.samvise85.bookshelf.model.user.User;
-import it.samvise85.bookshelf.rest.security.config.SpringSecurityConfig;
+import it.samvise85.bookshelf.model.User;
+import it.samvise85.bookshelf.persist.clauses.ProjectionClause;
 import it.samvise85.bookshelf.utils.ControllerUtils;
-import it.samvise85.bookshelf.utils.UserUtils;
+import it.samvise85.bookshelf.web.config.SpringSecurityConfig;
+import it.samvise85.bookshelf.web.security.BookshelfRole;
 
 import java.util.Collection;
 
@@ -57,7 +57,7 @@ public class UserController extends AnalyticsAwareController {
 	}
 	
 	protected User getUser(String id, String requestingUser) {
-		return userManager.get(id, UserUtils.getFilter(!checkUser(id, requestingUser)));
+		return userManager.get(id, getFilter(!checkUser(id, requestingUser)));
     }
 
 	@RequestMapping(value="/users", method=RequestMethod.POST)
@@ -176,5 +176,12 @@ public class UserController extends AnalyticsAwareController {
 	protected Logger getLogger() {
 		return log;
 	}
-	
+
+	public static ProjectionClause getFilter(boolean concealInfo) {
+		if(concealInfo) {
+			//TODO metti solo informazioni che l'utente sceglie di condividere
+			return User.TOTAL_PROTECTION;
+		}
+		return User.PASSWORD_PROTECTION;
+	}
 }

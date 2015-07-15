@@ -1,12 +1,12 @@
 package it.samvise85.bookshelf.rest.controller;
 
+import it.samvise85.bookshelf.manager.RestErrorManager;
+import it.samvise85.bookshelf.manager.RestRequestManager;
 import it.samvise85.bookshelf.manager.UserManager;
-import it.samvise85.bookshelf.manager.analytics.RestErrorManager;
-import it.samvise85.bookshelf.manager.analytics.RestRequestManager;
-import it.samvise85.bookshelf.model.user.BookshelfRole;
-import it.samvise85.bookshelf.model.user.User;
-import it.samvise85.bookshelf.rest.security.config.SpringSecurityConfig;
+import it.samvise85.bookshelf.model.User;
 import it.samvise85.bookshelf.utils.ControllerUtils;
+import it.samvise85.bookshelf.web.config.SpringSecurityConfig;
+import it.samvise85.bookshelf.web.security.BookshelfRole;
 
 import javax.servlet.http.HttpServletRequest;
 

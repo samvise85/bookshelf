@@ -1,6 +1,6 @@
 package it.samvise85.bookshelf.persist.repository;
 
-import it.samvise85.bookshelf.model.user.User;
+import it.samvise85.bookshelf.model.User;
 
 import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.stereotype.Repository;

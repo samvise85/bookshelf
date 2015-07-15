@@ -1,19 +1,17 @@
 package it.samvise85.bookshelf.rest.controller;
 
-import it.samvise85.bookshelf.manager.analytics.RestErrorManager;
-import it.samvise85.bookshelf.manager.analytics.RestRequestManager;
-import it.samvise85.bookshelf.manager.analytics.RouteManager;
-import it.samvise85.bookshelf.model.analytics.RestError;
-import it.samvise85.bookshelf.model.analytics.RestRequest;
-import it.samvise85.bookshelf.model.analytics.Route;
-import it.samvise85.bookshelf.model.user.BookshelfRole;
+import it.samvise85.bookshelf.manager.RestErrorManager;
+import it.samvise85.bookshelf.manager.RestRequestManager;
+import it.samvise85.bookshelf.manager.RouteManager;
+import it.samvise85.bookshelf.model.RestError;
+import it.samvise85.bookshelf.model.RestRequest;
+import it.samvise85.bookshelf.model.Route;
 import it.samvise85.bookshelf.persist.PersistOptions;
-import it.samvise85.bookshelf.persist.clauses.ExclusionClause;
-import it.samvise85.bookshelf.persist.clauses.NoProjectionClause;
 import it.samvise85.bookshelf.persist.clauses.PaginationClause;
 import it.samvise85.bookshelf.persist.clauses.ProjectionClause;
-import it.samvise85.bookshelf.utils.ControllerConstants;
+import it.samvise85.bookshelf.utils.BookshelfConstants;
 import it.samvise85.bookshelf.utils.ControllerUtils;
+import it.samvise85.bookshelf.web.security.BookshelfRole;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -33,7 +31,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class AnalyticsController {
 	private static final Logger log = Logger.getLogger(AnalyticsController.class);
 	
-	private static final ProjectionClause ERROR_STACK_TRACE_PROJECTION = new ExclusionClause("stackTrace");
+	private static final ProjectionClause ERROR_STACK_TRACE_PROJECTION = ProjectionClause.createExclusionClause("stackTrace");
 
 	@Autowired
 	private RestRequestManager requestManager;
@@ -50,8 +48,8 @@ public class AnalyticsController {
 		String methodName = ControllerUtils.getMethodName();
 		log.info(methodName);
 		return requestManager.getList(new PersistOptions(
-        		NoProjectionClause.NO_PROJECTION, null, null,
-        		page != null ? new PaginationClause(ControllerConstants.Pagination.DEFAULT_PAGE_SIZE, page) : null));
+        		ProjectionClause.NO_PROJECTION, null, null,
+        		page != null ? new PaginationClause(BookshelfConstants.Pagination.DEFAULT_PAGE_SIZE, page) : null));
 	}
 
 	@RequestMapping(value="/analytics/requests/{id}")

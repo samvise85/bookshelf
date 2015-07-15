@@ -1,12 +1,11 @@
 package it.samvise85.bookshelf.manager;
 
-import it.samvise85.bookshelf.model.book.Book;
-import it.samvise85.bookshelf.model.user.User;
+import it.samvise85.bookshelf.model.Book;
+import it.samvise85.bookshelf.model.User;
+import it.samvise85.bookshelf.persist.AbstractPersistenceUnit;
 import it.samvise85.bookshelf.persist.PersistOptions;
-import it.samvise85.bookshelf.persist.clauses.NoProjectionClause;
 import it.samvise85.bookshelf.persist.clauses.ProjectionClause;
 import it.samvise85.bookshelf.persist.repository.BookRepository;
-import it.samvise85.bookshelf.persist.repository.DatabasePersistenceUnit;
 
 import java.io.Serializable;
 import java.util.Collections;
@@ -18,7 +17,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
-public class BookManagerImpl extends DatabasePersistenceUnit<Book>  implements BookManager {
+public class BookManagerImpl extends AbstractPersistenceUnit<Book>  implements BookManager {
 	@Autowired
 	protected BookRepository repository;
 	
@@ -31,7 +30,7 @@ public class BookManagerImpl extends DatabasePersistenceUnit<Book>  implements B
 
 	@Override
 	public Book update(Book updates) {
-		Book bookToUpdate = get(updates.getId(), NoProjectionClause.NO_PROJECTION);
+		Book bookToUpdate = get(updates.getId(), ProjectionClause.NO_PROJECTION);
 		
 		if(StringUtils.isNotEmpty(updates.getAuthor()))
 			bookToUpdate.setAuthor(updates.getAuthor());

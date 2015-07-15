@@ -2,20 +2,19 @@ package it.samvise85.bookshelf.rest.controller;
 
 import it.samvise85.bookshelf.exception.BookshelfException;
 import it.samvise85.bookshelf.manager.ChapterManager;
-import it.samvise85.bookshelf.manager.analytics.RestErrorManager;
-import it.samvise85.bookshelf.manager.analytics.RestRequestManager;
-import it.samvise85.bookshelf.model.book.Chapter;
-import it.samvise85.bookshelf.model.user.BookshelfRole;
+import it.samvise85.bookshelf.manager.RestErrorManager;
+import it.samvise85.bookshelf.manager.RestRequestManager;
+import it.samvise85.bookshelf.model.Chapter;
 import it.samvise85.bookshelf.persist.PersistOptions;
-import it.samvise85.bookshelf.persist.clauses.NoProjectionClause;
 import it.samvise85.bookshelf.persist.clauses.Order;
 import it.samvise85.bookshelf.persist.clauses.OrderClause;
 import it.samvise85.bookshelf.persist.clauses.PaginationClause;
+import it.samvise85.bookshelf.persist.clauses.ProjectionClause;
 import it.samvise85.bookshelf.persist.clauses.SelectionClause;
 import it.samvise85.bookshelf.persist.clauses.SelectionOperation;
-import it.samvise85.bookshelf.persist.clauses.SimpleProjectionClause;
-import it.samvise85.bookshelf.utils.ControllerConstants;
+import it.samvise85.bookshelf.utils.BookshelfConstants;
 import it.samvise85.bookshelf.utils.ControllerUtils;
+import it.samvise85.bookshelf.web.security.BookshelfRole;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -60,10 +59,10 @@ public class ChapterController extends AnalyticsAwareController {
 	
     protected Collection<Chapter> getChapterList(String book, Integer page, Integer num) {
         return chapterManager.getList(new PersistOptions(
-        		new SimpleProjectionClause("id", "position", "number", "title", "book"),
+        		ProjectionClause.createInclusionClause("id", "position", "number", "title", "book"),
         		Collections.singletonList(new SelectionClause("book", SelectionOperation.EQUALS, book)), 
         		Arrays.asList(new OrderClause[] {new OrderClause("position", Order.ASC), new OrderClause("number", Order.ASC)}),
-        		page != null ? new PaginationClause(num != null ? num : ControllerConstants.Pagination.DEFAULT_PAGE_SIZE, page) : null));
+        		page != null ? new PaginationClause(num != null ? num : BookshelfConstants.Pagination.DEFAULT_PAGE_SIZE, page) : null));
     }
 	
 	@RequestMapping("/books/{book}/chapters/{id}")
@@ -83,7 +82,7 @@ public class ChapterController extends AnalyticsAwareController {
 	}
 	
     protected Chapter getChapterByPosition(String book, Integer position) {
-		Chapter chapter = chapterManager.getChapterByBookAndPosition(book, position, NoProjectionClause.NO_PROJECTION);
+		Chapter chapter = chapterManager.getChapterByBookAndPosition(book, position, ProjectionClause.NO_PROJECTION);
         return chapter;
     }
 	
@@ -104,7 +103,7 @@ public class ChapterController extends AnalyticsAwareController {
 		if(position != null)
 			selection.add(new SelectionClause("position", SelectionOperation.EQUALS, position));
 		
-		List<Chapter> list = chapterManager.getList(new PersistOptions(NoProjectionClause.NO_PROJECTION, selection, null));
+		List<Chapter> list = chapterManager.getList(new PersistOptions(ProjectionClause.NO_PROJECTION, selection, null));
 		
     	if(list == null || list.isEmpty()) return null;
     	if(list.size() > 1) log.warn("MORE THAN A CHAPTER FOUND BY TITLE " + title + " IN THE BOOK " + book);

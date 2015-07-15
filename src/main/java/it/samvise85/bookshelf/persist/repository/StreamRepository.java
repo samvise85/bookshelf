@@ -1,6 +1,6 @@
 package it.samvise85.bookshelf.persist.repository;
 
-import it.samvise85.bookshelf.model.comment.Stream;
+import it.samvise85.bookshelf.model.Stream;
 
 import org.springframework.data.repository.PagingAndSortingRepository;
 

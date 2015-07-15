@@ -1,6 +1,6 @@
 package it.samvise85.bookshelf.persist.repository;
 
-import it.samvise85.bookshelf.model.book.Section;
+import it.samvise85.bookshelf.model.Section;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;

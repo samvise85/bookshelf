@@ -1,7 +1,14 @@
 package it.samvise85.bookshelf.rest.controller;
 
+import it.samvise85.bookshelf.manager.SettingManager;
 import it.samvise85.bookshelf.manager.UserManager;
-import it.samvise85.bookshelf.model.user.User;
+import it.samvise85.bookshelf.model.User;
+import it.samvise85.bookshelf.model.UserProfile;
+import it.samvise85.bookshelf.utils.SHA1Digester;
+import it.samvise85.bookshelf.web.config.AppVersion;
+import it.samvise85.bookshelf.web.security.BookshelfRole.Role;
+
+import java.util.List;
 
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,6 +22,8 @@ public class ConfigureController {
 	
 	@Autowired
 	private UserManager userManager;
+	@Autowired
+	private SettingManager settingManager;
 	
 	@RequestMapping(value = "/configure", method = RequestMethod.PUT)
 	public String configure() {
@@ -23,22 +32,36 @@ public class ConfigureController {
 				User admin = new User();
 				admin.setId("admin");
 				admin.setUsername("admin");
-				admin.setPassword("prova");
+				admin.setPassword(SHA1Digester.digest("prova"));
 				admin.setFirstname("");
 				admin.setLastname("Administrator");
 				admin.setLanguage("en");
 				admin.setAdmin(true);
 				userManager.create(admin);
 
+				UserProfile up = new UserProfile();
+				up.setUser(admin.getId());
+				up.setProfile(Role.ANYONE.name());
+				userManager.createProfile(up);
+				up = new UserProfile();
+				up.setUser(admin.getId());
+				up.setProfile(Role.ADMIN.name());
+				userManager.createProfile(up);
+				
 				User user = new User();
 				user.setId("user");
 				user.setUsername("user");
-				user.setPassword("password");
+				user.setPassword(SHA1Digester.digest("password"));
 				user.setFirstname("Normal");
 				user.setLastname("User");
 				user.setLanguage("en");
 				user.setAdmin(false);
 				userManager.create(user);
+				
+				up = new UserProfile();
+				up.setUser(user.getId());
+				up.setProfile(Role.ANYONE.name());
+				userManager.createProfile(up);
 				
 				return "Configured! Try acces with admin/prova";
 			} catch(Exception e) {
@@ -48,5 +71,48 @@ public class ConfigureController {
 		} else {
 			return "You cannot configure the application!";
 		}
+	}
+
+	@RequestMapping(value = "/updateVersion", method = RequestMethod.PUT)
+	public String update() {
+		String appVersion = settingManager.getAppVersion();
+		AppVersion version = AppVersion.findByVersionCode(appVersion);
+		
+		if(version == null) {
+			updateFromA();
+		} else {
+			switch(version) {
+			case AGRAJAG:
+				updateFromA();
+			case BLART_VERSENWALT_III:
+				updateFromB();
+			default:
+				break;
+			}
+		}
+		return "ok";
+	}
+
+	private void updateFromA() {
+		//set profiles
+		List<User> list = userManager.getList(null);
+		for(User user : list) {
+			UserProfile up = new UserProfile();
+			up.setUser(user.getId());
+			up.setProfile(Role.ANYONE.name());
+			userManager.createProfile(up);
+			if(user.getAdmin() != null && user.getAdmin()) {
+				up = new UserProfile();
+				up.setUser(user.getId());
+				up.setProfile(Role.ADMIN.name());
+				userManager.createProfile(up);
+			}
+		}
+		settingManager.setAppVersion(AppVersion.BLART_VERSENWALT_III.getVersionCode());
+	}
+
+	private void updateFromB() {
+		//for future versions
+		
 	}
 }

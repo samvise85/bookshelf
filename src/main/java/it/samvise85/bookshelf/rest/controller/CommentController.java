@@ -3,19 +3,19 @@ package it.samvise85.bookshelf.rest.controller;
 import it.samvise85.bookshelf.exception.BookshelfException;
 import it.samvise85.bookshelf.exception.BookshelfSecurityException;
 import it.samvise85.bookshelf.manager.CommentManager;
-import it.samvise85.bookshelf.manager.analytics.RestErrorManager;
-import it.samvise85.bookshelf.manager.analytics.RestRequestManager;
-import it.samvise85.bookshelf.model.comment.Comment;
-import it.samvise85.bookshelf.model.user.BookshelfRole;
+import it.samvise85.bookshelf.manager.RestErrorManager;
+import it.samvise85.bookshelf.manager.RestRequestManager;
+import it.samvise85.bookshelf.model.Comment;
 import it.samvise85.bookshelf.persist.PersistOptions;
-import it.samvise85.bookshelf.persist.clauses.NoProjectionClause;
 import it.samvise85.bookshelf.persist.clauses.OrderClause;
 import it.samvise85.bookshelf.persist.clauses.PaginationClause;
+import it.samvise85.bookshelf.persist.clauses.ProjectionClause;
 import it.samvise85.bookshelf.persist.clauses.SelectionClause;
 import it.samvise85.bookshelf.persist.clauses.SelectionOperation;
-import it.samvise85.bookshelf.rest.security.config.SpringSecurityConfig;
-import it.samvise85.bookshelf.utils.ControllerConstants;
+import it.samvise85.bookshelf.utils.BookshelfConstants;
 import it.samvise85.bookshelf.utils.ControllerUtils;
+import it.samvise85.bookshelf.web.config.SpringSecurityConfig;
+import it.samvise85.bookshelf.web.security.BookshelfRole;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -56,10 +56,10 @@ public class CommentController extends AnalyticsAwareController {
 	
     protected Collection<Comment> getCommentList(String stream, Integer page, Integer num) {
         return commentManager.getList(new PersistOptions(
-        		NoProjectionClause.NO_PROJECTION,
+        		ProjectionClause.NO_PROJECTION,
         		Collections.singletonList(new SelectionClause("parentStream", SelectionOperation.EQUALS, stream)),
         		Collections.singletonList(OrderClause.DESC("creation")),
-        		page != null ? new PaginationClause(num != null ? num : ControllerConstants.Pagination.DEFAULT_PAGE_SIZE, page) : null));
+        		page != null ? new PaginationClause(num != null ? num : BookshelfConstants.Pagination.DEFAULT_PAGE_SIZE, page) : null));
     }
 	
 	@RequestMapping("/streams/{stream}/comments/{id}")

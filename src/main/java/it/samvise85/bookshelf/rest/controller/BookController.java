@@ -1,13 +1,13 @@
 package it.samvise85.bookshelf.rest.controller;
 
 import it.samvise85.bookshelf.manager.BookManager;
-import it.samvise85.bookshelf.manager.analytics.RestErrorManager;
-import it.samvise85.bookshelf.manager.analytics.RestRequestManager;
-import it.samvise85.bookshelf.model.book.Book;
-import it.samvise85.bookshelf.model.user.BookshelfRole;
+import it.samvise85.bookshelf.manager.RestErrorManager;
+import it.samvise85.bookshelf.manager.RestRequestManager;
+import it.samvise85.bookshelf.model.Book;
 import it.samvise85.bookshelf.persist.PersistOptions;
-import it.samvise85.bookshelf.persist.clauses.NoProjectionClause;
+import it.samvise85.bookshelf.persist.clauses.ProjectionClause;
 import it.samvise85.bookshelf.utils.ControllerUtils;
+import it.samvise85.bookshelf.web.security.BookshelfRole;
 
 import java.util.Collection;
 import java.util.Date;
@@ -47,7 +47,7 @@ public class BookController extends AnalyticsAwareController {
 	protected Collection<Book> getBookList(Map<String, String[]> queryParams) {
 		if(queryParams == null || queryParams.isEmpty())
 			return bookManager.getList(null);
-		return bookManager.getList(new PersistOptions(NoProjectionClause.NO_PROJECTION, 
+		return bookManager.getList(new PersistOptions(ProjectionClause.NO_PROJECTION, 
 				getSelectionFromParameterMap(queryParams), 
 				null));
 	}

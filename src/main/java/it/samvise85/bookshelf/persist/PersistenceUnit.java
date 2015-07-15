@@ -1,6 +1,6 @@
 package it.samvise85.bookshelf.persist;
 
-import it.samvise85.bookshelf.model.GenericIdentifiable;
+import it.samvise85.bookshelf.model.commons.GenericIdentifiable;
 import it.samvise85.bookshelf.persist.clauses.ProjectionClause;
 
 import java.io.Serializable;

@@ -1,6 +1,9 @@
 package it.samvise85.bookshelf.manager;
 
-import it.samvise85.bookshelf.model.user.User;
+import java.util.List;
+
+import it.samvise85.bookshelf.model.User;
+import it.samvise85.bookshelf.model.UserProfile;
 import it.samvise85.bookshelf.persist.PersistenceUnit;
 import it.samvise85.bookshelf.persist.clauses.ProjectionClause;
 
@@ -17,5 +20,9 @@ public interface UserManager extends PersistenceUnit<User> {
 	User resetPassword(String code, String newPassword);
 
 	User getByUsername(String username, ProjectionClause authenticationProtection);
+
+	List<UserProfile> getProfiles(String id);
+
+	UserProfile createProfile(UserProfile up);
 	
 }

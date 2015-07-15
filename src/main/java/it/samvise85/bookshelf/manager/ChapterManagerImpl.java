@@ -1,13 +1,11 @@
 package it.samvise85.bookshelf.manager;
 
-import it.samvise85.bookshelf.model.book.Chapter;
-import it.samvise85.bookshelf.model.comment.Stream;
+import it.samvise85.bookshelf.model.Chapter;
+import it.samvise85.bookshelf.model.Stream;
+import it.samvise85.bookshelf.persist.AbstractPersistenceUnit;
 import it.samvise85.bookshelf.persist.PersistOptions;
-import it.samvise85.bookshelf.persist.clauses.NoProjectionClause;
 import it.samvise85.bookshelf.persist.clauses.ProjectionClause;
-import it.samvise85.bookshelf.persist.clauses.SimpleProjectionClause;
 import it.samvise85.bookshelf.persist.repository.ChapterRepository;
-import it.samvise85.bookshelf.persist.repository.DatabasePersistenceUnit;
 
 import java.io.Serializable;
 import java.util.Collections;
@@ -24,8 +22,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 @Service
-public class ChapterManagerImpl extends DatabasePersistenceUnit<Chapter> implements ChapterManager {
-	private static final SimpleProjectionClause BASIC_PROJECTION = new SimpleProjectionClause("id", "position", "book");
+public class ChapterManagerImpl extends AbstractPersistenceUnit<Chapter> implements ChapterManager {
+	private static final ProjectionClause BASIC_PROJECTION = ProjectionClause.createInclusionClause("id", "position", "book");
 
 	private static final Logger log = Logger.getLogger(ChapterManagerImpl.class);
 	
@@ -95,7 +93,7 @@ public class ChapterManagerImpl extends DatabasePersistenceUnit<Chapter> impleme
 	}
 	
 	private Chapter update(Chapter updates, boolean updateOtherPositions) {
-		Chapter chapterToUpdate = get(updates.getId(), NoProjectionClause.NO_PROJECTION);
+		Chapter chapterToUpdate = get(updates.getId(), ProjectionClause.NO_PROJECTION);
 
 		if(StringUtils.isNotEmpty(updates.getNumber()))
 			chapterToUpdate.setNumber(updates.getNumber());

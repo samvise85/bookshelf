@@ -1,6 +1,6 @@
 package it.samvise85.bookshelf.manager;
 
-import it.samvise85.bookshelf.model.book.Chapter;
+import it.samvise85.bookshelf.model.Chapter;
 import it.samvise85.bookshelf.persist.PersistenceUnit;
 import it.samvise85.bookshelf.persist.clauses.ProjectionClause;
 

@@ -1,19 +1,19 @@
 package it.samvise85.bookshelf.rest.controller;
 
-import it.samvise85.bookshelf.manager.support.LabelManager;
-import it.samvise85.bookshelf.manager.support.LanguageManager;
-import it.samvise85.bookshelf.model.locale.Label;
-import it.samvise85.bookshelf.model.locale.Language;
-import it.samvise85.bookshelf.model.user.BookshelfRole;
+import it.samvise85.bookshelf.manager.LabelManager;
+import it.samvise85.bookshelf.manager.LanguageManager;
+import it.samvise85.bookshelf.model.Label;
+import it.samvise85.bookshelf.model.Language;
 import it.samvise85.bookshelf.persist.PersistOptions;
-import it.samvise85.bookshelf.persist.clauses.NoProjectionClause;
 import it.samvise85.bookshelf.persist.clauses.Order;
 import it.samvise85.bookshelf.persist.clauses.OrderClause;
 import it.samvise85.bookshelf.persist.clauses.PaginationClause;
+import it.samvise85.bookshelf.persist.clauses.ProjectionClause;
 import it.samvise85.bookshelf.persist.clauses.SelectionClause;
 import it.samvise85.bookshelf.persist.clauses.SelectionOperation;
-import it.samvise85.bookshelf.utils.ControllerConstants;
+import it.samvise85.bookshelf.utils.BookshelfConstants;
 import it.samvise85.bookshelf.utils.ControllerUtils;
+import it.samvise85.bookshelf.web.security.BookshelfRole;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -47,10 +47,10 @@ public class LabelController {
 		String methodName = ControllerUtils.getMethodName();
 		log.info(methodName);
 		return labelManager.getList(new PersistOptions(
-        		NoProjectionClause.NO_PROJECTION,
+        		ProjectionClause.NO_PROJECTION,
         		Collections.singletonList(new SelectionClause("lang", SelectionOperation.EQUALS, language)),
         		Collections.singletonList(new OrderClause("key", Order.ASC)),
-        		page != null ? new PaginationClause(num != null ? num : ControllerConstants.Pagination.DEFAULT_PAGE_SIZE, page) : null));
+        		page != null ? new PaginationClause(num != null ? num : BookshelfConstants.Pagination.DEFAULT_PAGE_SIZE, page) : null));
 	}
 
 	@RequestMapping(value="/labels", method=RequestMethod.DELETE)
@@ -85,8 +85,8 @@ public class LabelController {
 		String methodName = ControllerUtils.getMethodName();
 		log.info(methodName);
 		return languageManager.getList(new PersistOptions(
-        		NoProjectionClause.NO_PROJECTION, null, null,
-        		page != null ? new PaginationClause(ControllerConstants.Pagination.DEFAULT_PAGE_SIZE, page) : null));
+        		ProjectionClause.NO_PROJECTION, null, null,
+        		page != null ? new PaginationClause(BookshelfConstants.Pagination.DEFAULT_PAGE_SIZE, page) : null));
 	}
 
 	@RequestMapping(value="/languages/{id}", method=RequestMethod.PUT)

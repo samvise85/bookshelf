@@ -1,12 +1,13 @@
 package it.samvise85.bookshelf.manager;
 
-import it.samvise85.bookshelf.model.user.User;
+import it.samvise85.bookshelf.model.User;
+import it.samvise85.bookshelf.model.UserProfile;
+import it.samvise85.bookshelf.persist.AbstractPersistenceUnit;
 import it.samvise85.bookshelf.persist.PersistOptions;
 import it.samvise85.bookshelf.persist.clauses.ProjectionClause;
-import it.samvise85.bookshelf.persist.repository.DatabasePersistenceUnit;
+import it.samvise85.bookshelf.persist.repository.UserProfileRepository;
 import it.samvise85.bookshelf.persist.repository.UserRepository;
 import it.samvise85.bookshelf.utils.SHA1Digester;
-import it.samvise85.bookshelf.utils.UserUtils;
 
 import java.io.Serializable;
 import java.util.Calendar;
@@ -18,12 +19,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
-public final class UserManagerImpl extends DatabasePersistenceUnit<User> implements UserManager {
+public final class UserManagerImpl extends AbstractPersistenceUnit<User> implements UserManager {
 
 	private static final String ACTIVATION_KEY = "activationkey";
 	private static final String RESET_KEY = "resetkey";
 	@Autowired
 	protected UserRepository repository;
+	@Autowired
+	protected UserProfileRepository profileRepository;
 	
 	public UserManagerImpl() {
 		super(User.class);
@@ -34,7 +37,7 @@ public final class UserManagerImpl extends DatabasePersistenceUnit<User> impleme
 	 */
 	@Override
 	public User update(User updates) {
-		User userToUpdate = get(updates.getId(), UserUtils.NO_PROTECTION);
+		User userToUpdate = get(updates.getId(), User.NO_PROTECTION);
 		
 		if(StringUtils.isNotEmpty(updates.getActivationCode()))
 			userToUpdate.setActivationCode(updates.getActivationCode());
@@ -68,7 +71,7 @@ public final class UserManagerImpl extends DatabasePersistenceUnit<User> impleme
 		userToUpdate.setLastModification(new Date());
 		super.update(userToUpdate);
 		
-		return get(userToUpdate.getId(), UserUtils.TOTAL_PROTECTION);
+		return get(userToUpdate.getId(), User.TOTAL_PROTECTION);
 	}
 	
 	@Override
@@ -79,14 +82,14 @@ public final class UserManagerImpl extends DatabasePersistenceUnit<User> impleme
 	@Override
 	public User get(Serializable id, ProjectionClause projection) {
 		if(projection == null) 
-			projection = UserUtils.TOTAL_PROTECTION;
+			projection = User.TOTAL_PROTECTION;
 		return super.get(id, projection);
 	}
 
 	@Override
 	public User getByUsername(String username, ProjectionClause projection) {
 		if(projection == null) 
-			projection = UserUtils.TOTAL_PROTECTION;
+			projection = User.TOTAL_PROTECTION;
 		User user = repository.findOneByUsername(username);
 		if(user != null)
 			user.setProjection(projection);
@@ -98,7 +101,7 @@ public final class UserManagerImpl extends DatabasePersistenceUnit<User> impleme
 		if(options == null)
 			options = new PersistOptions();
 		if(options.getProjection() == null)
-			options.setProjection(UserUtils.TOTAL_PROTECTION);
+			options.setProjection(User.TOTAL_PROTECTION);
 		return super.getList(options);
 	}
 
@@ -111,7 +114,7 @@ public final class UserManagerImpl extends DatabasePersistenceUnit<User> impleme
 		objectToSave.setActivationCode(SHA1Digester.digest(data));
 		
 		super.create(objectToSave);
-		return get(objectToSave.getId(), UserUtils.NO_PROTECTION);
+		return get(objectToSave.getId(), User.NO_PROTECTION);
 	}
 
 	@Override
@@ -126,12 +129,11 @@ public final class UserManagerImpl extends DatabasePersistenceUnit<User> impleme
 		if(userToUpdate == null)
 			userToUpdate = repository.findOneByEmail(usernameormail);
 		if(userToUpdate == null) return null;
-//		User userToUpdate = get(id, UserUtils.NO_PROTECTION);
 		
 		String data = userToUpdate.getUsername() + ":" + new Date().getTime() + ":" + RESET_KEY;
 		userToUpdate.setResetCode(SHA1Digester.digest(data));
 		update(userToUpdate);
-		return get(userToUpdate.getId(), UserUtils.NO_PROTECTION);
+		return get(userToUpdate.getId(), User.NO_PROTECTION);
 	}
 
 	private static Integer getBirthYear(Date birthday) {
@@ -160,9 +162,9 @@ public final class UserManagerImpl extends DatabasePersistenceUnit<User> impleme
 	@Override
 	public User login(String username) {
 		String id = username.replaceAll("\\W+", "_");
-		User user = get(id, UserUtils.NO_PROTECTION);
+		User user = get(id, User.NO_PROTECTION);
 		if(user != null && user.getActivationCode() == null)
-			return user.setProjection(UserUtils.PASSWORD_PROTECTION);
+			return user.setProjection(User.PASSWORD_PROTECTION);
 		return null;
 	}
 
@@ -173,7 +175,7 @@ public final class UserManagerImpl extends DatabasePersistenceUnit<User> impleme
 		
 		user.setActivationCode(null);
 		repository.save(user);
-		return user.setProjection(UserUtils.TOTAL_PROTECTION);
+		return user.setProjection(User.TOTAL_PROTECTION);
 	}
 	
 	@Override
@@ -184,7 +186,19 @@ public final class UserManagerImpl extends DatabasePersistenceUnit<User> impleme
 		user.setResetCode(null);
 		user.setPassword(newPassword);
 		repository.save(user);
-		return user.setProjection(UserUtils.TOTAL_PROTECTION);
+		return user.setProjection(User.TOTAL_PROTECTION);
+	}
+
+	@Override
+	public List<UserProfile> getProfiles(String id) {
+		return profileRepository.findByUser(id);
+	}
+
+	@Override
+	public UserProfile createProfile(UserProfile up) {
+		UserProfile profile = profileRepository.findOneByUserAndProfile(up.getUser(), up.getProfile());
+		if(profile != null) return profile;
+		return profileRepository.save(up);
 	}
 
 }

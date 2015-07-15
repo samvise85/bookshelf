@@ -1,13 +1,13 @@
 package it.samvise85.bookshelf.manager;
 
 import it.samvise85.bookshelf.exception.BookshelfException;
-import it.samvise85.bookshelf.model.comment.Comment;
-import it.samvise85.bookshelf.model.comment.Stream;
+import it.samvise85.bookshelf.model.Comment;
+import it.samvise85.bookshelf.model.Stream;
+import it.samvise85.bookshelf.persist.AbstractPersistenceUnit;
 import it.samvise85.bookshelf.persist.PersistOptions;
-import it.samvise85.bookshelf.persist.clauses.NoProjectionClause;
+import it.samvise85.bookshelf.persist.clauses.ProjectionClause;
 import it.samvise85.bookshelf.persist.clauses.SelectionClause;
 import it.samvise85.bookshelf.persist.repository.CommentRepository;
-import it.samvise85.bookshelf.persist.repository.DatabasePersistenceUnit;
 
 import java.util.Date;
 import java.util.List;
@@ -19,7 +19,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
-public class CommentManagerImpl extends DatabasePersistenceUnit<Comment> implements CommentManager {
+public class CommentManagerImpl extends AbstractPersistenceUnit<Comment> implements CommentManager {
 	@Autowired
 	private CommentRepository repository;
 	@Autowired
@@ -68,7 +68,7 @@ public class CommentManagerImpl extends DatabasePersistenceUnit<Comment> impleme
 
 	@Override
 	public Comment update(Comment updates) {
-		Comment commentToUpdate = get(updates.getId(), NoProjectionClause.NO_PROJECTION);
+		Comment commentToUpdate = get(updates.getId(), ProjectionClause.NO_PROJECTION);
 		Date date = new Date();
 		if(commentToUpdate.getCreation() == null)
 			commentToUpdate.setCreation(date);
