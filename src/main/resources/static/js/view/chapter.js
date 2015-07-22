@@ -26,9 +26,6 @@ window.ChapterListView = Backbone.View.extend({
 			self.listItemViewReady = true;
 		});
 	},
-	newOptions: function(options) {
-		return !arraysEqual(this.lastOptions, options);
-	},
 	render: function (options) {
 		this.lastOptions = options;
 		$(this.el).empty();
@@ -58,26 +55,29 @@ window.ChapterListView = Backbone.View.extend({
 			var chapters = new Chapters({book: options.book});
 			chapters.fetch({
 				data: $.param({"page": self.page, "num": self.num}),
-				success: function(chapters) {
-					if(chapters.models.length == 0 || chapters.models.length < self.num) self.stopScroll = true;
-					_.each(chapters.models, function (chapter) {
-						$('table tbody', self.el).append(new ChapterListItemView(chapter).render().el);
-					}, self);
-					return self;
-				},
-				error: function () {
-					$(self.el).empty();
-					$(self.el).html(self.template());
-					return self;
-				}
+				success: function(chapters) { self.onFetchSuccess(chapters); },
+				error: function () { self.onFetchError(); }
 			});
 			this.page++;
 		}
-	}
+	},
+	onFetchSuccess: function(chapters) {
+		if(chapters.error) return this.onFetchError();
+		if(chapters.models.length == 0 || chapters.models.length < this.num) this.stopScroll = true;
+		_.each(chapters.models, function (chapter) {
+			$('table tbody', this.el).append(new ChapterListItemView(chapter).render().el);
+		}, this);
+		return this;
+	},
+	onFetchError: function() {
+		this.stopScroll = true;
+		$(this.el).empty();
+		$(this.el).html(this.template());
+	},
 });
 
 window.ChapterSelectItemView = Backbone.View.extend({
-    render:function (options) {
+    render: function(options) {
         var html = this.template(options);
         this.setElement(html);
         return this;
@@ -85,7 +85,6 @@ window.ChapterSelectItemView = Backbone.View.extend({
 });
 
 window.ChapterEditView = Backbone.View.extend({
-	lastOptions : null,
 	reload : false,
 	clearMessages : true,
 	messages: new Messages(true),
@@ -95,9 +94,6 @@ window.ChapterEditView = Backbone.View.extend({
 		viewLoader.load("ChapterSelectItemView", function() {
 			self.listItemViewReady = true;
 		});
-	},
-	newOptions: function(options) {
-		return !arraysEqual(this.lastOptions, options);
 	},
 	events: {
 		'submit .edit-chapter-form': 'saveChapter',
@@ -122,70 +118,70 @@ window.ChapterEditView = Backbone.View.extend({
 	},
 	saveChapter: function (ev) {
 		this.validate();
-//		console.log("messages empty: " + this.messages.isEmpty());
 		if(this.messages.isEmpty()) {
 			var chapterDetails = $(ev.currentTarget).serializeObject();
 			var chapter = new Chapter({book:chapterDetails.book});
+			var self = this;
 			chapter.save(chapterDetails, {
-				success: function (chapter) {
-					if(app.bookReadView) app.bookReadView.reload = true;
-					app.navigate('book/' + chapter.get('book'), {trigger:true});
-				},
-				error: function (req, resp) {
-					if(resp.status == 200) {
-						if(app.bookReadView) app.bookReadView.reload = true;
-						app.navigate('book/' + chapter.get('book'), {trigger:true, reload:true});
-					}
-				}
+				success: function (chapter) { self.onSaveSuccess(chapter); },
+				error: function (req, resp) { self.onSaveError(); }
 			});
 		}
 		return false;
+	},
+	onSaveSuccess: function(chapter) {
+		if(chapter.error || chapter.errorMap) return this.onSaveError(chapter.error, chapter.errorMap);
+		app.navigate('book/' + chapter.get('book'), {trigger:true});
+	},
+	onSaveError: function(message, errorMap) {
+		if(!message) message = "{{generic.js.error}}".format("{{generic.js.saving}}", "{{generic.js.thechapter}}");
+		app.pushMessageAndNavigate("error", message);
+		//errorMapToMessages(errorMap);//TODO
 	},
 	deleteChapter: function (callback) {
 		var book = this.chapter.get('book');
 		var title = this.chapter.get('title');
 		var self = this;
 		this.chapter.destroy({
-			success: function () {
-				self.backToBook(title, book);
-				if(callback) callback();
-			},
-			error: function (req, resp) {
-				if(resp.status == 200)
-					self.backToBook(book);
-				else
-					app.pushMessageAndNavigate("error", "{{generic.js.error}}".format("{{generis.js.deleting}}", htmlEncode(title)));
-				if(callback) callback();
-			}
+			success: function (response) { self.onDeleteSuccess(response, title, book, callback); },
+			error: function (req, resp) { self.onDeleteError(null, callback); }
 		});
 		return false;
 	},
-	backToBook: function(title, book) {
-		if(app.bookReadView) app.bookReadView.reload = true;
+	onDeleteSuccess: function(response, title, book, callback) {
+		if(response.error) return this.onDeleteError(response.error, callback);
 		app.pushMessageAndNavigate("message", "{{chapter.js.deleted}}".format(title), "book/" + book);
+		if(callback) callback();
+	},
+	onDeleteError: function(message, callback) {
+		if(!message) message = "{{generic.js.error}}".format("{{generis.js.deleting}}", htmlEncode(title));
+		app.pushMessageAndNavigate("error", message);
+		if(callback) callback();
 	},
 	render: function (options) {
-		lastOptions = options;
+		this.lastOptions = options;
 		var self = this;
 		if(options.id) {
 			self.chapter = new Chapter(options);
 			self.chapter.fetch({
-				success: function (chapter) {
-					$(self.el).empty();
-					$(self.el).html(self.template({book: options.book, chapter: chapter}));
-					self.showChapterSelection(options.book);
-					return self;
-				},
-				error: function () {
-					app.pushMessageAndNavigate("error", "{{generic.js.notfound}}".format("{{generic.js.thechapter}}"));
-				}
+				success: function (chapter) { self.onFetchSuccess(chapter); },
+				error: function () { self.onFetchError(); }
 			});
 		} else {
-			$(self.el).empty();
-			$(self.el).html(self.template({book: options.book, chapter: null}));
-			self.showChapterSelection(options.book);
-			return self;
+			self.onFetchSuccess(null);
 		}
+	},
+	onFetchSuccess: function(chapter) {
+		if(chapter && chapter.error) return this.onFetchError(chapter.error);
+		$(this.el).empty();
+		$(this.el).html(this.template({book: this.lastOptions.book, chapter: chapter}));
+		this.showChapterSelection(this.lastOptions.book);
+		return this;
+		
+	},
+	onFetchError: function(message) {
+		if(!message) message = "{{generic.js.notfound}}".format("{{generic.js.thechapter}}");
+		app.pushMessageAndNavigate("error", message);
 	},
 	showChapterSelection: function(book) {
 		if(this.listItemViewReady) {
@@ -199,7 +195,6 @@ window.ChapterEditView = Backbone.View.extend({
 		var self = this;
 		var chapters = new Chapters({book: book});
 		chapters.fetch({
-//			data: $.param({"projection": "MAX"}),
 			success: function(chapters) {
 				if(chapters.models.length > 0) {
 					_.each(chapters.models, function (chapter) {
@@ -215,12 +210,6 @@ window.ChapterEditView = Backbone.View.extend({
 });
 
 window.ChapterReadView = Backbone.View.extend({
-	lastOptions : null,
-	reload : false,
-	clearMessages : true,
-	newOptions: function(options) {
-		return !arraysEqual(this.lastOptions, options);
-	},
 	events: {
 		'click .prev': 'prev',
 		'click .next': 'next'
@@ -231,47 +220,37 @@ window.ChapterReadView = Backbone.View.extend({
 		if(options.id) {
 			self.chapter = new Chapter(options);
 			self.chapter.fetch({
-				success: function (chapter) {
-					$(self.el).empty();
-					$(self.el).html(self.template({book: options.book, chapter: chapter}));
-					self.loadComments();
-					return self;
-				},
-				error: function () {
-					app.pushMessageAndNavigate("error", "{{generic.js.notfound}}".format("{{generic.js.thechapter}}"));
-				}
+				success: function (chapter) { self.onFetchSuccess(chapter); },
+				error: function () { self.onFetchError(); }
 			});
 		} else if(options.title) {
 			self.chapter = new Chapter(options);
 			self.chapter.fetch({
 				data: $.param({"title":options.title, "pos":options.position}),
-				success: function (chapter) {
-					$(self.el).empty();
-					$(self.el).html(self.template({book: options.book, chapter: chapter}));
-					self.loadComments();
-					return self;
-				},
-				error: function () {
-					app.pushMessageAndNavigate("error", "{{generic.js.notfound}}".format("{{generic.js.thechapter}}"));
-				}
+				success: function (chapter) { self.onFetchSuccess(chapter); },
+				error: function () { self.onFetchError(); }
 			});
 		} else if(options.position) {
 			self.chapter = new ChapterByPosition(options);
 			self.chapter.fetch({
 				data: $.param({"position": options.position}),
-				success: function (chapter) {
-					$(self.el).empty();
-					$(self.el).html(self.template({book: options.book, chapter: chapter}));
-					self.loadComments();
-					return self;
-				},
-				error: function () {
-					app.pushMessageAndNavigate("error", "{{generic.js.notfound}}".format("{{generic.js.thechapter}}"));
-				}
+				success: function (chapter) { self.onFetchSuccess(chapter); },
+				error: function () { self.onFetchError(); }
 			});
 		} else {
-			app.pushMessageAndNavigate("error", "{{generic.js.notfound}}".format("{{generic.js.thechapter}}"));
+			this.onFetchError();
 		}
+	},
+	onFetchSuccess: function(chapter) {
+		if(!chapter.id || chapter.error) return this.onFetchError(chapter.error);
+		$(this.el).empty();
+		$(this.el).html(this.template({book: this.lastOptions.book, chapter: chapter}));
+		this.loadComments();
+		return this;
+	},
+	onFetchError: function(message) {
+		if(!message) message = "{{generic.js.notfound}}".format("{{generic.js.thechapter}}");
+		app.pushMessageAndNavigate("error", message);
 	},
 	prev: function () {
 		var position;
@@ -280,14 +259,8 @@ window.ChapterReadView = Backbone.View.extend({
 		if(position > 0) {
 			this.navToChapterPosition(position ? position : null);
 		} else {
-			app.pushMessageAndNavigate("error", "{{chapter.js.noprev}}".format(this.chapter.get('book')));
+			this.onFetchError("{{chapter.js.noprev}}".format(this.chapter.get('book')));
 		}
-	},
-	scroll: function () {
-		var self = this;
-		if(!self.next)
-			self = app.chapterReadView;
-		self.next();
 	},
 	next: function () {
 		var position;
@@ -297,11 +270,10 @@ window.ChapterReadView = Backbone.View.extend({
 		}
 	},
 	navToChapterPosition: function(position) {
-		if(this.chapter && position && position != null) {
+		if(this.chapter && position && position != null)
 			app.navigate('book/' + this.chapter.get('book') + '/chapter?position=' + position, {trigger:true});
-		} else {
-			app.pushMessageAndNavigate("error", "{{chapter.js.noposition}}");
-		}
+		else
+			this.onFetchError("{{chapter.js.noposition}}");
 	},
 	loadComments: function() {
 		if(!this.commentListView) {

@@ -4,9 +4,9 @@ import it.samvise85.bookshelf.manager.BookManager;
 import it.samvise85.bookshelf.manager.RestErrorManager;
 import it.samvise85.bookshelf.manager.RestRequestManager;
 import it.samvise85.bookshelf.model.Book;
+import it.samvise85.bookshelf.model.dto.ResponseDto;
 import it.samvise85.bookshelf.persist.PersistOptions;
 import it.samvise85.bookshelf.persist.clauses.ProjectionClause;
-import it.samvise85.bookshelf.utils.ControllerUtils;
 import it.samvise85.bookshelf.web.security.BookshelfRole;
 
 import java.util.Collection;
@@ -38,9 +38,8 @@ public class BookController extends AnalyticsAwareController {
 	private RestErrorManager errorManager;
 
 	@RequestMapping("/books")
-    public Collection<Book> getBookList(HttpServletRequest request) {
-		String methodName = ControllerUtils.getMethodName();
-		
+    public ResponseDto getBookList(HttpServletRequest request) {
+		String methodName = getMethodName();
 		return executeMethod(request, methodName, new Class<?>[] { Map.class }, new Object[] { request.getParameterMap() });
     }
 
@@ -53,8 +52,8 @@ public class BookController extends AnalyticsAwareController {
 	}
 
 	@RequestMapping("/books/{id}")
-    public Book getBook(HttpServletRequest request, @PathVariable String id) {
-		String methodName = ControllerUtils.getMethodName();
+    public ResponseDto getBook(HttpServletRequest request, @PathVariable String id) {
+		String methodName = getMethodName();
 		return executeMethod(request, methodName, new Class<?>[] { String.class }, new Object[] { id });
 	}
 	
@@ -64,8 +63,8 @@ public class BookController extends AnalyticsAwareController {
 
 	@RequestMapping(value="/books", method=RequestMethod.POST)
 	@Secured({BookshelfRole.ADMIN, BookshelfRole.AUTHOR})
-	public Book createBook(HttpServletRequest request, @RequestBody Book book) {
-		String methodName = ControllerUtils.getMethodName();
+	public ResponseDto createBook(HttpServletRequest request, @RequestBody Book book) {
+		String methodName = getMethodName();
 		return executeMethod(request, methodName, new Class<?>[] { Book.class }, new Object[] { book }, book);
 	}
 	
@@ -76,8 +75,8 @@ public class BookController extends AnalyticsAwareController {
 
 	@RequestMapping(value="/books/{id}", method=RequestMethod.PUT)
 	@Secured({BookshelfRole.ADMIN, BookshelfRole.AUTHOR})
-    public Book updateBook(HttpServletRequest request, @PathVariable String id, @RequestBody Book book) {
-		String methodName = ControllerUtils.getMethodName();
+    public ResponseDto updateBook(HttpServletRequest request, @PathVariable String id, @RequestBody Book book) {
+		String methodName = getMethodName();
 		return executeMethod(request, methodName, new Class<?>[] { String.class, Book.class }, new Object[] { id, book }, book);
 	}
 	
@@ -88,8 +87,8 @@ public class BookController extends AnalyticsAwareController {
 
 	@RequestMapping(value="/books/{id}", method=RequestMethod.DELETE)
 	@Secured(BookshelfRole.ADMIN)
-    public Book deleteBook(HttpServletRequest request, @PathVariable String id) {
-		String methodName = ControllerUtils.getMethodName();
+    public ResponseDto deleteBook(HttpServletRequest request, @PathVariable String id) {
+		String methodName = getMethodName();
 		return executeMethod(request, methodName, new Class<?>[] { String.class }, new Object[] { id });
 	}
 	

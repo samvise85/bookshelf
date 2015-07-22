@@ -1,5 +1,6 @@
 package it.samvise85.bookshelf.manager;
 
+import it.samvise85.bookshelf.exception.BookshelfException;
 import it.samvise85.bookshelf.model.Book;
 import it.samvise85.bookshelf.model.User;
 import it.samvise85.bookshelf.persist.AbstractPersistenceUnit;
@@ -55,6 +56,9 @@ public class BookManagerImpl extends AbstractPersistenceUnit<Book>  implements B
 	public Book create(Book objectToSave) {
 		if(objectToSave.getId() == null)
 			objectToSave.setId(objectToSave.getTitle().replaceAll("\\W+", "_"));
+		Book book = get(objectToSave.getId());
+		if(book != null)
+			throw new BookshelfException("Book " + objectToSave.getId() + " already exists");
 		return super.create(objectToSave);
 	}
 
@@ -89,7 +93,7 @@ public class BookManagerImpl extends AbstractPersistenceUnit<Book>  implements B
 		if(author != null) {
 			User user = userManager.get(author);
 			if(user == null)
-				user = userManager.getByUsername(author, null);
+				user = userManager.getByUsername(author, User.TOTAL_PROTECTION);
 			if(user != null)
 				book.setAuthorname(user.getUsername());
 		}

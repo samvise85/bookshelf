@@ -16,8 +16,8 @@
 <script>
 	$('.comments_table').scroll(function(e) {
 		if($('.comments_table').scrollTop() + $(".comments_table").height() >= $(".comments_table").prop('scrollHeight') - 50) {
-			if(app.<%=view.lastOptions.parentViewName%> && app.<%=view.lastOptions.parentViewName%>.commentListView)
-				app.<%=view.lastOptions.parentViewName%>.commentListView.append(app.<%=view.lastOptions.parentViewName%>.commentListView.lastOptions);
+			if(app.currentView && app.currentView.commentListView)
+				app.currentView.commentListView.append(app.currentView.commentListView.options);
 		}
 	});
 

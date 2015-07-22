@@ -24,43 +24,43 @@ window.Router = Backbone.Router.extend({
 		"forgot": "forgot",
 		"reset/:code": "resetPassword",
         "login" : "login",
-        "logout" : "logout",
-		"denied" : "denied"
+        "logout" : "logout"
     },
     init: function () {
 		var self = this;
 		//load user
 		if($.cookie("bookshelf-username")) {
-			try {
-				$.ajax({url: '/login',
-					type:'GET',
-					success:function (data, textStatus, request) {
-						self.user = eval(data);
-						self.initHistory();
-						error = null;
-						if(!self.user) {
-							$.deleteCookie("bookshelf-username");
-							$.deleteCookie("bookshelf-token");
-							error = "{{user.js.loginerr}} {{user.js.activateaccount}}";
-						}
-						self.initView(null, null, error);
-					},
-					error: function (request, textStatus, error) {
-						if($.cookie("bookshelf-username")) {
-							$.deleteCookie("bookshelf-username");
-							$.deleteCookie("bookshelf-token");
-							self.initHistory();
-							self.initView(null, null, "{{user.js.loginerr}}");
-						}
-					}
-				});
-			} catch(error) {
-				console.log(error);
-			}
+			$.ajax({url: '/login',
+				type:'GET',
+				success:function (data) { self.onLoginSuccess(data); },
+				error: function () { self.onLoginError("{{user.js.loginerr}}"); }
+			});
 		} else {
 			self.initHistory();
 			self.initView();
 		}
+	},
+	onLoginSuccess: function(data) {
+		data = eval(data);
+		if(data.errors) {
+			this.onLoginError("{{user.js.loginerr}}");
+		} else if(data.response) {
+			this.user = data.response;
+			if(!this.user) {
+				this.onLoginError("{{user.js.loginerr}} {{user.js.activateaccount}}");
+			} else {
+				this.initHistory();
+				this.initView();
+			}
+		}
+	},
+	onLoginError: function(message) {
+		if($.cookie("bookshelf-username")) {
+			$.deleteCookie("bookshelf-username");
+			$.deleteCookie("bookshelf-token");
+		}
+		this.initHistory();
+		this.initView(null, null, message);
 	},
 	initHistory: function () {
 		this.routesHit = 0;
@@ -93,11 +93,6 @@ window.Router = Backbone.Router.extend({
 	clear: function () {
 		this.currentView = null;
 		this.initView();
-	},
-	languageChanged: function() {
-		viewLoader.clear();
-		this.clear();
-//		alert('language changed!!!');
 	},
 	back: function() {
 		if(this.routesHit > 1) {
@@ -150,7 +145,7 @@ window.Router = Backbone.Router.extend({
 	rerenderView : function() {
 		if(this.currentView) {
 			var headerOptions = {rerender: true};
-			this.renderView(this.currentViewName, this.currentViewClass, headerOptions, currentView.lastOptions);
+			this.renderView(this.currentViewName, this.currentViewClass, headerOptions, this.currentView.lastOptions);
 		}
 	},
 	pushMessageAndNavigate: function(messageType, message, route) {
@@ -162,6 +157,11 @@ window.Router = Backbone.Router.extend({
 			this.clearMessages = false;
 			this.navigate(route, {trigger:true});
 		}
+	},
+	languageChanged: function() {
+		viewLoader.clear();
+		this.clear();
+//		alert('language changed!!!');
 	},
 	
 	//route callbacks (or simply page rendering functions)
@@ -287,9 +287,6 @@ window.Router = Backbone.Router.extend({
 		this.clear();
 		this.user = null;
 		this.back();
-	},
-	denied: function () {
-		this.renderView('deniedView', DeniedView, null, null);
 	}
 
 });

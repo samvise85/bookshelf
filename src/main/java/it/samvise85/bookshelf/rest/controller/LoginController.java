@@ -4,7 +4,7 @@ import it.samvise85.bookshelf.manager.RestErrorManager;
 import it.samvise85.bookshelf.manager.RestRequestManager;
 import it.samvise85.bookshelf.manager.UserManager;
 import it.samvise85.bookshelf.model.User;
-import it.samvise85.bookshelf.utils.ControllerUtils;
+import it.samvise85.bookshelf.model.dto.ResponseDto;
 import it.samvise85.bookshelf.web.config.SpringSecurityConfig;
 import it.samvise85.bookshelf.web.security.BookshelfRole;
 
@@ -33,8 +33,8 @@ public class LoginController extends AnalyticsAwareController {
 	
 	@RequestMapping(value = "/login", method = RequestMethod.GET)
 	@Secured(BookshelfRole.ANYONE)
-	public User login(HttpServletRequest request, @RequestHeader(value=SpringSecurityConfig.USERNAME_PARAM_NAME) String username) {
-		String methodName = ControllerUtils.getMethodName();
+	public ResponseDto login(HttpServletRequest request, @RequestHeader(value=SpringSecurityConfig.USERNAME_PARAM_NAME) String username) {
+		String methodName = getMethodName();
 		return executeMethod(request, methodName, new Class<?>[] { String.class }, new Object[] { username });
 	}
 	

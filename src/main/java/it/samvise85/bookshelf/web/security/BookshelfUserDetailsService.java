@@ -34,8 +34,7 @@ public class BookshelfUserDetailsService implements UserDetailsService, Initiali
 		if (user == null)
 			return null;
 
-		List<GrantedAuthority> auths = BookshelfRoleUtils.getGrantedAuthorities(user);
-		
+		List<GrantedAuthority> auths = BookshelfRoleUtils.getGrantedAuthorities(userManager.getProfiles(user.getId()));
 		return new org.springframework.security.core.userdetails.User(username, user.getPassword(), true, true, true, true, auths);
 	}
 

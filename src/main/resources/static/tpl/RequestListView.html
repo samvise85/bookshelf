@@ -28,8 +28,8 @@
 <script>
 	$('.requests_table').scroll(function(e) {
 		if($('.requests_table').scrollTop() + $(".requests_table").height() >= $(".requests_table").prop('scrollHeight') - 50) {
-			if(app.requestListView && app.requestListView)
-				app.requestListView.append(app.requestListView.lastOptions);
+			if(app.currentView)
+				app.currentView.append(app.currentView.lastOptions);
 		}
 	});
 </script>

@@ -4,9 +4,8 @@ import it.samvise85.bookshelf.model.Label;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.repository.PagingAndSortingRepository;
 
-public interface LabelRepository extends PagingAndSortingRepository<Label, String> {
+public interface LabelRepository extends SearchRepository<Label, String> {
 
 	Label findOneByLabelKeyAndLang(String key, String language);
 

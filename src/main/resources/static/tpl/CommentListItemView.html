@@ -16,8 +16,6 @@
 	<script type="text/javascript">
 	$("#delete-dialog-<%= comment.id %>").hide();
 	$('#comment-<%= comment.id %> .delete').click(function(ev) {
-		console.log(ev);
-		console.log(ev.target);
 		$("#delete-dialog-<%= comment.id %>").dialog({
 			resizable: false,
 			height: 240,
@@ -28,15 +26,15 @@
 					text: "{{comment.edit.modaldelete.confirm}}",
 					click: function() {
 						var self = this;
-						app.chapterReadView.commentListView.deleteComment($(ev.target), function() {
-							$(self).dialog( "close" );
+						app.currentView.commentListView.deleteComment($(ev.target), function() {
+							$(self).dialog("close");
 						});
 					}
 				},
 				{
 					text: "{{comment.edit.modaldelete.cancel}}",
 					click: function() {
-						$( this ).dialog( "close" );
+						$(this).dialog("close");
 					}
 				}
 			]

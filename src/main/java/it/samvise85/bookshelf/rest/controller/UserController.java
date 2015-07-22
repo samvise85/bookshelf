@@ -5,8 +5,8 @@ import it.samvise85.bookshelf.manager.RestErrorManager;
 import it.samvise85.bookshelf.manager.RestRequestManager;
 import it.samvise85.bookshelf.manager.UserManager;
 import it.samvise85.bookshelf.model.User;
+import it.samvise85.bookshelf.model.dto.ResponseDto;
 import it.samvise85.bookshelf.persist.clauses.ProjectionClause;
-import it.samvise85.bookshelf.utils.ControllerUtils;
 import it.samvise85.bookshelf.web.config.SpringSecurityConfig;
 import it.samvise85.bookshelf.web.security.BookshelfRole;
 
@@ -23,6 +23,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -40,8 +41,8 @@ public class UserController extends AnalyticsAwareController {
 	
 	@RequestMapping("/users")
 	@Secured(BookshelfRole.ANYONE)
-    public Collection<User> getUserList(HttpServletRequest request) {
-		String methodName = ControllerUtils.getMethodName();
+    public ResponseDto getUserList(HttpServletRequest request) {
+		String methodName = getMethodName();
 		return executeMethod(request, methodName);
 	}
 	
@@ -50,20 +51,30 @@ public class UserController extends AnalyticsAwareController {
     }
 	
 	@RequestMapping("/users/{id}")
-    public User getUser(HttpServletRequest request, @PathVariable String id,
+    public ResponseDto getUser(HttpServletRequest request, @PathVariable String id,
     		@RequestHeader(value=SpringSecurityConfig.USERNAME_PARAM_NAME, required = false) String requestingUser) {
-		String methodName = ControllerUtils.getMethodName();
+		String methodName = getMethodName();
 		return executeMethod(request, methodName, new Class<?>[] { String.class, String.class }, new Object[] { id, requestingUser });
 	}
 	
 	protected User getUser(String id, String requestingUser) {
 		return userManager.get(id, getFilter(!checkUser(id, requestingUser)));
     }
+	
+	@RequestMapping(value="/users/{id}", params={"username"})
+    public ResponseDto getUserByUsername(HttpServletRequest request, @RequestParam(value="username", required=true) String username) {
+		String methodName = getMethodName();
+		return executeMethod(request, methodName, new Class<?>[] { String.class }, new Object[] { username });
+	}
+	
+	protected User getUserByUsername(String username) {
+		return userManager.getByUsername(username, User.TOTAL_PROTECTION);
+    }
 
 	@RequestMapping(value="/users", method=RequestMethod.POST)
-    public User createUser(HttpServletRequest request, @RequestBody User user,
+    public ResponseDto createUser(HttpServletRequest request, @RequestBody User user,
     		@RequestHeader(value=SpringSecurityConfig.USERNAME_PARAM_NAME, required = false) String requestingUser) {
-		String methodName = ControllerUtils.getMethodName();
+		String methodName = getMethodName();
 		
 		return executeMethod(request, methodName, new Class<?>[] { User.class, String.class }, new Object[] { user, requestingUser }, user);
 	}
@@ -81,9 +92,9 @@ public class UserController extends AnalyticsAwareController {
 
 	@RequestMapping(value="/users/{id}", method=RequestMethod.PUT)
 	@Secured(BookshelfRole.ANYONE)
-    public User updateUser(HttpServletRequest request, @PathVariable String id, @RequestBody User user,
+    public ResponseDto updateUser(HttpServletRequest request, String id, @RequestBody User user,
     		@RequestHeader(value=SpringSecurityConfig.USERNAME_PARAM_NAME) String requestingUser) {
-		String methodName = ControllerUtils.getMethodName();
+		String methodName = getMethodName();
 		return executeMethod(request, methodName, new Class<?>[] { String.class, User.class, String.class }, new Object[] { id, user, requestingUser }, user);
 	}
 	
@@ -99,9 +110,9 @@ public class UserController extends AnalyticsAwareController {
 
 	@RequestMapping(value="/users/{id}", method=RequestMethod.DELETE)
 	@Secured(BookshelfRole.ANYONE)
-    public User deleteUser(HttpServletRequest request, @PathVariable String id,
+    public ResponseDto deleteUser(HttpServletRequest request, @PathVariable String id,
     		@RequestHeader(value=SpringSecurityConfig.USERNAME_PARAM_NAME) String requestingUser) {
-		String methodName = ControllerUtils.getMethodName();
+		String methodName = getMethodName();
 		return executeMethod(request, methodName, new Class<?>[] { String.class, String.class }, new Object[] { id, requestingUser });
 	}
 	
@@ -115,8 +126,8 @@ public class UserController extends AnalyticsAwareController {
     }
 
 	@RequestMapping(value="/users/{id}/forgot", method=RequestMethod.PUT)
-    public User resetPassword(HttpServletRequest request, @PathVariable String id) {
-		String methodName = ControllerUtils.getMethodName();
+    public ResponseDto resetPassword(HttpServletRequest request, @PathVariable String id) {
+		String methodName = getMethodName();
 		return executeMethod(request, methodName, new Class<?>[] { String.class }, new Object[] { id });
 	}
 	
@@ -125,8 +136,8 @@ public class UserController extends AnalyticsAwareController {
     }
 
 	@RequestMapping(value="/activationCode/{code}", method=RequestMethod.PUT)
-    public User activate(HttpServletRequest request, @PathVariable String code) {
-		String methodName = ControllerUtils.getMethodName();
+    public ResponseDto activate(HttpServletRequest request, @PathVariable String code) {
+		String methodName = getMethodName();
 		return executeMethod(request, methodName, new Class<?>[] { String.class }, new Object[] { code });
 	}
 	
@@ -135,8 +146,8 @@ public class UserController extends AnalyticsAwareController {
     }
 
 	@RequestMapping(value="/forgot", method=RequestMethod.PUT)
-    public User forgot(HttpServletRequest request, @RequestBody User user) {
-		String methodName = ControllerUtils.getMethodName();
+    public ResponseDto forgot(HttpServletRequest request, @RequestBody User user) {
+		String methodName = getMethodName();
 		String usernameormail = user.getUsername();
 		return executeMethod(request, methodName, new Class<?>[] { String.class }, new Object[] { usernameormail });
 	}
@@ -148,8 +159,8 @@ public class UserController extends AnalyticsAwareController {
 	}
 
 	@RequestMapping(value="/resetCode/{code}", method=RequestMethod.PUT)
-    public User reset(HttpServletRequest request, @PathVariable String code, @RequestBody User user) {
-		String methodName = ControllerUtils.getMethodName();
+    public ResponseDto reset(HttpServletRequest request, @PathVariable String code, @RequestBody User user) {
+		String methodName = getMethodName();
 		String password = user.getPassword();
 		return executeMethod(request, methodName, new Class<?>[] { String.class, String.class }, new Object[] { code, password });
 	}
@@ -157,10 +168,6 @@ public class UserController extends AnalyticsAwareController {
     protected User reset(String code, String password) {
         return userManager.resetPassword(code, password);
     }
-	
-	private boolean checkUser(String requestedUser, String username) {
-		return StringUtils.isNotEmpty(username) && username.equals(requestedUser);
-	}
 
 	@Override
 	protected RestRequestManager getRequestManager() {
@@ -176,8 +183,12 @@ public class UserController extends AnalyticsAwareController {
 	protected Logger getLogger() {
 		return log;
 	}
+	
+	private boolean checkUser(String requestedUser, String username) {
+		return StringUtils.isNotEmpty(username) && username.equals(requestedUser);
+	}
 
-	public static ProjectionClause getFilter(boolean concealInfo) {
+	private static ProjectionClause getFilter(boolean concealInfo) {
 		if(concealInfo) {
 			//TODO metti solo informazioni che l'utente sceglie di condividere
 			return User.TOTAL_PROTECTION;

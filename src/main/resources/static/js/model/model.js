@@ -1,27 +1,38 @@
 
 window.Book = Backbone.Model.extend({
   urlRoot: '/books',
-    
-  initialize:function () {
-  	this.chapters = new Chapters({book:this.id});
-  	this.chapters.url = '/books/' + this.id + '/chapters';
-  }
+  parse: function(data) {
+	  this.error = data.error;
+	  return data.response ? data.response : data;
+  },
 });
 window.Books = Backbone.Collection.extend({
+  url: '/books',
   model: Book,
-  url: '/books'
+  parse: function(data) {
+	  this.error = data.error;
+	  return data.response;
+  }
 });
 
 window.ChapterByPosition = Backbone.Model.extend({
   url: null,
   initialize: function(options) {
-	this.url = '/books/' + options.book + '/chapters';// + (options.position ? '?position=' + options.position : '');
+	this.url = '/books/' + options.book + '/chapters';
+  },
+  parse: function(data) {
+	  this.error = data.error;
+	  return data.response ? data.response : data;
   }
 });
 window.Chapter = Backbone.Model.extend({
   urlRoot: null,
   initialize: function(options) {
 	this.urlRoot = '/books/' + options.book + '/chapters';
+  },
+  parse: function(data) {
+	  this.error = data.error;
+	  return data.response ? data.response : data;
   }
 });
 window.Chapters = Backbone.Collection.extend({
@@ -29,6 +40,10 @@ window.Chapters = Backbone.Collection.extend({
   model: Chapter,
   initialize: function(options) {
 	  this.url = '/books/' + options.book + '/chapters';// + (options.page ? '?page=' + options.page : '');
+  },
+  parse: function(data) {
+	  this.error = data.error;
+	  return data.response ? data.response : data;
   }
 });
 
@@ -36,6 +51,10 @@ window.Comment = Backbone.Model.extend({
   urlRoot: null,
   initialize: function(options) {
 	this.urlRoot = '/streams/' + options.stream + '/comments';
+  },
+  parse: function(data) {
+	  this.error = data.error;
+	  return data.response ? data.response : data;
   }
 });
 window.Comments = Backbone.Collection.extend({
@@ -43,5 +62,9 @@ window.Comments = Backbone.Collection.extend({
   model: Comment,
   initialize: function(options) {
 	  this.url = '/streams/' + options.stream + '/comments' + (options.page ? '?page=' + options.page : '');
+  },
+  parse: function(data) {
+	  this.error = data.error;
+	  return data.response ? data.response : data;
   }
 });

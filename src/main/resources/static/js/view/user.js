@@ -51,22 +51,25 @@ window.UserListView = Backbone.View.extend({
 			var self = this;
 			var users = new Users({page: this.page});
 			users.fetch({
-				success: function(users) {
-					var self = this;
-					if(users.models.length == 0) self.stopScroll = true;
-					_.each(users.models, function (user) {
-						$('table tbody', self.el).append(new UserListItemView(user).render().el);
-					}, self);
-					return self;
-				},
-				error: function () {
-					$(self.el).empty();
-					$(self.el).html(self.template());
-					return self;
-				}
+				success: function(users) { return self.onFetchSuccess(users); },
+				error: function () { self.onFetchError(); }
 			});
 			this.page++;
 		}
+	},
+	onFetchSuccess: function(users) {
+		if(users.error) return this.onFetchError(users.error);
+		if(users.models.length == 0) this.stopScroll = true;
+		_.each(users.models, function (user) {
+			$('table tbody', this.el).append(new UserListItemView(user).render().el);
+		}, this);
+		return this;
+	},
+	onFetchError: function(message) {
+		this.stopScroll = true;
+		$(this.el).empty();
+		$(this.el).html(this.template());
+		return this;
 	}
 });
 
@@ -86,7 +89,6 @@ window.UserEditView = Backbone.View.extend({
 		return !arraysEqual(this.lastOptions, options);
 	},
 	events: {
-//		'submit .edit-user-form': 'saveUser',
 		'click .edit-user-form .save': 'saveUser',
 		'click .delete': 'deleteUser',
 		'blur #username': 'validateUsername',
@@ -105,7 +107,9 @@ window.UserEditView = Backbone.View.extend({
 			} else {
 				var userExists = new User({id: username});
 				userExists.fetch({
+					data: $.param({'username': username}),
 					success: function (user) {
+						if(!user.get('username') || user.error) return self.messages.remove("username_err");
 						self.messages.add("username_err", "{{user.js.usernamenotavailable}}");
 					},
 					error: function () {
@@ -223,41 +227,37 @@ window.UserEditView = Backbone.View.extend({
 			    data: JSON.stringify(self.userj),
 			    contentType: "application/json; charset=utf-8",
 			    dataType: "json",
-				success:function (data) {
-					if(app.userListView) app.userListView.reload = true;
-					if(self.user && self.userj.language != self.user.get('language')) app.languageChanged();
-					
-					app.pushMessageAndNavigate("message", self.user ? "{{user.js.usermodified}}" : "{{user.js.usercreated}}", "users");
-				},
-				error: function (req, resp) {
-					if(resp.status == 500) {
-						app.pushMessageAndNavigate("error", "{{generic.js.error}}".format("{{generic.js.saving}}", htmlEncode(self.userj.username)));
-					} else if(resp.status != 403) {
-						if(app.userListView) app.userListView.reload = true;
-						app.pushMessageAndNavigate("message", self.user ? "{{user.js.usermodified}}" : "{{user.js.usercreated}}", "users");
-					}
-				}
+				success: function(data) { self.onSaveSuccess(data); },
+				error: function(req, resp) { self.onSaveError(); }
 			});
 		}
 		return false;
 	},
+	onSaveSuccess: function(response) {
+		if(response.error || response.errorMap) return this.onSaveError(response.error, response.errorMap);
+		if(this.user && this.userj.language != this.user.get('language')) app.languageChanged();
+		app.pushMessageAndNavigate("message", this.user ? "{{user.js.usermodified}}" : "{{user.js.usercreated}}", "users");
+	},
+	onSaveError: function(message, errorMap) {
+		if(!message) message = "{{generic.js.error}}".format("{{generic.js.saving}}", htmlEncode(this.userj.username))
+		app.pushMessageAndNavigate("error", message);
+		//errorMapToMessages(errorMap);//TODO
+	},
 	deleteUser: function (ev) {
 		var self = this;
 		this.user.destroy({
-			success: function () {
-				if(app.userListView) app.userListView.reload = true;
-				app.pushMessageAndNavigate("message", "{{user.js.userdeleted}}".format(self.user.id), "users");
-			},
-			error: function (req, resp, error) {
-				if(resp.status == 500) {
-					app.pushMessageAndNavigate("error", "{{generic.js.error}}".format("{{generic.js.deleting}}", htmlEncode(self.user.id))); 
-				} else if(resp.status != 403) {
-					if(app.userListView) app.userListView.reload = true;
-					app.pushMessageAndNavigate("message", "{{user.js.userdeleted}}".format(self.user.id), "users");
-				}
-			}
+			success: function(response) { self.onDeleteSuccess(response); },
+			error: function (req, resp) { self.onDeleteError(); }
 		});
 		return false;
+	},
+	onDeleteSuccess: function(response) {
+		if(response.error) return this.onDeleteError(response.error);
+		app.pushMessageAndNavigate("message", "{{user.js.userdeleted}}".format(this.user.id), "users");
+	},
+	onDeleteError: function(message) {
+		if(!message) message = "{{generic.js.error}}".format("{{generic.js.deleting}}", htmlEncode(this.user.id));
+		app.pushMessageAndNavigate("error", message); 
 	},
 	render: function (options) {
 		this.lastOptions = options;
@@ -266,42 +266,37 @@ window.UserEditView = Backbone.View.extend({
 			if(app.getUser() && (app.getUser().id == options.id || app.isAdmin())) {
 				self.user = new User({id: options.id});
 				self.user.fetch({
-					success: function (user) {
-						$(self.el).empty();
-						$(self.el).html(self.template({user: user}));
-						self.addLanguagesWhenReady();
-						return self;
-					},
-					error: function () {
-						app.pushMessageAndNavigate("error", "{{generic.js.notfound}}".format("user"));
-					}
+					success: function (user) { self.onFetchSuccess(user); },
+					error: function () { self.onFetchError(); }
 				});
 			} else {
-				app.pushMessageAndNavigate("error", "{{user.js.cantedit}}");
+				this.onFetchError("{{user.js.cantedit}}");
 			}
 		} else {
-			$(self.el).empty();
-			$(self.el).html(self.template({user: null}));
-			self.addLanguagesWhenReady();
-			return self;
+			this.onFetchSuccess();
 		}
+	},
+	onFetchSuccess: function(user) {
+		if(user && user.error) return this.onFetchError(user.error);
+		$(this.el).empty();
+		$(this.el).html(this.template({user: user}));
+		this.addLanguagesWhenReady();
+		return this;
+	},
+	onFetchError: function(message) {
+		if(!message) message = "{{generic.js.notfound}}".format("{{generic.js.theuser}}");
+		app.pushMessageAndNavigate("error", message);
 	},
 	recaptcha: function() {
 		var self = this;
 		grecaptcha.render('recaptcha', {
 			'sitekey' : '6Le83QcTAAAAAIsK6kgz3-M73bODFXVqB8t-9Ul-'
-//			'callback': function(code) {
-//				alert("AAAA");
-//				self.code = code;
-//			}
 		});
 	},
 	addLanguagesWhenReady: function() {
 		if(this.listItemViewReady) {
-//			console.log("Pronto");
 			this.addLanguages();
 		} else {
-//			console.log("Non è pronto");
 			var self  = this;
 			setTimeout(function() { self.addLanguagesWhenReady(); }, 100);
 		}
@@ -310,18 +305,21 @@ window.UserEditView = Backbone.View.extend({
 		var self  = this;
 		var languages = new Languages();
 		languages.fetch({
-			success: function(languages) {
-//				console.log("Trovate "  + languages.length + " lingue");
-				_.each(languages.models, function(language) {
-					var languageSelectItemView = new LanguageSelectItemView();
-					languageSelectItemView.render({language: language, currLang: self.user ? self.user.get('language') : ''});
-					$('select[name=language]').append(languageSelectItemView.el);
-				})
-			},
-			error: function(req, resp) {
-				app.pushMessageAndNavigate("error", "{{generic.js.notfound}}".format("user"));
-			}
+			success: function(languages) { self.onLangFetchSuccess(languages); },
+			error: function(req, resp) { self.onLangFetchError(); }
 		});
+	},
+	onLangFetchSuccess: function(languages) {
+		if(languages.error) return this.onLangFetchError(languages.error);
+		_.each(languages.models, function(language) {
+			var languageSelectItemView = new LanguageSelectItemView();
+			languageSelectItemView.render({language: language, currLang: this.user ? this.user.get('language') : ''});
+			$('select[name=language]').append(languageSelectItemView.el);
+		});
+	},
+	onLangFetchError: function(message) {
+		if(!message) message = "{{generic.js.notfound}}".format("{{generic.js.languagelist}}");
+		app.pushMessageAndNavigate("error", message);
 	}
 });
 
@@ -346,17 +344,21 @@ window.UserView = Backbone.View.extend({
 		if(options.id) {
 			self.user = new User({id: options.id});
 			self.user.fetch({
-				success: function (user) {
-					$(self.el).empty();
-					$(self.el).html(self.template({user: user}));
-				},
-				error: function () {
-					app.pushMessageAndNavigate("error", "{{generic.js.notfound}}".format("user"));
-				}
+				success: function (user) { self.onFetchSuccess(user); },
+				error: function () { self.onFetchError(); }
 			});
 		} else {
-			app.pushMessageAndNavigate("error", "{{generic.js.notfound}}".format("user"));
+			this.onFetchError();
 		}
+	},
+	onFetchSuccess: function(user) {
+		if(user.error) this.onFetchError(user.error);
+		$(this.el).empty();
+		$(this.el).html(this.template({user: user}));
+	},
+	onFetchError: function(message) {
+		if(!message) message = "{{generic.js.notfound}}".format("user");
+		app.pushMessageAndNavigate("error", message);
 	}
 });
 
@@ -371,20 +373,22 @@ window.UserActivateView = Backbone.View.extend({
 		if(options.id) {
 			$.ajax({url: '/activationCode/' + options.code,
 				type:'PUT',
-				success:function (data, textStatus, request) {
-					user = eval(data);
-					if(!user)
-						app.pushMessageAndNavigate("error", "{{generic.js.error}}".format("{{user.js.activating}}", "{{generic.js.theuser}}"), "");
-					else
-						app.pushMessageAndNavigate("message", "{{user.js.accountactivated}}".format(user.username), "");
+				success:function (data) {
 				},
-				error: function (request, textStatus, error) {
-					app.pushMessageAndNavigate("error", "{{generic.js.error}}".format("{{user.js.activating}}", "{{generic.js.theuser}}"), "");
-				}
+				error: function (req, resp) { this.onActivationError(); }
 			});
 		} else {
-			app.pushMessageAndNavigate("error", "{{generic.js.notfound}}".format("{{generic.js.theuser}}"), "");
+			this.onActivationError();
 		}
+	},
+	onActivationSuccess: function(data) {
+		response = eval(data);
+		if(!response.response || response.error) return this.onActivationError(response.error);
+		app.pushMessageAndNavigate("message", "{{user.js.accountactivated}}".format(user.username), "");
+	},
+	onActivationError: function(message) {
+		if(!message) message = "{{generic.js.error}}".format("{{user.js.activating}}", "{{generic.js.theuser}}");
+		app.pushMessageAndNavigate("error", message, "");
 	}
 });
 
@@ -434,18 +438,20 @@ window.ForgotView = Backbone.View.extend({
 			    data: JSON.stringify(self.userj),
 			    contentType: "application/json; charset=utf-8",
 			    dataType: "json",
-				success:function (data) {
-					app.pushMessageAndNavigate("message", "{{user.js.forgotmailsent}}", "");
-				},
-				error: function (req, resp) {
-					if(resp.status == 500) {
-						app.pushMessageAndNavigate("error", "{{generic.js.error}}".format("{{generic.js.resetting}}", "{{generic.js.theuser}}"));
-					} else if(resp.status == 200) {
-						app.pushMessageAndNavigate("message", "{{user.js.forgotmailsent}}", "");
-					}
-				}
+				success:function (data) { self.onResetSuccess(data); },
+				error: function (req, resp) { self.onResetError(); }
 			});
 		}
+	},
+	onResetSuccess: function(data) {
+		response = eval(data);
+		if(response.error || response.errorMap) return this.onResetError(response.error, response.errorMap);
+		app.pushMessageAndNavigate("message", "{{user.js.forgotmailsent}}", "");
+	},
+	onResetError: function(message, errorMap) {
+		if(!message) message = "{{generic.js.error}}".format("{{generic.js.resetting}}", "{{generic.js.theuser}}");
+		app.pushMessageAndNavigate("error", message);
+		//errorMapToMessages(errorMap);//TODO
 	}
 });
 
@@ -502,23 +508,19 @@ window.ResetView = Backbone.View.extend({
 			    data: JSON.stringify(self.userj),
 			    contentType: "application/json; charset=utf-8",
 			    dataType: "json",
-				success:function (data) {
-					if(data == null)
-						app.pushMessageAndNavigate("error", "{{user.js.resetko}}", "");
-					else
-						app.pushMessageAndNavigate("message", "{{user.js.resetok}}", "");
-				},
-				error: function (req, resp) {
-					if(resp.status == 500) {
-						app.pushMessageAndNavigate("error", "{{generic.js.error}}".format("{{generic.js.resetting}}", "{{generic.js.theuser}}"));
-					} else if(resp.status == 200) {
-						if(data == null)
-							app.pushMessageAndNavigate("error", "{{user.js.resetko}}", "");
-						else
-							app.pushMessageAndNavigate("message", "{{user.js.resetok}}", "");
-					}
-				}
+				success:function (data) { self.onResetSuccess(data); },
+				error: function (req, resp) { self.onResetError(); }
 			});
 		}
+	},
+	onResetSuccess: function(data) {
+		response = eval(data);
+		if(!response.response || response.error || response.errorMap) return this.onResetError(response.error, response.errorMap);
+		app.pushMessageAndNavigate("message", "{{user.js.resetok}}", "");
+	},
+	onResetError: function(message, errorMap) {
+		if(!message) message = "{{user.js.resetko}}";
+		app.pushMessageAndNavigate("error", message, "");
+		//errorMapToMessages(errorMap);//TODO
 	}
 });

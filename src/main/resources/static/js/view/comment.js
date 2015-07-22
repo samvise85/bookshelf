@@ -40,26 +40,23 @@ window.CommentListItemView = Backbone.View.extend({
     deleteComment: function(callback) {
     	var self = this;
     	this.options.comment.destroy({
-    		success: function() {
-    			$(self.el).remove();
-    			if(callback) callback();
-    		},
-    		error: function(req, resp) {
-				if(resp.status == 200) {
-	    			$(self.el).remove();
-				} else {
-					app.pushMessageAndNavigate("error", "{{generic.js.error}}".format("{{generis.js.deleting}}", "{{generic.js.thecomment}}"));
-				}
-				if(callback) callback();
-    		}
+    		success: function(response) { self.onDeleteSuccess(response, callback); },
+    		error: function(req, resp) { self.onDeleteError(null, callback); }
     	});
+    },
+    onDeleteSuccess: function(response, callback) {
+    	if(response.error) return this.onDeleteError(response.error);
+		$(this.el).remove();
+		if(callback) callback();
+    },
+    onDeleteError: function(message, callback) {
+    	if(!message) message = "{{generic.js.error}}".format("{{generis.js.deleting}}", "{{generic.js.thecomment}}");
+		app.pushMessageAndNavigate("error", message);
+		if(callback) callback();
     }
 });
 
 window.CommentListView = Backbone.View.extend({
-	lastOptions : null,
-	reload : false,
-	clearMessages : true,
 	page: 1,
 	stopScroll: false,
 	itemViews: {},
@@ -70,13 +67,10 @@ window.CommentListView = Backbone.View.extend({
 			self.listItemViewReady = true;
 		});
 	},
-	newOptions: function(options) {
-		return !arraysEqual(this.lastOptions, options);
-	},
 	render: function (options) {
 		this.lastOptions = options;
 		$(this.el).empty();
-		$(this.el).html(this.template({view: this}));
+		$(this.el).html(this.template());
 		this.append(options);
 		if(app.getUser()) {
 			var self = this;
@@ -99,23 +93,27 @@ window.CommentListView = Backbone.View.extend({
 			var self = this;
 			var comments = new Comments({stream: options.stream, page: this.page});
 			comments.fetch({
-				success: function(comments) {
-					if(comments.models.length == 0) self.stopScroll = true;
-					_.each(comments.models, function (comment) {
-						var itemView = new CommentListItemView({comment: comment, parentViewName: options.parentViewName});
-						self.itemViews[comment.id] = itemView;
-						$('table tbody', self.el).append(itemView.render().el);
-					}, self);
-					return self;
-				},
-				error: function () {
-					$(self.el).empty();
-					$(self.el).html(self.template());
-					return self;
-				}
+				success: function(comments) { return self.onFetchSuccess(comments); },
+				error: function () { self.onFetchError(); }
 			});
 			this.page++;
 		}
+	},
+	onFetchSuccess: function(comments) {
+		if(comments.error) return this.onFetchError(comments.error);
+		var self = this;
+		if(comments.models.length == 0) self.stopScroll = true;
+		_.each(comments.models, function (comment) {
+			var itemView = new CommentListItemView({comment: comment, parentViewName: this.lastOptions.parentViewName});
+			self.itemViews[comment.id] = itemView;
+			$('table tbody', self.el).append(itemView.render().el);
+		}, self);
+		return self;
+	},
+	onFetchError: function(message) {
+		$(self.el).empty();
+		$(self.el).html(self.template());
+		return self;
 	},
 	toggleEdit: function (options) {
 		alert('CommentListView::toggleEdit(' + options + ')');
@@ -127,53 +125,52 @@ window.CommentListView = Backbone.View.extend({
 });
 
 window.CommentEditView = Backbone.View.extend({
-	lastOptions : null,
-	reload : false,
-	clearMessages : true,
-	newOptions: function(options) {
-		return !arraysEqual(this.lastOptions, options);
-	},
 	events: {
 		'submit .edit-comment-form': 'saveComment'
 	},
 	saveComment: function (ev) {
 		var commentDetails = $(ev.currentTarget).serializeObject();
 		var comment = new Comment({stream:commentDetails.parentStream});
+		var self = this;
 		comment.save(commentDetails, {
-			success: function (comment) {
-				if(lastOptions && lastOptions.parentView) {
-					lastOptions.parentView.toggleEdit(comment);
-				} else {
-					app.rerenderView();
-				}
-			},
-			error: function (req, resp) {
-				if(resp.status != 403) {
-					app.rerenderView();
-				}
-			}
+			success: function (comment) { self.onSaveSuccess(comment); },
+			error: function (req, resp) { self.onSaveError(); }
 		});
 		return false;
 	},
+	onSaveSuccess: function(comment) {
+		if(comment.error) return this.onSaveError(comment.error);
+		if(this.lastOptions && this.lastOptions.parentView)
+			this.lastOptions.parentView.toggleEdit(comment);
+		else
+			app.rerenderView();
+	},
+	onSaveError: function(message) {
+		if(!message) message = "{{generic.js.error}}".format("{{generic.js.saving}}", "{{generic.js.thecomment}}");
+		app.pushMessageAndNavigate("error", message);
+	},
 	render: function (options) {
-		lastOptions = options;
+		this.lastOptions = options;
 		var self = this;
 		if(options.id) {
 			self.comment = new Comment(options);
 			self.comment.fetch({
-				success: function (comment) {
-					$(self.el).empty();
-					$(self.el).html(self.template({comment: comment, stream: options.stream}));
-					return self;
-				},
-				error: function () {
-					app.pushMessageAndNavigate("error", "{{generic.js.notfound}}".format("{{generic.js.thecomment}}"));
-				}
+				success: function (comment) { return self.onFetchSuccess(comment); },
+				error: function () { self.onFetchError(); }
 			});
 		} else {
-			$(self.el).empty();
-			$(self.el).html(self.template({stream: options.stream, comment: null}));
-			return self;
+			this.onFetchSuccess();
 		}
+		return this;
+	},
+	onFetchSuccess: function(comment) {
+		if(comment && comment.error) return this.onFetchError(comment.error);
+		$(this.el).empty();
+		$(this.el).html(this.template({comment: comment, stream: this.lastOptions.stream}));
+		return self;
+	},
+	onFetchError: function(message) {
+		if(!message) message = "{{generic.js.notfound}}".format("{{generic.js.thecomment}}");
+		app.pushMessageAndNavigate("error", message);
 	}
 });

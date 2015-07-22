@@ -15,34 +15,53 @@ window.AdminRouter = Backbone.Router.extend({
     },
     init: function () {
 		var self = this;
-		//load user
 		if($.cookie("bookshelf-username")) {
-			try {
-				$.ajax({url: '/login',
-					type:'GET',
-					success:function (data, textStatus, request) {
-						self.user = eval(data);
-						self.initView();
-					},
-					error: function (request, textStatus, error) {
-						if($.cookie("bookshelf-username")) {
-							$.deleteCookie("bookshelf-username");
-							$.deleteCookie("bookshelf-token");
-							self.initView();
-							self.messageView.errors.push("Username or password are not correct");
-							self.messageView.rerender();
-						}
-					}
-				});
-			} catch(error) {
-				console.log(error);
-			}
+			$.ajax({url: '/login',
+				type:'GET',
+				success:function (data) { self.onLoginSuccess(data); },
+				error: function () { self.onLoginError("{{user.js.loginerr}}"); }
+			});
 		} else {
+			self.initHistory();
 			self.initView();
 		}
 	},
-	initView: function () {
+	onLoginSuccess: function(data) {
+		data = eval(data);
+		if(data.errors) {
+			this.onLoginError("{{user.js.loginerr}}");
+		} else if(data.response) {
+			this.user = data.response;
+			if(!this.user) {
+				this.onLoginError("{{user.js.loginerr}} {{user.js.activateaccount}}");
+			} else {
+				this.initHistory();
+				this.initView();
+			}
+		}
+	},
+	onLoginError: function(message) {
+		if($.cookie("bookshelf-username")) {
+			$.deleteCookie("bookshelf-username");
+			$.deleteCookie("bookshelf-token");
+		}
+		this.initHistory();
+		this.initView(null, null, message);
+	},
+	initHistory: function () {
 		this.routesHit = 0;
+        Backbone.history.start();
+		Backbone.history.on('route', function(router, method) {
+			this.routesHit++;
+			app.history.push({
+				method : method,
+				fragment : Backbone.history.fragment
+			});
+//			console.log(app.history); //TODO create and save route
+		}, this);
+	},
+	initView: function (message, warning, error) {
+//		console.log("init");
 		var self = this;
 		viewLoader.load("HeaderView", function() {
 			self.headerView = new HeaderView();
@@ -50,26 +69,16 @@ window.AdminRouter = Backbone.Router.extend({
 		});
 		viewLoader.load("MessageView", function() {
 	        self.messageView = new MessageView();
+	        if(message) self.messageView.messages.push(message);
+	        if(warning) self.messageView.warnings.push(warning);
+	        if(error) self.messageView.errors.push(error);
+//	        console.log("init Rendering messages");
 	        $('#messages').html(self.messageView.render().el);
 		});
-        
-		Backbone.history.start();
-		Backbone.history.on('route', function(router, method) {
-			this.routesHit++;
-			app.history.push({
-				method : method,
-				fragment : Backbone.history.fragment
-			});
-//			console.log(app.history);
-		}, this);
     },
 	clear: function () {
-		_.each(this.savedViews, function (savedViewName) {
-			eval('app.' + savedViewName + ' = null');
-		});
-		this.savedViews = {};
 		this.currentView = null;
-		this.user = null;
+		this.initView();
 	},
 	back: function() {
 		if(this.routesHit > 1) {
@@ -89,59 +98,55 @@ window.AdminRouter = Backbone.Router.extend({
 		return this.getUser() && this.getUser().admin === true;
 	},
 	
-	renderView : function(savedViewName, View, headerOptions, viewOptions) {
-		if(headerOptions && headerOptions.selection)
+	renderView : function(viewName, View, headerOptions, viewOptions) {
+		if(headerOptions)
 			this.headerSelection = headerOptions.selection;
-		this.savedViews[savedViewName] = savedViewName;
-		this.currentViewName = savedViewName;
+		
+		//clear current view
+		if(this.currentView) this.currentView.close();
+		this.currentViewName = viewName;
 		this.currentViewClass = View;
 		
-		this.renderCurrentView(headerOptions, viewOptions);
-	},
-	rerenderView : function() {
-		if(this.currentViewName && this.currentViewClass) {
-			var currentView = eval("this." + this.currentViewName);
-			
-			var headerOptions = {rerender: true, selection: this.headerView.selection};
-			currentView.reload = true;
-			this.renderCurrentView(headerOptions, currentView.lastOptions);
-		}
-	},
-	renderCurrentView : function(headerOptions, viewOptions) {
-		var currentView = eval("this." + this.currentViewName);
-		
-		var clearMessages = !currentView || !(currentView.clearMessages === false); //if clear messages true or undefined
-		
 		//renders the view
-		if (!currentView || currentView.reload || !currentView.newOptions || currentView.newOptions(viewOptions)) {
-			var self = this;
-			var className = this.currentViewName.charAt(0).toUpperCase() + this.currentViewName.slice(1);
-			viewLoader.load(className, function() {
-				currentView = new self.currentViewClass();
-				eval("self." + self.currentViewName + " = currentView;");
-				currentView.render(viewOptions);
-				$("#content").html(currentView.el);
-			});
-		} else {
-			currentView.delegateEvents(); // delegate events when the view is recycled
-			$("#content").html(currentView.el);
-		}
+		var self = this;
+		var className = viewName.charAt(0).toUpperCase() + viewName.slice(1);
+		viewLoader.load(className, function() {
+			self.currentView = new self.currentViewClass();
+			self.currentView.render(viewOptions);
+			$("#content").html(self.currentView.el);
+			self.currentView.delegateEvents();
+		});
 		
 		//selects header
 		if(this.headerView) {
-			if(headerOptions && headerOptions.rerender)
+			if(!headerOptions || headerOptions.rerender !== false)
 				$("#header").html(this.headerView.render().el);
-			if(this.headerSelection)
-				this.headerView.select(this.headerSelection);
 		}
-		//renders the messages
-		if(this.messageView) {
-			if(clearMessages)
-				this.messageView.clear();
+		if(this.clearMessages && this.messageView) {
+			this.messageView.clear();
 			$('#messages').html(this.messageView.render().el);
+		} else {
+			this.clearMessages = true;
 		}
 	},
-	
+	rerenderView : function() {
+		if(this.currentView) {
+			var headerOptions = {rerender: true};
+			this.renderView(this.currentViewName, this.currentViewClass, headerOptions, this.currentView.lastOptions);
+		}
+	},
+	pushMessageAndNavigate: function(messageType, message, route) {
+		if(this.messageView) {
+			eval("this.messageView." + messageType + "s.push(message);");
+			$('#messages').html(this.messageView.render().el);
+		} 
+		if(route != null) {
+			this.clearMessages = false;
+			this.navigate(route, {trigger:true});
+		}
+	},
+
+	//route callbacks (or simply page rendering functions)
     admin: function () {
     	var options = {};
 		this.renderView('adminView', AdminView, 

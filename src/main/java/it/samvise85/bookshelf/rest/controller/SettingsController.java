@@ -2,13 +2,13 @@ package it.samvise85.bookshelf.rest.controller;
 
 import it.samvise85.bookshelf.manager.SettingManager;
 import it.samvise85.bookshelf.model.Setting;
+import it.samvise85.bookshelf.model.dto.ResponseDto;
 import it.samvise85.bookshelf.persist.PersistOptions;
 import it.samvise85.bookshelf.persist.clauses.Order;
 import it.samvise85.bookshelf.persist.clauses.OrderClause;
 import it.samvise85.bookshelf.persist.clauses.PaginationClause;
 import it.samvise85.bookshelf.persist.clauses.ProjectionClause;
 import it.samvise85.bookshelf.utils.BookshelfConstants;
-import it.samvise85.bookshelf.utils.ControllerUtils;
 import it.samvise85.bookshelf.web.security.BookshelfRole;
 
 import java.util.Collection;
@@ -37,14 +37,18 @@ public class SettingsController extends AbstractController {
 
 	@RequestMapping(value="/settings")
 	@Secured(BookshelfRole.ADMIN)
-	public Collection<Setting> getSettingsList(HttpServletRequest request,
+	public ResponseDto getSettingsList(HttpServletRequest request,
 			@RequestParam(value="page", required=false) Integer page,
     		@RequestParam(value="num", required=false) Integer num) {
-		log.info(ControllerUtils.getMethodName());
 		Map<String, String[]> queryParams = new HashMap<String, String[]>(request.getParameterMap());
 		queryParams.remove("page");
 		queryParams.remove("num");
 		
+		String methodName = getMethodName();
+		return executeMethod(request, methodName, new Class<?>[] { Map.class, String.class, String.class }, new Object[] { queryParams, page, num });
+	}
+	
+	protected Collection<Setting> getSettingsList(Map<String, String[]> queryParams, Integer page, Integer num) {
 		return settingManager.getList(new PersistOptions(
         		ProjectionClause.NO_PROJECTION,
         		getSelectionFromParameterMap(queryParams),
@@ -54,8 +58,12 @@ public class SettingsController extends AbstractController {
 
 	@RequestMapping(value="/settings/{id}", method=RequestMethod.PUT)
 	@Secured(BookshelfRole.ADMIN)
-    public Setting updateLabel(@PathVariable String id, @RequestBody Setting setting) {
-		log.info(ControllerUtils.getMethodName() + ": id = " + id);
+    public ResponseDto updateLabel(HttpServletRequest request,@PathVariable String id, @RequestBody Setting setting) {
+		String methodName = getMethodName();
+		return executeMethod(request, methodName, new Class<?>[] { String.class, Setting.class }, new Object[] { id, setting });
+	}
+	
+    protected Setting updateLabel(String id, Setting setting) {
 		return settingManager.saveSetting(setting.getId(), setting.getValue());
     }
 

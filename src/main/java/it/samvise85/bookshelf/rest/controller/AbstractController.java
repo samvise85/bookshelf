@@ -1,9 +1,12 @@
 package it.samvise85.bookshelf.rest.controller;
 
 import it.samvise85.bookshelf.mail.BookshelfMailSender;
+import it.samvise85.bookshelf.model.dto.ResponseDto;
 import it.samvise85.bookshelf.persist.clauses.SelectionClause;
 import it.samvise85.bookshelf.persist.clauses.SelectionOperation;
 
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -22,6 +25,52 @@ public abstract class AbstractController {
 
 	public AbstractController() {
 		super();
+	}
+	
+	protected String getMethodName() {
+		final StackTraceElement[] ste = Thread.currentThread().getStackTrace();
+		if(ste.length >= 3)
+			return ste[2].getMethodName();
+		return null;
+	}
+	
+	protected ResponseDto executeMethod (HttpServletRequest request, String methodName) {
+		return executeMethod(request, methodName, null, null);
+	}
+	
+	protected ResponseDto executeMethod (HttpServletRequest request, String methodName, Class<?>[] parameterTypes, Object[] args) {
+		initExecuteMethod(request, methodName, args);
+        try {
+        	return invokeMethod(methodName, parameterTypes, args);
+        } catch(Throwable e) {
+        	return manageError(e);
+        }
+	}
+
+	private void initExecuteMethod(HttpServletRequest request, String methodName, Object[] args) {
+		logMethodStart(methodName, args);
+		mailSender.setRequestApp(getRequestApp(request));
+	}
+
+	protected ResponseDto invokeMethod(String methodName, Class<?>[] parameterTypes, Object[] args) throws NoSuchMethodException,
+			IllegalAccessException, InvocationTargetException {
+		Method method = null;
+		if(parameterTypes != null)
+			method = this.getClass().getDeclaredMethod(methodName, parameterTypes);
+		else
+			method = this.getClass().getDeclaredMethod(methodName);
+		method.setAccessible(true);
+		
+		ResponseDto res = new ResponseDto();
+		res.setResponse(method.invoke(this, args));
+		return res;
+	}
+
+	protected ResponseDto manageError(Throwable e) {
+		getLogger().error(e);
+		ResponseDto res = new ResponseDto();
+		res.setError(e.getCause().getMessage());
+		return res;
 	}
 
 	protected void logMethodStart(String methodName, Object[] args) {

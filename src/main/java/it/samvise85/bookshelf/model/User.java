@@ -27,7 +27,7 @@ public class User extends EditableImpl implements StringIdentifiable, Editable, 
 	@Transient
 	public static final ProjectionClause NO_PROTECTION = ProjectionClause.NO_PROJECTION;
 	@Transient
-	public static final ProjectionClause AUTHENTICATION_PROTECTION = NO_PROTECTION;
+	public static final ProjectionClause AUTHENTICATION_PROTECTION = ProjectionClause.createInclusionClause("id", "username", "password", "activationCode", "resetCode");
 	
 	//internal attributes
 	@Id

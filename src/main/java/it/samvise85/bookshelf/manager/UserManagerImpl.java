@@ -5,12 +5,15 @@ import it.samvise85.bookshelf.model.UserProfile;
 import it.samvise85.bookshelf.persist.AbstractPersistenceUnit;
 import it.samvise85.bookshelf.persist.PersistOptions;
 import it.samvise85.bookshelf.persist.clauses.ProjectionClause;
+import it.samvise85.bookshelf.persist.clauses.SelectionClause;
+import it.samvise85.bookshelf.persist.clauses.SelectionOperation;
 import it.samvise85.bookshelf.persist.repository.UserProfileRepository;
 import it.samvise85.bookshelf.persist.repository.UserRepository;
 import it.samvise85.bookshelf.utils.SHA1Digester;
 
 import java.io.Serializable;
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
@@ -83,17 +86,14 @@ public final class UserManagerImpl extends AbstractPersistenceUnit<User> impleme
 	public User get(Serializable id, ProjectionClause projection) {
 		if(projection == null) 
 			projection = User.TOTAL_PROTECTION;
-		return super.get(id, projection);
+		return getOne(new PersistOptions(projection, Collections.singletonList(new SelectionClause("id", SelectionOperation.EQUALS, id)), null));
 	}
 
 	@Override
 	public User getByUsername(String username, ProjectionClause projection) {
 		if(projection == null) 
 			projection = User.TOTAL_PROTECTION;
-		User user = repository.findOneByUsername(username);
-		if(user != null)
-			user.setProjection(projection);
-		return user;
+		return repository.searchOne(new PersistOptions(projection, Collections.singletonList(new SelectionClause("username", SelectionOperation.EQUALS, username)), null));
 	}
 
 	@Override
@@ -102,7 +102,7 @@ public final class UserManagerImpl extends AbstractPersistenceUnit<User> impleme
 			options = new PersistOptions();
 		if(options.getProjection() == null)
 			options.setProjection(User.TOTAL_PROTECTION);
-		return super.getList(options);
+		return repository.search(options);
 	}
 
 	@Override
@@ -161,8 +161,7 @@ public final class UserManagerImpl extends AbstractPersistenceUnit<User> impleme
 
 	@Override
 	public User login(String username) {
-		String id = username.replaceAll("\\W+", "_");
-		User user = get(id, User.NO_PROTECTION);
+		User user = getByUsername(username, User.NO_PROTECTION);
 		if(user != null && user.getActivationCode() == null)
 			return user.setProjection(User.PASSWORD_PROTECTION);
 		return null;
@@ -199,6 +198,11 @@ public final class UserManagerImpl extends AbstractPersistenceUnit<User> impleme
 		UserProfile profile = profileRepository.findOneByUserAndProfile(up.getUser(), up.getProfile());
 		if(profile != null) return profile;
 		return profileRepository.save(up);
+	}
+
+	@Override
+	public User getOne(PersistOptions persistOptions) {
+		return repository.searchOne(persistOptions);
 	}
 
 }

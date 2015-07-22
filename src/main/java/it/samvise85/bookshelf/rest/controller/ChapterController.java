@@ -5,6 +5,7 @@ import it.samvise85.bookshelf.manager.ChapterManager;
 import it.samvise85.bookshelf.manager.RestErrorManager;
 import it.samvise85.bookshelf.manager.RestRequestManager;
 import it.samvise85.bookshelf.model.Chapter;
+import it.samvise85.bookshelf.model.dto.ResponseDto;
 import it.samvise85.bookshelf.persist.PersistOptions;
 import it.samvise85.bookshelf.persist.clauses.Order;
 import it.samvise85.bookshelf.persist.clauses.OrderClause;
@@ -13,7 +14,6 @@ import it.samvise85.bookshelf.persist.clauses.ProjectionClause;
 import it.samvise85.bookshelf.persist.clauses.SelectionClause;
 import it.samvise85.bookshelf.persist.clauses.SelectionOperation;
 import it.samvise85.bookshelf.utils.BookshelfConstants;
-import it.samvise85.bookshelf.utils.ControllerUtils;
 import it.samvise85.bookshelf.web.security.BookshelfRole;
 
 import java.util.ArrayList;
@@ -49,11 +49,11 @@ public class ChapterController extends AnalyticsAwareController {
 	private RestErrorManager errorManager;
 	
 	@RequestMapping(value="/books/{book}/chapters")
-    public Collection<Chapter> getChapterList(HttpServletRequest request, 
+    public ResponseDto getChapterList(HttpServletRequest request, 
     		@PathVariable String book,
     		@RequestParam(value="page", required=false) Integer page,
     		@RequestParam(value="num", required=false) Integer num) {
-		String methodName = ControllerUtils.getMethodName();
+		String methodName = getMethodName();
 		return executeMethod(request, methodName, new Class<?>[] { String.class, Integer.class, Integer.class }, new Object[] { book, page, num });
 	}
 	
@@ -66,8 +66,8 @@ public class ChapterController extends AnalyticsAwareController {
     }
 	
 	@RequestMapping("/books/{book}/chapters/{id}")
-    public Chapter getChapter(HttpServletRequest request, @PathVariable String id) {
-		String methodName = ControllerUtils.getMethodName();
+    public ResponseDto getChapter(HttpServletRequest request, @PathVariable String id) {
+		String methodName = getMethodName();
 		return executeMethod(request, methodName, new Class<?>[] { String.class }, new Object[] { id });
 	}
 	
@@ -76,8 +76,8 @@ public class ChapterController extends AnalyticsAwareController {
     }
 	
 	@RequestMapping(value="/books/{book}/chapters", params={"position"})
-    public Chapter getChapterByPosition(HttpServletRequest request, @PathVariable String book, @RequestParam(value="position", required=true) Integer position) {
-		String methodName = ControllerUtils.getMethodName();
+    public ResponseDto getChapterByPosition(HttpServletRequest request, @PathVariable String book, @RequestParam(value="position", required=true) Integer position) {
+		String methodName = getMethodName();
 		return executeMethod(request, methodName, new Class<?>[] { String.class, Integer.class }, new Object[] { book, position });
 	}
 	
@@ -87,11 +87,11 @@ public class ChapterController extends AnalyticsAwareController {
     }
 	
 	@RequestMapping(value="/books/{book}/chapters", params={"title"})
-    public Chapter getChapterByTitle(HttpServletRequest request,
+    public ResponseDto getChapterByTitle(HttpServletRequest request,
     		@PathVariable String book,
     		@RequestParam(value="title", required=true) String title,
     		@RequestParam(value="pos", required=false) Integer position) {
-		String methodName = ControllerUtils.getMethodName();
+		String methodName = getMethodName();
 		return executeMethod(request, methodName, new Class<?>[] { String.class, String.class, Integer.class }, new Object[] { book, title, position });
 	}
 	
@@ -112,8 +112,8 @@ public class ChapterController extends AnalyticsAwareController {
 
 	@RequestMapping(value="/books/{book}/chapters", method=RequestMethod.POST)
 	@Secured({BookshelfRole.ADMIN, BookshelfRole.AUTHOR})
-    public Chapter createChapter(HttpServletRequest request, @RequestBody Chapter chapter) {
-		String methodName = ControllerUtils.getMethodName();
+    public ResponseDto createChapter(HttpServletRequest request, @RequestBody Chapter chapter) {
+		String methodName = getMethodName();
 		return executeMethod(request, methodName, new Class<?>[] { Chapter.class }, new Object[] { chapter }, chapter);
 	}
 	
@@ -125,8 +125,8 @@ public class ChapterController extends AnalyticsAwareController {
 
 	@RequestMapping(value="/books/{book}/chapters/{id}", method=RequestMethod.PUT)
 	@Secured(BookshelfRole.ADMIN)
-    public Chapter updateChapter(HttpServletRequest request, @PathVariable String id, @RequestBody Chapter chapter) {
-		String methodName = ControllerUtils.getMethodName();
+    public ResponseDto updateChapter(HttpServletRequest request, @PathVariable String id, @RequestBody Chapter chapter) {
+		String methodName = getMethodName();
 		return executeMethod(request, methodName, new Class<?>[] { String.class, Chapter.class }, new Object[] { id, chapter }, chapter);
 	}
 	
@@ -137,8 +137,8 @@ public class ChapterController extends AnalyticsAwareController {
 
 	@RequestMapping(value="/books/{book}/chapters/{id}", method=RequestMethod.DELETE)
 	@Secured(BookshelfRole.ADMIN)
-    public Chapter deleteChapter(HttpServletRequest request, @PathVariable String id) {
-		String methodName = ControllerUtils.getMethodName();
+    public ResponseDto deleteChapter(HttpServletRequest request, @PathVariable String id) {
+		String methodName = getMethodName();
 		return executeMethod(request, methodName, new Class<?>[] { String.class }, new Object[] { id });
 	}
 	

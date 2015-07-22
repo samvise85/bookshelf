@@ -1,20 +1,34 @@
 window.User = Backbone.Model.extend({
-  urlRoot: '/users'
+  urlRoot: '/users',
+  parse: function(data) {
+	  this.error = data.error;
+	  return data.response;
+  }
 });
 window.Users = Backbone.Collection.extend({
-  model: User,
   url: '/users',
   initialize: function(options) {
 	  this.url = '/users' + (options.page ? '?page=' + options.page : '');
+  },
+  parse: function(data) {
+	  this.error = data.error;
+	  return data.response;
   }
 });
 
 window.Language = Backbone.Model.extend({
   urlRoot: '/languages',
+  parse: function(data) {
+	  this.error = data.error;
+	  return data.response;
+  }
 });
 window.Languages = Backbone.Collection.extend({
   url : '/languages',
-  model: Language
+  parse: function(data) {
+	  this.error = data.error;
+	  return data.response;
+  }
 });
 
 window.Messages = function Messages() {

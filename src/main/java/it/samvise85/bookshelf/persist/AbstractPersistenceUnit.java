@@ -6,6 +6,7 @@ import it.samvise85.bookshelf.persist.clauses.Order;
 import it.samvise85.bookshelf.persist.clauses.OrderClause;
 import it.samvise85.bookshelf.persist.clauses.PaginationClause;
 import it.samvise85.bookshelf.persist.clauses.ProjectionClause;
+import it.samvise85.bookshelf.persist.repository.SearchRepository;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -20,7 +21,6 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
-import org.springframework.data.repository.PagingAndSortingRepository;
 
 public abstract class AbstractPersistenceUnit<T extends GenericIdentifiable<?>> implements PersistenceUnit<T> {
 	protected Class<T> registeredClass;
@@ -76,7 +76,7 @@ public abstract class AbstractPersistenceUnit<T extends GenericIdentifiable<?>> 
 		return null;
 	}
 
-	public abstract <S extends Serializable> PagingAndSortingRepository<T, S> getRepository();
+	public abstract <S extends Serializable> SearchRepository<T, S> getRepository();
 	
 	protected List<T> convertToList(Iterable<T> iterable, ProjectionClause projectionClause) {
 		List<T> res = new ArrayList<T>();

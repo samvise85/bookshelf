@@ -1,4 +1,4 @@
-package it.samvise85.bookshelf.web.config;
+package it.samvise85.bookshelf.utils;
 
 
 public enum AppVersion {

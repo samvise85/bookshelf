@@ -64,66 +64,65 @@ window.BookEditView = Backbone.View.extend({
 	},
 	saveBook: function (ev) {
 		this.validate();
-//		console.log("messages empty: " + this.messages.isEmpty());
 		if(this.messages.isEmpty()) {
 			var bookDetails = $(ev.currentTarget).serializeObject();
 			var book = new Book();
+			var self = this;
 			book.save(bookDetails, {
-				success: function (book) {
-					if(app.bookListView) app.bookListView.reload = true;
-					if(app.bookReadView) app.bookReadView.reload = true;
-					app.navigate('books', {trigger:true});
-				},
-				error: function () {
-					if(resp.status == 200) {
-						if(app.bookListView) app.bookListView.clearMessages = false;
-						if(app.bookReadView) app.bookReadView.clearMessages = false;
-						app.navigate('books', {trigger:true});
-					} else {
-						app.pushMessageAndNavigate("error", "{{generic.js.error}}".format("{{generic.js.saving}}"));
-					}
-				}
+				success: function (book) { self.onSaveSuccess(book); },
+				error: function (req, resp) { self.onSaveError(); }
 			});
 		}
 		return false;
 	},
+	onSaveSuccess: function(book) {
+		if(book.error || book.errorMap) return this.onSaveError(book.error, book.errorMap);
+		app.navigate('books', {trigger:true});
+	},
+	onSaveError: function(message, errorMap) {
+		if(!message) message = "{{generic.js.error}}".format("{{generic.js.saving}}");
+		app.pushMessageAndNavigate("error", message);
+		//errorMapToMessages(errorMap);//TODO
+	},
 	deleteBook: function (callback) {
 		var self = this;
 		this.book.destroy({
-			success: function () {
-				if(app.bookListView) app.bookListView.reload = true;
-				app.navigate('books', {trigger:true});
-				if(callback) callback();
-			},
-			error: function (req, resp) {
-				if(resp.status == 200)
-					app.pushMessageAndNavigate("message", "{{book.js.deleted}}".format(self.book.id), "books");
-				else
-					app.pushMessageAndNavigate("error", "{{generic.js.error}}".format("{{generis.js.deleting}}", self.book.id));
-				if(callback) callback();
-			}
+			success: function (response ) { self.onDeleteSuccess(response, callback); },
+			error: function (req, resp) { self.onDeleteError(null, callback); }
 		});
 		return false;
+	},
+	onDeleteSuccess: function(response, callback) {
+		if(response.error) return this.onDeleteError(response.error, callback);
+		app.pushMessageAndNavigate("message", "{{book.js.deleted}}".format(htmlEncode(this.book.get('title'))), "books");
+		if(callback) callback();
+	},
+	onDeleteError: function(message, callback) {
+		if(!message) message = "{{generic.js.error}}".format("{{generis.js.deleting}}", htmlEncode(this.book.get('title')));
+		app.pushMessageAndNavigate("error", message);
+		if(callback) callback();
 	},
 	render: function (options) {
 		var self = this;
 		if(options.id) {
 			self.book = new Book({id: options.id});
 			self.book.fetch({
-				success: function (book) {
-					$(self.el).empty();
-					$(self.el).html(self.template({book: book}));
-					return self;
-				},
-				error: function () {
-					app.pushMessageAndNavigate("error", "{{generic.js.error}}".format("{{generic.js.loading}}", self.book.id));
-				}
+				success: function (book) { self.onFetchSuccess(book); },
+				error: function () { self.onFetchError(); }
 			});
 		} else {
-			$(self.el).empty();
-			$(self.el).html(self.template({book: null}));
-			return self;
+			return self.onFetchSuccess(null);
 		}
+	},
+	onFetchSuccess: function(book) {
+		if(book && book.error) return this.onFetchError(book.error);
+		$(this.el).empty();
+		$(this.el).html(this.template({book: book}));
+		return this;
+	}, 
+	onFetchError: function(message) {
+		if(!message) message = "{{generic.js.error}}".format("{{generic.js.loading}}", this.book.id);
+		app.pushMessageAndNavigate("error", message);
 	}
 });
 
@@ -144,19 +143,23 @@ window.BookReadView = Backbone.View.extend({
 		if(options.id) {
 			self.book = new Book({id: options.id});
 			self.book.fetch({
-				success: function (book) {  
-					$(self.el).empty();
-					$(self.el).html(self.template({book: book}));
-					self.loadChapters();
-					return self;  
-				},
-				error: function () {
-					app.pushMessageAndNavigate("error", "{{generic.js.notfound}}".format("{{generic.js.thebook}}"));
-				}
+				success: function (book) { self.onFetchSuccess(book); },
+				error: function () { self.onFetchError(); }
 			});
 		} else {
-			app.pushMessageAndNavigate("error", "{{generic.js.notfound}}".format("{{generic.js.thebook}}"));
+			self.onFetchError();
 		}
+	},
+	onFetchSuccess: function(book) {
+		if(book.error) return this.onFetchError(book.error);
+		$(this.el).empty();
+		$(this.el).html(this.template({book: book}));
+		this.loadChapters();
+		return this;
+	},
+	onFetchError: function(message) {
+		if(!message) message = "{{generic.js.notfound}}".format("{{generic.js.thebook}}");
+		app.pushMessageAndNavigate("error", message);
 	},
 	loadChapters: function () {
 		if(!this.chapterListView) {
@@ -164,7 +167,7 @@ window.BookReadView = Backbone.View.extend({
 			viewLoader.load("ChapterListView", function() {
 				self.chapterListView = new ChapterListView();
 				self.chapterListView.render({book: self.book.get('id'), parentElement: $('#chapters')});
-//				$('#chapters').html(self.chapterListView.el); //only for this time
+//				$('#chapters').html(self.chapterListView.el); //only for this time I give the control to the subview
 			});
 		} else {
 			this.chapterListView.append({book: this.book.get('id')});

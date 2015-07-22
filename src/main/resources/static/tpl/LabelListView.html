@@ -26,8 +26,7 @@
 <script>
 	$('.labels_table').scroll(function(e) {
 		if($('.labels_table').scrollTop() + $(".labels_table").height() >= $(".labels_table").prop('scrollHeight') - 50) {
-			if(app.labelListView && app.labelListView)
-				app.labelListView.append(app.labelListView.lastOptions);
+			app.currentView.append(app.currentView.lastOptions);
 		}
 	});
 </script>

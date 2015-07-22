@@ -4,9 +4,7 @@ import it.samvise85.bookshelf.model.UserProfile;
 
 import java.util.List;
 
-import org.springframework.data.repository.CrudRepository;
-
-public interface UserProfileRepository extends CrudRepository<UserProfile, Long>{
+public interface UserProfileRepository extends SearchRepository<UserProfile, Long>{
 
 	public List<UserProfile> findByUser(String user);
 

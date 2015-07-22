@@ -6,6 +6,7 @@ import it.samvise85.bookshelf.manager.CommentManager;
 import it.samvise85.bookshelf.manager.RestErrorManager;
 import it.samvise85.bookshelf.manager.RestRequestManager;
 import it.samvise85.bookshelf.model.Comment;
+import it.samvise85.bookshelf.model.dto.ResponseDto;
 import it.samvise85.bookshelf.persist.PersistOptions;
 import it.samvise85.bookshelf.persist.clauses.OrderClause;
 import it.samvise85.bookshelf.persist.clauses.PaginationClause;
@@ -13,7 +14,6 @@ import it.samvise85.bookshelf.persist.clauses.ProjectionClause;
 import it.samvise85.bookshelf.persist.clauses.SelectionClause;
 import it.samvise85.bookshelf.persist.clauses.SelectionOperation;
 import it.samvise85.bookshelf.utils.BookshelfConstants;
-import it.samvise85.bookshelf.utils.ControllerUtils;
 import it.samvise85.bookshelf.web.config.SpringSecurityConfig;
 import it.samvise85.bookshelf.web.security.BookshelfRole;
 
@@ -47,10 +47,10 @@ public class CommentController extends AnalyticsAwareController {
 	private RestErrorManager errorManager;
 
 	@RequestMapping(value="/streams/{stream}/comments")
-    public Collection<Comment> getCommentList(HttpServletRequest request, @PathVariable String stream,
+    public ResponseDto getCommentList(HttpServletRequest request, @PathVariable String stream,
     		@RequestParam(value="page", required=false) Integer page,
     		@RequestParam(value="num", required=false) Integer num) {
-		String methodName = ControllerUtils.getMethodName();
+		String methodName = getMethodName();
 		return executeMethod(request, methodName, new Class<?>[] { String.class, Integer.class, Integer.class }, new Object[] { stream, page, num });
 	}
 	
@@ -63,8 +63,8 @@ public class CommentController extends AnalyticsAwareController {
     }
 	
 	@RequestMapping("/streams/{stream}/comments/{id}")
-    public Comment getComment(HttpServletRequest request, @PathVariable String stream, @PathVariable String id) {
-		String methodName = ControllerUtils.getMethodName();
+    public ResponseDto getComment(HttpServletRequest request, @PathVariable String stream, @PathVariable String id) {
+		String methodName = getMethodName();
 		return executeMethod(request, methodName, new Class<?>[] { String.class, String.class }, new Object[] { stream, id });
 	}
 	
@@ -74,8 +74,8 @@ public class CommentController extends AnalyticsAwareController {
 	
 	@RequestMapping(value="/streams/{stream}/comments", method=RequestMethod.POST)
 	@Secured(BookshelfRole.ANYONE)
-    public Comment createComment(HttpServletRequest request, @PathVariable String stream, @RequestBody Comment comment) {
-		String methodName = ControllerUtils.getMethodName();
+    public ResponseDto createComment(HttpServletRequest request, @PathVariable String stream, @RequestBody Comment comment) {
+		String methodName = getMethodName();
 		return executeMethod(request, methodName, new Class<?>[] { String.class, Comment.class }, new Object[] { stream, comment }, comment);
 	}
 	
@@ -87,9 +87,9 @@ public class CommentController extends AnalyticsAwareController {
 
 	@RequestMapping(value="/streams/{stream}/comments/{id}", method=RequestMethod.PUT)
 	@Secured(BookshelfRole.ANYONE)
-    public Comment updateComment(HttpServletRequest request, @PathVariable String stream, @PathVariable String id, @RequestBody Comment comment, 
+    public ResponseDto updateComment(HttpServletRequest request, @PathVariable String stream, @PathVariable String id, @RequestBody Comment comment, 
     		@RequestHeader(value=SpringSecurityConfig.USERNAME_PARAM_NAME) String username) {
-		String methodName = ControllerUtils.getMethodName();
+		String methodName = getMethodName();
 		return executeMethod(request, methodName, new Class<?>[] { String.class, String.class, Comment.class, String.class }, new Object[] { stream, id, comment, username }, comment);
 	}
 	
@@ -102,9 +102,9 @@ public class CommentController extends AnalyticsAwareController {
 
 	@RequestMapping(value="/streams/{stream}/comments/{id}", method=RequestMethod.DELETE)
 	@Secured(BookshelfRole.ANYONE)
-    public Comment deleteComment(HttpServletRequest request, @PathVariable String stream, @PathVariable String id,
+    public ResponseDto deleteComment(HttpServletRequest request, @PathVariable String stream, @PathVariable String id,
     		@RequestHeader(value=SpringSecurityConfig.USERNAME_PARAM_NAME) String username) {
-		String methodName = ControllerUtils.getMethodName();
+		String methodName = getMethodName();
 		return executeMethod(request, methodName, new Class<?>[] { String.class, String.class, String.class }, new Object[] { stream, id, username });
 	}
 	

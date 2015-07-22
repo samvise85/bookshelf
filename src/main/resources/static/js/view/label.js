@@ -27,18 +27,19 @@ window.LanguageListView = Backbone.View.extend({
 		var self = this;
 		var languages = new Languages();
 		languages.fetch({
-			success: function(languages) {
-				_.each(languages.models, function (language) {
-					$('table tbody', self.el).append(new LanguageListItemView(language).render().el);
-				}, self);
-				return self;
-			},
-			error: function () {
-				$(self.el).empty();
-				$(self.el).html(self.template());
-				return self;
-			}
+			success: function(languages) { self.onFetchSuccess(languages); },
+			error: function () { self.onFetchError(); }
 		});
+	},
+	onFetchSuccess: function(languages) {
+		if(languages.error) return this.onFetchError(languages.error);
+		_.each(languages.models, function (language) {
+			$('table tbody', this.el).append(new LanguageListItemView(language).render().el);
+		}, this);
+		return this;
+	},
+	onFetchError: function(message) {
+		if(message) app.pushMessageAndNavigate("error", message);
 	}
 });
 
@@ -64,19 +65,17 @@ window.LanguageListItemView = Backbone.View.extend({
 		this.model.set('def', true);
 		var self = this;
 		self.model.save(null, {
-			success: function (lang) {
-				self.render(true);
-			},
-			error: function (req, resp) {
-				if(resp.status != 200) {
-					app.messageView.errors.push("An error occurred updating " + self.model.id);
-					app.rerenderMessages();
-					self.render();
-				} else {
-					self.render(true);
-				}
-			}
+			success: function (lang) { self.onSaveSuccess(lang); },
+			error: function (req, resp) { self.onSaveError(); }
 		});
+	},
+	onSaveSuccess: function(language) {
+		if(language.error) return this.onSaveError(language.error);
+		this.render(true);
+	},
+	onSaveError: function(message) {
+		if(!message) message = "{{general.js.general}}".format("{{general.js.saving}}", this.model.id);
+		app.pushMessageAndNavigate("error", message);
 	},
 	unsetOldDef: function() {
 		var oldDef = $(this.el).parent().find('tr[def=true]');
@@ -103,9 +102,6 @@ window.LabelListView = Backbone.View.extend({
 			self.listItemViewReady = true;
 		});
 	},
-	newOptions: function(options) {
-		return !arraysEqual(this.lastOptions, options);
-	},
 	render: function (options) {
 		this.lastOptions = options;
 		$(this.el).empty();
@@ -129,21 +125,23 @@ window.LabelListView = Backbone.View.extend({
 			var labels = new Labels();
 			labels.fetch({
 				data: $.param({"page": self.page, "language": options.lang}),
-				success: function(labels) {
-					if(labels.models.length == 0) self.stopScroll = true;
-					_.each(labels.models, function (label) {
-						$('table tbody', self.el).append(new LabelListItemView(label).render().el);
-					}, self);
-					return self;
-				},
-				error: function () {
-					$(self.el).empty();
-					$(self.el).html(self.template());
-					return self;
-				}
+				success: function(labels) { self.onFetchSuccess(labels); },
+				error: function () { self.onFetchError(); }
 			});
 			this.page++;
 		}
+	},
+	onFetchSuccess: function(labels) {
+		if(labels.error) return this.onFetchError(labels.error);
+		if(labels.models.length == 0) this.stopScroll = true;
+		_.each(labels.models, function (label) {
+			$('table tbody', this.el).append(new LabelListItemView(label).render().el);
+		}, this);
+		return this;
+	},
+	onFetchError: function(message) {
+		this.stopScroll = true;
+		if(message) app.pushMessageAndNavigate("error", message);
 	}
 });
 
@@ -176,22 +174,20 @@ window.LabelListItemView = Backbone.View.extend({
 	},
 	saveLabel: function() {
 		var self = this;
-        this.model.unbind("change");
 		self.model.save(null, {
-			success: function () {
-				self.render();
-			},
-			error: function (req, resp) {
-				if(resp.status != 200) {
-					app.messageView.errors.push("An error occurred updating " + self.model.id);
-					app.rerenderMessages();
-					self.render();
-				} else {
-					self.render();
-				}
-			}
+			success: function (response) { self.onSaveSuccess(response); },
+			error: function (req, resp) { self.onSaveError(); }
 		});
 		return false;
+	},
+	onSaveSuccess: function(response) {
+		if(response.error) return this.onSaveError(reposne.error);
+		this.render();
+	},
+	onSaveError: function(message) {
+		if(!message) message = "{{general.js.general}}".format("{{general.js.saving}}", this.model.id);
+		app.pushMessageAndNavigate("error", message);
+		this.render();
 	},
 	render: function () {
 		$(this.el).html(this.template({label: this.model}));

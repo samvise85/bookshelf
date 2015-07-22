@@ -14,8 +14,8 @@
 <script>
 	$('.chapters_table').scroll(function(e) {
 		if($('.chapters_table').scrollTop() + $(".chapters_table").height() >= $(".chapters_table").prop('scrollHeight') - 50) {
-			if(app.bookReadView && app.bookReadView.chapterListView)
-				app.bookReadView.chapterListView.append(app.bookReadView.chapterListView.lastOptions);
+			if(app.currentView && app.currentView.chapterListView)
+				app.currentView.chapterListView.append(app.currentView.chapterListView.lastOptions);
 		}
 	});
 </script>

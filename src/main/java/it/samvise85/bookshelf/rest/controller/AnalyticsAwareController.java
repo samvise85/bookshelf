@@ -1,45 +1,44 @@
 package it.samvise85.bookshelf.rest.controller;
 
-import it.samvise85.bookshelf.exception.BookshelfException;
 import it.samvise85.bookshelf.manager.RestErrorManager;
 import it.samvise85.bookshelf.manager.RestRequestManager;
 import it.samvise85.bookshelf.model.RestRequest;
-
-import java.lang.reflect.Method;
+import it.samvise85.bookshelf.model.dto.ResponseDto;
 
 import javax.servlet.http.HttpServletRequest;
 
+import org.springframework.beans.factory.annotation.Autowired;
+
 public abstract class AnalyticsAwareController extends AbstractController {
 
-	protected <T> T executeMethod (HttpServletRequest request, String methodName) {
+	@Autowired
+	RestRequestManager requestManager;
+	@Autowired
+	RestErrorManager errorManager;
+	
+	@Override
+	protected ResponseDto executeMethod (HttpServletRequest request, String methodName) {
 		return executeMethod(request, methodName, null, null, null);
 	}
 
-	protected <T> T executeMethod (HttpServletRequest request, String methodName, Class<?>[] parameterTypes, Object[] args) {
+	@Override
+	protected ResponseDto executeMethod (HttpServletRequest request, String methodName, Class<?>[] parameterTypes, Object[] args) {
 		return executeMethod(request, methodName, parameterTypes, args, null);
 	}
 	
-	@SuppressWarnings("unchecked")
-	protected <T> T executeMethod (HttpServletRequest request, String methodName, Class<?>[] parameterTypes, Object[] args, Object requestBody) {
-		logMethodStart(methodName, args);
-		mailSender.setRequestApp(getRequestApp(request));
-		
+	protected ResponseDto executeMethod (HttpServletRequest request, String methodName, Class<?>[] parameterTypes, Object[] args, Object requestBody) {
 		RestRequest restRequest = getRequestManager().create(request, methodName, requestBody);
         try {
-        	Method method = null;
-        	if(parameterTypes != null)
-        		method = this.getClass().getDeclaredMethod(methodName, parameterTypes);
-        	else
-        		method = this.getClass().getDeclaredMethod(methodName);
-        	method.setAccessible(true);
-        	return (T) method.invoke(this, args);
+        	return invokeMethod(methodName, parameterTypes, args);
         } catch(Throwable e) {
-        	getErrorManager().create(e, restRequest.getId());
-        	if(!(e instanceof BookshelfException))
-        		e = new BookshelfException(e.getMessage(), e);
-        	throw (BookshelfException)e;
+        	return manageError(e, restRequest);
         }
     }
+
+	protected ResponseDto manageError(Throwable e, RestRequest restRequest) {
+    	getErrorManager().create(e, restRequest.getId());
+		return super.manageError(e);
+	}
 
 	protected abstract RestRequestManager getRequestManager();
 	protected abstract RestErrorManager getErrorManager();

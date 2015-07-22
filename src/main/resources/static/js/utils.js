@@ -23,12 +23,9 @@ $.ajaxSetup({
         401: function(){
 			window.oldLocation = window.location.href;
             // Redirect the to the login page.
-            window.location.replace('#login');
-         
-        },
-        403: function() {
-            // 403 -- Access denied
-            window.location.replace('#denied');
+			if(app && !app.getUser()) {
+				window.location.replace(getAppPath() + '#login');
+			}
         }
     }
 });

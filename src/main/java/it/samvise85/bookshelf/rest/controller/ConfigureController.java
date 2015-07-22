@@ -4,11 +4,14 @@ import it.samvise85.bookshelf.manager.SettingManager;
 import it.samvise85.bookshelf.manager.UserManager;
 import it.samvise85.bookshelf.model.User;
 import it.samvise85.bookshelf.model.UserProfile;
+import it.samvise85.bookshelf.model.dto.ResponseDto;
+import it.samvise85.bookshelf.utils.AppVersion;
 import it.samvise85.bookshelf.utils.SHA1Digester;
-import it.samvise85.bookshelf.web.config.AppVersion;
 import it.samvise85.bookshelf.web.security.BookshelfRole.Role;
 
 import java.util.List;
+
+import javax.servlet.http.HttpServletRequest;
 
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,16 +20,26 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-public class ConfigureController {
+public class ConfigureController extends AbstractController {
 	private static final Logger log = Logger.getLogger(ConfigureController.class);
 	
 	@Autowired
 	private UserManager userManager;
 	@Autowired
 	private SettingManager settingManager;
-	
+
+	@Override
+	protected Logger getLogger() {
+		return log;
+	}
+
 	@RequestMapping(value = "/configure", method = RequestMethod.PUT)
-	public String configure() {
+	public ResponseDto configure(HttpServletRequest request) {
+		String methodName = getMethodName();
+		return executeMethod(request, methodName);
+	}
+
+	protected String configure() {
 		if(userManager.countUsers() == 0) {
 			try {
 				User admin = new User();
@@ -74,7 +87,12 @@ public class ConfigureController {
 	}
 
 	@RequestMapping(value = "/updateVersion", method = RequestMethod.PUT)
-	public String update() {
+	public ResponseDto update(HttpServletRequest request) {
+		String methodName = getMethodName();
+		return executeMethod(request, methodName);
+	}
+
+	protected String update() {
 		String appVersion = settingManager.getAppVersion();
 		AppVersion version = AppVersion.findByVersionCode(appVersion);
 		

@@ -67,15 +67,15 @@
 					text: "{{chapter.edit.modaldelete.confirm}}",
 					click: function() {
 						var self = this;
-						app.chapterEditView.deleteChapter(function() {
-							$(self).dialog( "close" );
+						app.currentView.deleteChapter(function() {
+							$(self).dialog("close");
 						});
 					}
 				},
 				{
 					text: "{{chapter.edit.modaldelete.cancel}}",
 					click: function() {
-						$( this ).dialog( "close" );
+						$( this ).dialog("close");
 					}
 				}
 			]
