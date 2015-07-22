@@ -22,6 +22,7 @@ import javax.mail.internet.MimeMessage;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.javamail.JavaMailSenderImpl;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -156,6 +157,7 @@ public class BookshelfMailSenderImpl implements BookshelfMailSender {
 	}
 	
 	@Override
+	@Async
 	public void sendSubscriptionMail(User user) {
 		MimeMessage mmessage = new MimeMessage(mailSender.getSession());
 		try {
@@ -174,6 +176,7 @@ public class BookshelfMailSenderImpl implements BookshelfMailSender {
 	}
 
 	@Override
+	@Async
 	public void sendResetMail(User user) {
 		MimeMessage mmessage = new MimeMessage(mailSender.getSession());
 		try {

@@ -132,9 +132,11 @@ Frontend:
 ================ What's left ================
 
 In this version:
+- Settings
 - Users can add more informations
 - Users can decide which information to display
 - Users have new profiles (eg. author, moderator)
+- (NTH) Separate the views of anonimous user, logged user and administrator (similarly to the internationalization)
 - Book types (some types don't have chapters)
 - Drafts
 - Route in analytics
@@ -145,7 +147,6 @@ In this version:
 
 In the future:
 - OAuth2 support (FB, Google, Twitter)
-- Separate the views of anonimous user, logged user and administrator (similarly to the internationalization).
 - Web services of the classes: Moderation, Section.
 
 ================ One Last Note ==============
