@@ -47,9 +47,33 @@ public class SearchRepositoryImpl<T, ID extends Serializable> extends SimpleJpaR
 			int page = options.getPagination().getPage(); //1 based
 			int pageSize = options.getPagination().getPageSize();
 			criteria.setFirstResult((page-1)*pageSize);
-			criteria.setFetchSize(pageSize);
+			criteria.setMaxResults(pageSize);
 		}
 		return criteria.list();
 	}
 
+	@Override
+	@SuppressWarnings("unchecked")
+	public T searchOne(PersistOptions options) {
+		Criteria criteria = em.unwrap(Session.class).createCriteria(getDomainClass());
+		
+		if(options.getProjection() != null) {
+			criteria.setProjection(options.getProjection().toProjection(getDomainClass()));
+			criteria.setResultTransformer(options.getProjection().getTransformer(getDomainClass()));
+		}
+		if(options.getSelection() != null) {
+			for(SelectionClause sel : options.getSelection()) {
+				Criterion crit = sel.toRestriction(getDomainClass());
+				if(crit != null)
+					criteria.add(crit);
+			}
+		}
+		if(options.getOrder() != null) {
+			for(OrderClause ord : options.getOrder()) {
+				criteria.addOrder(ord.toOrder());
+			}
+		}
+		criteria.setMaxResults(1);
+		return (T) criteria.uniqueResult();
+	}
 }

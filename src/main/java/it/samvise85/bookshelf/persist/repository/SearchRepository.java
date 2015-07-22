@@ -12,4 +12,6 @@ import org.springframework.data.repository.PagingAndSortingRepository;
 public interface SearchRepository<T, ID extends Serializable> extends PagingAndSortingRepository<T, ID> {
 	
 	List<T> search(PersistOptions options);
+
+	T searchOne(PersistOptions options);
 }
