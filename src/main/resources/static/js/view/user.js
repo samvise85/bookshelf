@@ -25,9 +25,6 @@ window.UserListView = Backbone.View.extend({
 			self.listItemViewReady = true;
 		});
 	},
-	newOptions: function(options) {
-		return !arraysEqual(this.lastOptions, options);
-	},
 	render: function (options) {
 		if(app.isAdmin()) {
 			this.lastOptions = options;
@@ -84,9 +81,6 @@ window.UserEditView = Backbone.View.extend({
 		viewLoader.load("LanguageSelectItemView", function() {
 			self.listItemViewReady = true;
 		});
-	},
-	newOptions: function(options) {
-		return !arraysEqual(this.lastOptions, options);
 	},
 	events: {
 		'click .edit-user-form .save': 'saveUser',
@@ -335,9 +329,6 @@ window.UserView = Backbone.View.extend({
 	lastOptions : null,
 	reload : false,
 	clearMessages : true,
-	newOptions: function(options) {
-		return !arraysEqual(this.lastOptions, options);
-	},
 	render: function (options) {
 		this.lastOptions = options;
 		var self = this;
@@ -365,9 +356,6 @@ window.UserView = Backbone.View.extend({
 window.UserActivateView = Backbone.View.extend({
 	reload : true,
 	clearMessages : true,
-	newOptions: function(options) {
-		return true;
-	},
 	render: function (options) {
 		var self = this;
 		if(options.id) {
@@ -396,9 +384,6 @@ window.ForgotView = Backbone.View.extend({
 	reload : true,
 	clearMessages : true,
 	messages: new Messages(true),
-	newOptions: function(options) {
-		return true;
-	},
 	
 	events: {
 		'click .edit-user-form .save': 'sendMail',
@@ -459,9 +444,6 @@ window.ResetView = Backbone.View.extend({
 	reload : true,
 	clearMessages : true,
 	messages: new Messages(true),
-	newOptions: function(options) {
-		return true;
-	},
 	
 	events: {
 		'click .edit-user-form .save': 'sendMail',

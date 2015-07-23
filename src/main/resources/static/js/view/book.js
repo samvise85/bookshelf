@@ -7,15 +7,19 @@ window.BookListView = Backbone.View.extend({
 		var books = new Books();
 		books.fetch({
 			data: options && options.queryparams ? $.param(options.queryparams) : null,
-			success: function(books) {
-				$(self.el).empty();
-				$(self.el).html(self.template({books: books.models}));
-				return self;
-			},
-			error: function () {
-				app.pushMessageAndNavigate("error", "{{generic.js.error}}".format("{{generic.js.loading}}", "{{generic.js.booklist}}"));
-			}
+			success: function(books) { self.onFetchSuccess(books); },
+			error: function () { self.onFetchError(); }
 		});
+	},
+	onFetchSuccess: function(books) {
+		if(books.error) return this.onFetchError(books.error);
+		$(this.el).empty();
+		$(this.el).html(this.template({books: books.models}));
+		return this;
+	},
+	onFetchError: function(message) {
+		if(!message) message = "{{generic.js.error}}".format("{{generic.js.loading}}", "{{generic.js.booklist}}");
+		app.pushMessageAndNavigate("error", message);
 	}
 });
 
@@ -25,9 +29,6 @@ window.BookEditView = Backbone.View.extend({
 	clearMessages : true,
 	messages: new Messages(true),
 	
-	newOptions: function(options) {
-		return !arraysEqual(this.lastOptions, options);
-	},
 	events: {
 		'submit .edit-book-form': 'saveBook',
 		'blur [name=title]': 'validateTitle',
@@ -48,7 +49,6 @@ window.BookEditView = Backbone.View.extend({
 		var year = $('[name=year]').val();
 		if(year != null && !year.isEmpty()) {
 			var y = parseInt(year);
-			console.log(y > new Date().getFullYear());
 			if(isNaN(y))
 				this.messages.add("year_err", "{{book.js.yearnan}}");
 			else if(y > new Date().getFullYear()) {
@@ -133,9 +133,6 @@ window.BookReadView = Backbone.View.extend({
 	
 	events: {
 		'click .next': 'loadChapters'
-	},
-	newOptions: function(options) {
-		return !arraysEqual(this.lastOptions, options);
 	},
 	render: function (options) {
 		this.lastOptions = options;

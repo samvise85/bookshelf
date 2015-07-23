@@ -1,27 +1,23 @@
 package it.samvise85.bookshelf.model;
 
-import it.samvise85.bookshelf.model.commons.Commentable;
 import it.samvise85.bookshelf.model.commons.CommentableImpl;
-import it.samvise85.bookshelf.model.commons.Editable;
-import it.samvise85.bookshelf.model.commons.Projectable;
+import it.samvise85.bookshelf.model.commons.Publishable;
 import it.samvise85.bookshelf.model.commons.StringIdentifiable;
-import it.samvise85.bookshelf.persist.clauses.ProjectionClause;
 
 import java.util.Date;
+import java.util.List;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Transient;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 
 @JsonInclude(Include.NON_NULL)
 @Entity
-public class Book extends CommentableImpl implements Commentable, Editable, StringIdentifiable, Projectable {
-	//internal attributes
+public class Book extends CommentableImpl implements StringIdentifiable, Publishable {
 
 	@Id
 	private String id;
@@ -35,13 +31,15 @@ public class Book extends CommentableImpl implements Commentable, Editable, Stri
 	private String genre;
 	@Column
 	private String author;
+	@Column
+	private String publishingStatus;
+	@Column
+	private Date publishingDate; 
 	
 	@Transient
 	private String authorname;
-	
 	@Transient
-	@JsonIgnore
-	private ProjectionClause projection;
+	private List<UserProfile> profiles;
 	
 	public Book() {}
 	public Book(String name, String author) {
@@ -57,43 +55,43 @@ public class Book extends CommentableImpl implements Commentable, Editable, Stri
 		this.id = id;
 	}
 	public String getTitle() {
-		return returnNullOrValue("title", title);
+		return title;
 	}
 	public void setTitle(String title) {
 		this.title = title;
 	}
 	public Integer getYear() {
-		return returnNullOrValue("year", year);
+		return year;
 	}
 	public void setYear(Integer year) {
 		this.year = year;
 	}
 	public String getSynopsis() {
-		return returnNullOrValue("synopsis", synopsis);
+		return synopsis;
 	}
 	public void setSynopsis(String synopsis) {
 		this.synopsis = synopsis;
 	}
 	public String getGenre() {
-		return returnNullOrValue("genre", genre);
+		return genre;
 	}
 	public void setGenre(String genre) {
 		this.genre = genre;
 	}
 	public String getAuthor() {
-		return returnNullOrValue("author", author);
+		return author;
 	}
 	public void setAuthor(String author) {
 		this.author = author;
 	}
-	@Override
-	public Date getCreation() {
-		return returnNullOrValue("creation", super.getCreation());
-	}
-	@Override
-	public Date getLastModification() {
-		return returnNullOrValue("lastModification", super.getLastModification());
-	}
+//	@Override
+//	public Date getCreation() {
+//		return super.getCreation();
+//	}
+//	@Override
+//	public Date getLastModification() {
+//		return super.getLastModification();
+//	}
 
 	public String getAuthorname() {
 		if(authorname != null) return authorname;
@@ -102,17 +100,21 @@ public class Book extends CommentableImpl implements Commentable, Editable, Stri
 	public void setAuthorname(String authorname) {
 		this.authorname = authorname;
 	}
+	
 	@Override
-	public ProjectionClause getProjection() {
-		return projection;
+	public String getPublishingStatus() {
+		return publishingStatus;
 	}
 	@Override
-	public Book setProjection(ProjectionClause projection) {
-		this.projection = projection;
-		return this;
+	public void setPublishingStatus(String status) {
+		this.publishingStatus = status;
 	}
-
-	private <T> T returnNullOrValue(String fieldName, T fieldValue) {
-		return ProjectionClause.returnNullOrValue(projection, fieldName, fieldValue);
+	@Override
+	public Date getPublishingDate() {
+		return publishingDate;
+	}
+	@Override
+	public void setPublishingDate(Date publishingDate) {
+		this.publishingDate = publishingDate;
 	}
 }

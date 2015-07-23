@@ -86,7 +86,7 @@ public final class UserManagerImpl extends AbstractPersistenceUnit<User> impleme
 	public User get(Serializable id, ProjectionClause projection) {
 		if(projection == null) 
 			projection = User.TOTAL_PROTECTION;
-		return getOne(new PersistOptions(projection, Collections.singletonList(new SelectionClause("id", SelectionOperation.EQUALS, id)), null));
+		return super.get(id, projection);
 	}
 
 	@Override
@@ -161,31 +161,30 @@ public final class UserManagerImpl extends AbstractPersistenceUnit<User> impleme
 
 	@Override
 	public User login(String username) {
-		User user = getByUsername(username, User.NO_PROTECTION);
-		if(user != null && user.getActivationCode() == null)
-			return user.setProjection(User.PASSWORD_PROTECTION);
-		return null;
+		return getOne(new PersistOptions(User.NO_PROTECTION, SelectionClause.list(
+						new SelectionClause("username", SelectionOperation.EQUALS, username),
+						new SelectionClause("activationCode", SelectionOperation.IS_NULL, null))));
 	}
 
 	@Override
 	public User activate(String code) {
-		User user = repository.findOneByActivationCode(code);
+		User user = getOne(new PersistOptions(User.NO_PROTECTION, Collections.singletonList(new SelectionClause("activationCode", SelectionOperation.EQUALS, code))));
 		if(user == null) return null;
 		
 		user.setActivationCode(null);
 		repository.save(user);
-		return user.setProjection(User.TOTAL_PROTECTION);
+		return get(user.getId());
 	}
 	
 	@Override
 	public User resetPassword(String code, String newPassword) {
-		User user = repository.findOneByResetCode(code);
+		User user = getOne(new PersistOptions(User.NO_PROTECTION, Collections.singletonList(new SelectionClause("resetCode", SelectionOperation.EQUALS, code))));
 		if(user == null) return null;
 		
 		user.setResetCode(null);
 		user.setPassword(newPassword);
 		repository.save(user);
-		return user.setProjection(User.TOTAL_PROTECTION);
+		return get(user.getId());
 	}
 
 	@Override
@@ -198,11 +197,6 @@ public final class UserManagerImpl extends AbstractPersistenceUnit<User> impleme
 		UserProfile profile = profileRepository.findOneByUserAndProfile(up.getUser(), up.getProfile());
 		if(profile != null) return profile;
 		return profileRepository.save(up);
-	}
-
-	@Override
-	public User getOne(PersistOptions persistOptions) {
-		return repository.searchOne(persistOptions);
 	}
 
 }

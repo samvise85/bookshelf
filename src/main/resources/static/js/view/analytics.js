@@ -2,9 +2,6 @@ window.AdminView = Backbone.View.extend({
 	lastOptions : null,
 	reload : true,
 	clearMessages : true,
-	newOptions: function(options) {
-		return true;
-	},
 	render: function (options) {
 		this.lastOptions = options;
 		var self = this;
@@ -17,9 +14,6 @@ window.AnalyticsView = Backbone.View.extend({
 	lastOptions : null,
 	reload : true,
 	clearMessages : true,
-	newOptions: function(options) {
-		return true;
-	},
 	render: function (options) {
 		this.lastOptions = options;
 		var self = this;
@@ -129,9 +123,6 @@ window.RequestView = Backbone.View.extend({
 	lastOptions : null,
 	reload : false,
 	clearMessages : true,
-	newOptions: function(options) {
-		return !arraysEqual(this.lastOptions, options);
-	},
 	render: function (options) {
 		this.lastOptions = options;
 		var self = this;
@@ -183,9 +174,6 @@ window.ErrorView = Backbone.View.extend({
 	lastOptions : null,
 	reload : false,
 	clearMessages : true,
-	newOptions: function(options) {
-		return !arraysEqual(this.lastOptions, options);
-	},
 	render: function (options) {
 		this.lastOptions = options;
 		var self = this;

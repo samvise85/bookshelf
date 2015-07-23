@@ -9,7 +9,6 @@ import it.samvise85.bookshelf.persist.clauses.ProjectionClause;
 import it.samvise85.bookshelf.persist.repository.BookRepository;
 
 import java.io.Serializable;
-import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
@@ -77,12 +76,7 @@ public class BookManagerImpl extends AbstractPersistenceUnit<Book>  implements B
 
 	@Override
 	public List<Book> getList(PersistOptions options) {
-		List<Book> list = Collections.emptyList();
-		if(options == null) list = super.getList(options);
-		else {
-			list = repository.search(options);
-		}
-		
+		List<Book> list = super.getList(options);
 		for(Book book : list)
 			setAuthorname(book);
 		return list;

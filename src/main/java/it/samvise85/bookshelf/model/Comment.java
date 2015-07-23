@@ -1,24 +1,18 @@
 package it.samvise85.bookshelf.model;
 
-import it.samvise85.bookshelf.model.commons.Commentable;
 import it.samvise85.bookshelf.model.commons.CommentableImpl;
-import it.samvise85.bookshelf.model.commons.Editable;
-import it.samvise85.bookshelf.model.commons.Projectable;
 import it.samvise85.bookshelf.model.commons.StringIdentifiable;
-import it.samvise85.bookshelf.persist.clauses.ProjectionClause;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
-import javax.persistence.Transient;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 
 @JsonInclude(Include.NON_NULL)
 @Entity
-public class Comment extends CommentableImpl implements Commentable, Editable, StringIdentifiable, Projectable {
+public class Comment extends CommentableImpl implements StringIdentifiable {
 	//internal
 	@Id
 	private String id;
@@ -30,10 +24,6 @@ public class Comment extends CommentableImpl implements Commentable, Editable, S
 	private String user;
 	@Column
 	private String moderation;
-	
-	@Transient
-	@JsonIgnore
-	private ProjectionClause projection;
 	
 	public Comment() {};
 	public Comment(String comment, String parentStream, String user) {
@@ -74,14 +64,4 @@ public class Comment extends CommentableImpl implements Commentable, Editable, S
 		this.moderation = moderation;
 	}
 
-	@Override
-	public ProjectionClause getProjection() {
-		return projection;
-	}
-	@Override
-	public Comment setProjection(ProjectionClause projection) {
-		this.projection = projection;
-		return this;
-	}
-	
 }

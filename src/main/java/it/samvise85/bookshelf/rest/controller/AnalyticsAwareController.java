@@ -31,13 +31,13 @@ public abstract class AnalyticsAwareController extends AbstractController {
         try {
         	return invokeMethod(methodName, parameterTypes, args);
         } catch(Throwable e) {
-        	return manageError(e, restRequest);
+        	return manageError(methodName, e, restRequest);
         }
     }
 
-	protected ResponseDto manageError(Throwable e, RestRequest restRequest) {
-    	getErrorManager().create(e, restRequest.getId());
-		return super.manageError(e);
+	protected ResponseDto manageError(String methodName, Throwable e, RestRequest restRequest) {
+    	getErrorManager().create(e.getCause(), restRequest.getId());
+		return super.manageError(methodName, e);
 	}
 
 	protected abstract RestRequestManager getRequestManager();

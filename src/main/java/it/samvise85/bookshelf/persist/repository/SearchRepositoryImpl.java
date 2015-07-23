@@ -28,26 +28,29 @@ public class SearchRepositoryImpl<T, ID extends Serializable> extends SimpleJpaR
 	public List<T> search(PersistOptions options) {
 		Criteria criteria = em.unwrap(Session.class).createCriteria(getDomainClass());
 		
-		if(options.getProjection() != null) {
-			criteria.setProjection(options.getProjection().toProjection(getDomainClass()));
-		}
-		if(options.getSelection() != null) {
-			for(SelectionClause sel : options.getSelection()) {
-				Criterion crit = sel.toRestriction(getDomainClass());
-				if(crit != null)
-					criteria.add(crit);
+		if(options != null) {
+			if(options.getProjection() != null) {
+				criteria.setProjection(options.getProjection().toProjection(getDomainClass()));
+				criteria.setResultTransformer(options.getProjection().getTransformer(getDomainClass()));
 			}
-		}
-		if(options.getOrder() != null) {
-			for(OrderClause ord : options.getOrder()) {
-				criteria.addOrder(ord.toOrder());
+			if(options.getSelection() != null) {
+				for(SelectionClause sel : options.getSelection()) {
+					Criterion crit = sel.toRestriction(getDomainClass());
+					if(crit != null)
+						criteria.add(crit);
+				}
 			}
-		}
-		if(options.getPagination() != null) {
-			int page = options.getPagination().getPage(); //1 based
-			int pageSize = options.getPagination().getPageSize();
-			criteria.setFirstResult((page-1)*pageSize);
-			criteria.setMaxResults(pageSize);
+			if(options.getOrder() != null) {
+				for(OrderClause ord : options.getOrder()) {
+					criteria.addOrder(ord.toOrder());
+				}
+			}
+			if(options.getPagination() != null) {
+				int page = options.getPagination().getPage(); //1 based
+				int pageSize = options.getPagination().getPageSize();
+				criteria.setFirstResult((page-1)*pageSize);
+				criteria.setMaxResults(pageSize);
+			}
 		}
 		return criteria.list();
 	}

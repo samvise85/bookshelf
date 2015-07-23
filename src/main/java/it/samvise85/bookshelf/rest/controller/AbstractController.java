@@ -43,7 +43,7 @@ public abstract class AbstractController {
         try {
         	return invokeMethod(methodName, parameterTypes, args);
         } catch(Throwable e) {
-        	return manageError(e);
+        	return manageError(methodName, e);
         }
 	}
 
@@ -66,8 +66,8 @@ public abstract class AbstractController {
 		return res;
 	}
 
-	protected ResponseDto manageError(Throwable e) {
-		getLogger().error(e);
+	protected ResponseDto manageError(String methodName, Throwable e) {
+		getLogger().error(methodName, e.getCause());
 		ResponseDto res = new ResponseDto();
 		res.setError(e.getCause().getMessage());
 		return res;

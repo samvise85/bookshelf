@@ -3,11 +3,9 @@ package it.samvise85.bookshelf.manager;
 import it.samvise85.bookshelf.exception.BookshelfException;
 import it.samvise85.bookshelf.model.Language;
 import it.samvise85.bookshelf.persist.AbstractPersistenceUnit;
-import it.samvise85.bookshelf.persist.PersistOptions;
 import it.samvise85.bookshelf.persist.repository.LanguageRepository;
 
 import java.io.Serializable;
-import java.util.List;
 import java.util.Locale;
 
 import javax.transaction.Transactional;
@@ -15,8 +13,6 @@ import javax.transaction.Transactional.TxType;
 
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -35,17 +31,6 @@ public class LanguageManagerImpl extends AbstractPersistenceUnit<Language> imple
 	@Override
 	public LanguageRepository getRepository() {
 		return repository;
-	}
-
-	@Override
-	public List<Language> getList(PersistOptions options) {
-		Pageable pageable = createPageable(options.getPagination());
-		if(pageable != null)
-			return convertToList(repository.findAll(pageable), options.getProjection());
-		Sort sort = createSort(options.getOrder());
-		if(sort != null)
-			return convertToList(repository.findAll(sort), options.getProjection());
-		return convertToList(repository.findAll(), options.getProjection());
 	}
 
 	@Override

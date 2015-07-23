@@ -4,7 +4,11 @@ import it.samvise85.bookshelf.model.Chapter;
 import it.samvise85.bookshelf.model.Stream;
 import it.samvise85.bookshelf.persist.AbstractPersistenceUnit;
 import it.samvise85.bookshelf.persist.PersistOptions;
+import it.samvise85.bookshelf.persist.clauses.Order;
+import it.samvise85.bookshelf.persist.clauses.OrderClause;
 import it.samvise85.bookshelf.persist.clauses.ProjectionClause;
+import it.samvise85.bookshelf.persist.clauses.SelectionClause;
+import it.samvise85.bookshelf.persist.clauses.SelectionOperation;
 import it.samvise85.bookshelf.persist.repository.ChapterRepository;
 
 import java.io.Serializable;
@@ -18,7 +22,6 @@ import javax.transaction.Transactional.TxType;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -47,42 +50,12 @@ public class ChapterManagerImpl extends AbstractPersistenceUnit<Chapter> impleme
 	}
 
 	@Override
-	public List<Chapter> getList(PersistOptions options) {
-		List<Chapter> list = Collections.emptyList();
-		if(options == null) list = super.getList(options);
-		else {
-			list = repository.search(options);
-		}
-		return list;
-		
-//		if(options != null) {
-//			String book = null;
-//			Pageable pagination = null;
-//			if(options.getSelection() != null && options.getSelection().size() == 1 &&
-//					options.getSelection().get(0).getField().equals("book"))
-//				book = (String) options.getSelection().get(0).getValue();
-//			if(options.getPagination() != null)
-//				pagination = createPageable(options.getPagination());
-//			if(book != null)
-//				return findChapters(book, pagination, options.getProjection());
-//		}
-//		return super.getList(options);
+	public Chapter getChapterByBookAndPosition(String book, Integer position, ProjectionClause projection) {
+		return getOne(new PersistOptions(projection, SelectionClause.list(
+				new SelectionClause("book", SelectionOperation.EQUALS, book),
+				new SelectionClause("position", SelectionOperation.EQUALS, position))));
 	}
 
-	@Override
-	public Chapter getChapterByBookAndPosition(String book, Integer position,
-			ProjectionClause projection) {
-		Chapter chapter = repository.findFirstByBookAndPosition(book, position);
-		if(chapter == null) return null;
-		return chapter.setProjection(projection);
-	}
-
-	private List<Chapter> findChapters(String book, Pageable pagination, ProjectionClause projection) {
-		if(pagination == null)
-			return convertToList(repository.findByBookOrderByPositionAsc(book), projection);
-		return convertToList(repository.findByBookOrderByPositionAsc(book, pagination), projection);
-	}
-	
 	private Chapter findLastChapter(String book, ProjectionClause projection) {
 		return repository.findFirstByBookOrderByPositionDesc(book);
 	}
@@ -168,7 +141,9 @@ public class ChapterManagerImpl extends AbstractPersistenceUnit<Chapter> impleme
 	
 	private Chapter updateChaptersPosition(Chapter chapter, boolean last) {
 		log.debug("Updating other chapters position");
-		List<Chapter> chapters = findChapters(chapter.getBook(), null, BASIC_PROJECTION);
+		List<Chapter> chapters = getList(new PersistOptions(BASIC_PROJECTION, 
+				Collections.singletonList(new SelectionClause("book", SelectionOperation.EQUALS, chapter.getBook())),
+				Collections.singletonList(new OrderClause("position", Order.ASC))));
 		
 		if(chapters != null) {
 			int lastPosition = 0;

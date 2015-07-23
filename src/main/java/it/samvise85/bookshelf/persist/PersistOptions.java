@@ -14,20 +14,23 @@ public class PersistOptions {
 	private PaginationClause pagination;
 	
 	public PersistOptions() {}
+
+	public PersistOptions(ProjectionClause projection,
+			List<SelectionClause> selection) {
+		this.projection = projection;
+		this.selection = selection;
+	}
 	
 	public PersistOptions(ProjectionClause projection,
 			List<SelectionClause> selection, List<OrderClause> order) {
-		this.projection = projection;
-		this.selection = selection;
+		this(projection, selection);
 		this.order = order;
 	}
 	
 	public PersistOptions(ProjectionClause projection,
 			List<SelectionClause> selection, List<OrderClause> order,
 			PaginationClause pagination) {
-		this.projection = projection;
-		this.selection = selection;
-		this.order = order;
+		this(projection, selection, order);
 		this.pagination = pagination;
 	}
 	

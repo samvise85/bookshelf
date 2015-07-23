@@ -3,24 +3,18 @@ package it.samvise85.bookshelf.model;
 import it.samvise85.bookshelf.model.commons.Commentable;
 import it.samvise85.bookshelf.model.commons.CommentableImpl;
 import it.samvise85.bookshelf.model.commons.Editable;
-import it.samvise85.bookshelf.model.commons.Projectable;
 import it.samvise85.bookshelf.model.commons.StringIdentifiable;
-import it.samvise85.bookshelf.persist.clauses.ProjectionClause;
-
-import java.util.Date;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
-import javax.persistence.Transient;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 
 @JsonInclude(Include.NON_NULL)
 @Entity
-public class Section extends CommentableImpl implements Commentable, Editable, StringIdentifiable, Projectable {
+public class Section extends CommentableImpl implements Commentable, Editable, StringIdentifiable {
 	//internal attributes
 	@Id
 	private String id;
@@ -32,10 +26,6 @@ public class Section extends CommentableImpl implements Commentable, Editable, S
 	private String synopsis;
 	@Column
 	private String book;
-
-	@Transient
-	@JsonIgnore
-	private ProjectionClause projection;
 
 	public Section() {};
 	public Section(String title, String book) {
@@ -51,50 +41,27 @@ public class Section extends CommentableImpl implements Commentable, Editable, S
 		this.id = id;
 	}
 	public Integer getPosition() {
-		return returnNullOrValue("position", position);
+		return position;
 	}
 	public void setPosition(Integer position) {
 		this.position = position;
 	}
 	public String getTitle() {
-		return returnNullOrValue("title", title);
+		return title;
 	}
 	public void setTitle(String title) {
 		this.title = title;
 	}
 	public String getSynopsis() {
-		return returnNullOrValue("synopsis", synopsis);
+		return synopsis;
 	}
 	public void setSynopsis(String synopsis) {
 		this.synopsis = synopsis;
 	}
 	public String getBook() {
-		return returnNullOrValue("book", book);
+		return book;
 	}
 	public void setBook(String book) {
 		this.book = book;
 	}
-	@Override
-	public Date getCreation() {
-		return returnNullOrValue("creation", super.getCreation());
-	}
-	@Override
-	public Date getLastModification() {
-		return returnNullOrValue("lastModification", super.getLastModification());
-	}
-
-	@Override
-	public ProjectionClause getProjection() {
-		return projection;
-	}
-	@Override
-	public Section setProjection(ProjectionClause projection) {
-		this.projection = projection;
-		return this;
-	}
-	
-	private <T> T returnNullOrValue(String fieldName, T fieldValue) {
-		return ProjectionClause.returnNullOrValue(projection, fieldName, fieldValue);
-	}
-	
 }

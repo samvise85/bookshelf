@@ -1,21 +1,17 @@
 package it.samvise85.bookshelf.model;
 
-import it.samvise85.bookshelf.model.commons.Projectable;
 import it.samvise85.bookshelf.model.commons.StringIdentifiable;
-import it.samvise85.bookshelf.persist.clauses.ProjectionClause;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
-import javax.persistence.Transient;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 
 @JsonInclude(Include.NON_NULL)
 @Entity
-public class Moderation implements StringIdentifiable, Projectable {
+public class Moderation implements StringIdentifiable {
 	//internals
 	@Id
 	private String id;
@@ -23,11 +19,7 @@ public class Moderation implements StringIdentifiable, Projectable {
 	private String comment;
 	@Column
 	private String moderator;
-	
-	@Transient
-	@JsonIgnore
-	private ProjectionClause projection;
-	
+
 	public String getId() {
 		return id;
 	}
@@ -45,15 +37,5 @@ public class Moderation implements StringIdentifiable, Projectable {
 	}
 	public void setModerator(String moderator) {
 		this.moderator = moderator;
-	}
-
-	@Override
-	public ProjectionClause getProjection() {
-		return projection;
-	}
-	@Override
-	public Moderation setProjection(ProjectionClause projection) {
-		this.projection = projection;
-		return this;
 	}
 }

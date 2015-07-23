@@ -1,16 +1,12 @@
 package it.samvise85.bookshelf.manager;
 
-import it.samvise85.bookshelf.exception.BookshelfException;
 import it.samvise85.bookshelf.model.Comment;
 import it.samvise85.bookshelf.model.Stream;
 import it.samvise85.bookshelf.persist.AbstractPersistenceUnit;
-import it.samvise85.bookshelf.persist.PersistOptions;
 import it.samvise85.bookshelf.persist.clauses.ProjectionClause;
-import it.samvise85.bookshelf.persist.clauses.SelectionClause;
 import it.samvise85.bookshelf.persist.repository.CommentRepository;
 
 import java.util.Date;
-import java.util.List;
 
 import javax.transaction.Transactional;
 import javax.transaction.Transactional.TxType;
@@ -33,24 +29,6 @@ public class CommentManagerImpl extends AbstractPersistenceUnit<Comment> impleme
 	@Override
 	public CommentRepository getRepository() {
 		return repository;
-	}
-
-	@Override
-	public List<Comment> getList(PersistOptions options) {
-		String streamId = null;
-		if(options.getSelection() != null && !options.getSelection().isEmpty()) {
-			for(SelectionClause s : options.getSelection()) {
-				if(s.getField().equalsIgnoreCase("parentStream")) {
-					streamId = (String) s.getValue();
-				}
-			}
-		}
-		if(streamId == null)
-			throw new BookshelfException("Stream cannot be null");
-		if(options.getPagination() != null)
-			return convertToList(repository.findByParentStreamOrderByCreationDesc(streamId, createPageable(options.getPagination())), options.getProjection());
-		else
-			return convertToList(repository.findByParentStreamOrderByCreationDesc(streamId), options.getProjection());
 	}
 
 	@Override

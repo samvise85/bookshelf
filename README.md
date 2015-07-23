@@ -132,7 +132,7 @@ Frontend:
 ================ What's left ================
 
 In this version:
-- Settings
+- ~~Settings~~
 - Users can add more informations
 - Users can decide which information to display
 - Users have new profiles (eg. author, moderator)
@@ -142,7 +142,7 @@ In this version:
 - Route in analytics
 - Better URLs (tiny URLs)
 - External css
-- Response wrapping to manage errors
+- ~~Response wrapping to manage errors~~
 - Mobile!
 
 In the future:

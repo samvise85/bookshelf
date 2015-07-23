@@ -1,12 +1,10 @@
 window.ChapterListItemView = Backbone.View.extend({
     tagName:"tr",
 
-    initialize:function (chapter) {
-		this.model = chapter;
-        this.model.bind("change", this.render, this);
-        this.model.bind("destroy", this.close, this);
+    initialize: function(chapter) {
+    	this.model = chapter;
     },
-    render:function () {
+    render: function() {
         $(this.el).html(this.template({chapter: this.model}));
         return this;
     }

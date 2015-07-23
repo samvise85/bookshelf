@@ -11,6 +11,8 @@ public interface PersistenceUnit<T extends GenericIdentifiable<?>> {
 	public T get(Serializable id);
 
 	public T get(Serializable id, ProjectionClause projection);
+
+	public T getOne(PersistOptions options);
 	
 	public List<T> getList(PersistOptions options);
 	

@@ -3,7 +3,9 @@ package it.samvise85.bookshelf.persist.clauses;
 import it.samvise85.bookshelf.exception.BookshelfException;
 
 import java.lang.reflect.Field;
+import java.util.Arrays;
 import java.util.Date;
+import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
 import org.hibernate.criterion.Criterion;
@@ -45,11 +47,16 @@ public class SelectionClause {
 		case EQUALS:
 			return Restrictions.eq(getField(), cast(clazz, field, value));
 		case NOT_EQUALS:
-			return Restrictions.not(Restrictions.eq(getField(), cast(clazz, field, value)));
+			return Restrictions.ne(getField(), cast(clazz, field, value));
 		case IS_NULL:
 			return Restrictions.isNull(field);
 		case IS_NOT_NULL:
-			Restrictions.isNotNull(field);
+			return Restrictions.isNotNull(field);
+		case GREATER_THAN: return Restrictions.gt(field, cast(clazz, field, value));
+		case GREATER_EQUALS: return Restrictions.ge(field, cast(clazz, field, value));
+		case LESSER_THAN: return Restrictions.lt(field, cast(clazz, field, value));
+		case LESSER_EQUALS: return Restrictions.le(field, cast(clazz, field, value));
+		case LIKE: return Restrictions.like(field, value == null ? (String) value : value.toString());
 		default:
 			return null;
 		}
@@ -80,5 +87,9 @@ public class SelectionClause {
 		} catch(Exception e) {
 			throw new BookshelfException(e.getMessage(), e);
 		}
+	}
+
+	public static List<SelectionClause> list(SelectionClause ... clauses) {
+		return Arrays.asList(clauses);
 	}
 }
