@@ -209,3 +209,11 @@ Backbone.View.prototype.close = function(){
 	if (this.onClose)
 		this.onClose(); //defie this function to unbind specific model bindings
 }
+
+window.downloadFile = function(content, type, name) {
+    var file = new Blob([content], {type: type});
+	var a = document.createElement("a");
+    a.href = URL.createObjectURL(file);
+    a.download = name;
+    a.click();
+}

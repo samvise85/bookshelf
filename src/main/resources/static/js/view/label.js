@@ -74,7 +74,7 @@ window.LanguageListItemView = Backbone.View.extend({
 		this.render(true);
 	},
 	onSaveError: function(message) {
-		if(!message) message = "{{general.js.general}}".format("{{general.js.saving}}", this.model.id);
+		if(!message) message = "{{generic.js.error}}".format("{{generic.js.saving}}", this.model.id);
 		app.pushMessageAndNavigate("error", message);
 	},
 	unsetOldDef: function() {
@@ -95,7 +95,13 @@ window.LabelListView = Backbone.View.extend({
 	clearMessages : true,
 	page: 1,
 	stopScroll: false,
+	messages: new Messages(true),
 
+	events: {
+		"click #export-labels": "exportLabels",
+		"click .fileinput-button": "importLabels",
+		"change #fileupload": "upload",
+	},
 	initialize: function() {
 		var self = this;
 		viewLoader.load("LabelListItemView", function() {
@@ -142,6 +148,73 @@ window.LabelListView = Backbone.View.extend({
 	onFetchError: function(message) {
 		this.stopScroll = true;
 		if(message) app.pushMessageAndNavigate("error", message);
+	},
+	exportLabels: function(ev) {
+		var self = this;
+		$.ajax({
+			url: '/languages/' + this.messagesFilename(),
+			type: 'GET',
+			success: function (response) { self.onExportSuccess(response); },
+            error: function (req, resp) { self.onExportError(); }
+		});
+	},
+	onExportSuccess: function(response) {
+		if(response.error) return this.onExportError(response.error);
+		downloadFile(response.response, 'text/plain', this.messagesFilename());
+	},
+	onExportError: function(message) {
+		if(!message) message = "{{generic.js.error}}".format("{{generic.js.exporting}}", "{{generic.js.labellist}}");
+		app.pushMessageAndNavigate("error", message);
+	},
+	messagesFilename: function() {
+		return 'messages_' + this.lastOptions.lang + '.properties';
+	},
+	importLabels: function(ev) {
+		if(this.uploading) return;
+		this.uploading = true;
+		$("#fileupload").click();
+		this.uploading = false;
+	},
+	validateFile: function(file) {
+		this.messages.remove("fileinput_err");
+		if(file.type != '' && file.type != 'text/plain')
+			this.messages.add("fileinput_err", "{{label.js.textual}}");
+		if(file.size > 1000000)
+			this.messages.add("fileinput_err2", "");
+	},
+	upload: function(ev) {
+		app.pushMessageAndNavigate("warning", "{{label.js.loading}}");
+		var file = $('#fileupload').prop('files')[0];
+		this.validateFile(file);
+		if(this.messages.isEmpty()) {
+			var self = this;
+			var formData = new FormData();
+		    formData.append("file", file);
+			$.ajax({
+				url: '/languages/' + this.lastOptions.lang + "/properties",
+				type: 'POST',
+		        data: formData,
+				cache: false,
+				contentType:false,
+				dataType: 'json',
+				processData: false, // Don't process the files
+				success: function (response) { self.onUploadSuccess(response); },
+				error: function (req, resp) { self.onUploadError(); }
+			});
+        	$('#fileupload').wrap('<form>').parent('form').trigger('reset');
+            $('#fileupload').unwrap();
+		}
+	},
+	onUploadSuccess: function(response) {
+		if(response.error) this.onUploadError(response.error);
+		app.pushMessageAndNavigate("message", "{{label.js.uploaded}}");
+		this.page--;
+		$('table tbody', this.el).empty();
+		this.appendWhenReady(this.lastOptions);
+	},
+	onUploadError: function(message) {
+		if(!message) message = "{{label.js.notuploaded}}";
+		app.pushMessageAndNavigate("error", message);
 	}
 });
 
@@ -185,7 +258,7 @@ window.LabelListItemView = Backbone.View.extend({
 		this.render();
 	},
 	onSaveError: function(message) {
-		if(!message) message = "{{general.js.general}}".format("{{general.js.saving}}", this.model.id);
+		if(!message) message = "{{generic.js.error}}".format("{{generic.js.saving}}", this.model.id);
 		app.pushMessageAndNavigate("error", message);
 		this.render();
 	},

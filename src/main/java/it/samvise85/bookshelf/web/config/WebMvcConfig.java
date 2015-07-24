@@ -4,10 +4,14 @@ import it.samvise85.bookshelf.web.internationalization.InternationalizationResou
 import it.samvise85.bookshelf.web.internationalization.InternationalizationTemplateResourceResolver;
 import it.samvise85.bookshelf.web.internationalization.TimestampResourceResolver;
 
+import javax.servlet.MultipartConfigElement;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.concurrent.ConcurrentMapCache;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.Environment;
+import org.springframework.web.multipart.MultipartResolver;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.ViewControllerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
@@ -43,5 +47,17 @@ public class WebMvcConfig extends WebMvcConfigurerAdapter {
 	@Override
 	public void addViewControllers(ViewControllerRegistry registry) {
 	    registry.addViewController("/").setViewName("forward:/index.html");
+	}
+
+	@Bean
+	public MultipartConfigElement multipartConfigElement() {
+		return new MultipartConfigElement("", 1024*1024, 1200*1024, 1024*1024);
+	}
+
+	@Bean
+	public MultipartResolver multipartResolver() {
+		org.springframework.web.multipart.commons.CommonsMultipartResolver multipartResolver = new org.springframework.web.multipart.commons.CommonsMultipartResolver();
+		multipartResolver.setMaxUploadSize(1000000);
+		return multipartResolver;
 	}
 }

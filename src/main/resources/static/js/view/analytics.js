@@ -150,7 +150,7 @@ window.RequestView = Backbone.View.extend({
 		this.loadError();
 	},
 	onFetchError: function(message) {
-		if(!message) message = "{{general.js.notfound}}".format("{{general.js.request}}");
+		if(!message) message = "{{generic.js.notfound}}".format("{{generic.js.request}}");
 		app.pushMessageAndNavigate("error", message);
 	},
 	loadError: function() {
@@ -201,7 +201,7 @@ window.ErrorView = Backbone.View.extend({
 			this.lastOptions.callback(this.el);
 	},
 	onFetchError: function(message) {
-		if(!message) message = "{{general.js.notfound}}".format("{{general.js.error}}");
+		if(!message) message = "{{generic.js.notfound}}".format("{{generic.js.error}}");
 		app.pushMessageAndNavigate("error", message);
 	}
 });

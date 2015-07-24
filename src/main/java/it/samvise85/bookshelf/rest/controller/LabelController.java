@@ -1,5 +1,6 @@
 package it.samvise85.bookshelf.rest.controller;
 
+import it.samvise85.bookshelf.exception.BookshelfException;
 import it.samvise85.bookshelf.manager.LabelManager;
 import it.samvise85.bookshelf.manager.LanguageManager;
 import it.samvise85.bookshelf.model.Label;
@@ -15,21 +16,28 @@ import it.samvise85.bookshelf.persist.clauses.SelectionOperation;
 import it.samvise85.bookshelf.utils.BookshelfConstants;
 import it.samvise85.bookshelf.web.security.BookshelfRole;
 
+import java.io.IOException;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Enumeration;
 import java.util.List;
+import java.util.Properties;
 
 import javax.servlet.http.HttpServletRequest;
 
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.annotation.Secured;
+import org.springframework.stereotype.Controller;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 @RestController
 public class LabelController extends AbstractController {
@@ -54,7 +62,7 @@ public class LabelController extends AbstractController {
 		return labelManager.getList(new PersistOptions(
         		ProjectionClause.NO_PROJECTION,
         		Collections.singletonList(new SelectionClause("lang", SelectionOperation.EQUALS, language)),
-        		Collections.singletonList(new OrderClause("key", Order.ASC)),
+        		Collections.singletonList(new OrderClause("labelKey", Order.ASC)),
         		page != null ? new PaginationClause(num != null ? num : BookshelfConstants.Pagination.DEFAULT_PAGE_SIZE, page) : null));
 	}
 
@@ -120,6 +128,84 @@ public class LabelController extends AbstractController {
 		return languageManager.update(language);
     }
 
+	@RequestMapping(value="/languages/messages_{id}.properties", method=RequestMethod.GET)
+	@Secured(BookshelfRole.ADMIN)
+    public ResponseDto getLanguageProperties(HttpServletRequest request, @PathVariable String id) {
+		String methodName = getMethodName();
+		return executeMethod(request, methodName, new Class<?>[] { String.class }, new Object[] { id });
+	}
+	
+    protected String getLanguageProperties(String id) {
+    	List<Label> list = labelManager.getList(new PersistOptions(ProjectionClause.NO_PROJECTION,
+    			SelectionClause.list(new SelectionClause("lang", SelectionOperation.EQUALS, id)), 
+    			OrderClause.list(OrderClause.ASC("labelKey"))));
+    	StringBuilder sb = new StringBuilder();
+    	boolean first = true;
+    	for(Label label : list) {
+    		if(first) first = false;
+    		else sb.append("\n");
+    		sb.append(label.getLabelKey());
+    		sb.append("=");
+    		if(label.getLabel() != null)
+    			sb.append(label.getLabel());
+    	}
+    	return sb.toString();
+    }
+
+	@Controller
+	public static class UploadController extends AbstractController {
+		@Autowired
+		private LabelManager labelManager;
+
+		@Autowired
+		private LanguageManager languageManager;
+		
+		@RequestMapping(value="/languages/{id}/properties", method=RequestMethod.POST)
+		@Secured(BookshelfRole.ADMIN)
+	    public @ResponseBody ResponseDto updateLanguageLabels(HttpServletRequest request, @PathVariable String id, @RequestParam("file") MultipartFile file) {
+			String methodName = getMethodName();
+			return executeMethod(request, methodName, new Class<?>[] { String.class, MultipartFile.class }, new Object[] { id, file });
+		}
+	
+		protected boolean updateLanguageLabels(String id, MultipartFile file) throws IOException {
+			Properties prop = new Properties();
+			try {
+				prop.load(file.getInputStream());
+			} catch(IOException e) {
+				throw new BookshelfException(e.getMessage(), e);
+			}
+
+			if(prop.size() > 0) {
+				Enumeration<Object> keys = prop.keys();
+				while(keys.hasMoreElements()) {
+					String key = (String) keys.nextElement();
+					String value = prop.getProperty(key);
+					Label label = labelManager.get(key, id);
+					if(!StringUtils.isEmpty(value)) {
+						if(label == null) {
+							label = new Label();
+							label.setId(key + "_" + id);
+							label.setLabelKey(key);
+						}
+						label.setLabel(value);
+						labelManager.update(label, false);
+					} else {
+						labelManager.delete(label.getId());
+					}
+				}
+				languageManager.increaseVersion(id);
+				return true;
+			} else {
+				return false;
+			}
+	    }
+	
+		@Override
+		protected Logger getLogger() {
+			return log;
+		}
+	}
+	
 	@Override
 	protected Logger getLogger() {
 		return log;

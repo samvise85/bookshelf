@@ -10,5 +10,7 @@ public interface LabelManager extends PersistenceUnit<Label> {
 	Label getDefault(String key);
 
 	void deleteAll();
+	
+	public Label update(Label objectToUpdate, boolean updateLanguageVersion);
 
 }

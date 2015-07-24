@@ -31,14 +31,15 @@ Security:
 
 Security implementation is simple: the client generates and send a token (remember-me-like) through this function:
 
-  SHA-1(username + ":" + expiration date + ":" + SHA-1(password) + ":" + salt)
-
+```JavaScript
+SHA1(username + ":" + expiration_date + ":" + SHA1(password) + ":" + salt)
+```
+  
 NOTE: the expiration date is always -1 and the salt is the phrase "bookshelf by Samvise85!"
-NOTE 2: to support old version, it can work even with passwords stored unencrypted.
 
 When the sever receives the username and the token can verify the token (it can recalculate the token because it knows all the parts that compose it).
 
-The web services are marked with @Secured annotation that indicated wich role the user must possess (NOTE: roles are required to start with the prefix "ROLE_").
+The web services are marked with ```@Secured``` annotation that indicated wich role the user must possess (NOTE: roles are required to start with the prefix "ROLE_").
 
 Is it safe? Of course not! Nothing is secure without SSL (maybe even with)
 
@@ -49,10 +50,12 @@ Database:
 
 Bookshelf now runs with both MySQL and H2 datasources.
 If you want to use MySQL you just have to configure a file db.properties in your user home as follows:
+```ini
 db.url=jdbc:mysql://<ip>:<port>/<databasename>
 db.user=<username>
 db.password=<password>
 db.driver=com.mysql.jdbc.Driver
+```
 
 If the file is not configured the Bookshelf H2 database is created/connected in your user home.
 
@@ -60,30 +63,32 @@ If the file is not configured the Bookshelf H2 database is created/connected in 
 E-mail:
 
 Bookshelf can connect to any smtp server (with password authorization). just configure a file mail.properties in your user home as follows:
+```ini
 smtp.host=<your smtp server>
 smtp.port=<your smtp port>
 smtp.protocol=<smtp or smtps>
 smtp.username=<your username>
 smtp.password=<your password>
 support.email=<your email>
+```
 
 If the file is not configured Bookshelf will send no mail.
 
 
 Internationalization:
 
-A chain of ResourceResolver is configured in WebMvcConfig.java. It permits to template-ize all text resources (html, js, css).
+A chain of ```ResourceResolver``` is configured in ```WebMvcConfig.java```. It permits to template-ize all text resources (html, js, css).
 When a resource is requested:
-- TimestampResourceResolver parse the requested path to find a version number into the file name and erase it (this version is needed to bypass server and client caches, see index.html to understand how is used).
-- InternationalizationResourceResolver append to the requested path: language code and version o language (everytime a label is updated, language version is incremented)
-- CachingResourceResolver (Spring standard) caches all the requests resolved by InternationalizationResourceResolver
-- InternationalizationTemplateResourceResolver gets the requested path and retrieve the right resource then it passes the resource to InternationalizationTransformer that gets the user language and substitutes all the keys in the files (surrounded by double brackets "{{key}}") with the label. If the language is not supported labels are chosen by the default language and if a label of a supported language does not exists it creates a new empty one and returns the missing key surrounded by question marks.
+- ```TimestampResourceResolver``` parse the requested path to find a version number into the file name and erase it (this version is needed to bypass server and client caches, see index.html to understand how is used).
+- ```InternationalizationResourceResolver``` append to the requested path: language code and version o language (everytime a label is updated, language version is incremented)
+- ```CachingResourceResolver``` (Spring standard) caches all the requests resolved by InternationalizationResourceResolver
+- ```InternationalizationTemplateResourceResolver``` gets the requested path and retrieve the right resource then it passes the resource to ```InternationalizationTransformer``` that gets the user language and substitutes all the keys in the files (surrounded by double brackets "```{{key}}```") with the label. If the language is not supported labels are chosen by the default language and if a label of a supported language does not exists it creates a new empty one and returns the missing key surrounded by question marks.
  
 For example, if /tpl/HeaderView_1434550070203.html is requested, the request path is manipulated as follows:
-- TimestampResourceResolver transform it to /tpl/HeaderView.html and passes forward
-- InternationalizationResourceResolver transform it to /tpl/HeaderView_en_102.html and passes forward
-- CachingResourceResolver checks if the respource is in the cache, if not passes forward
-- InternationalizationTemplateResourceResolver transforms the path again to /tpl/HeaderView.html, gets the resource and translate it then returns it back.
+- ```TimestampResourceResolver``` transform it to /tpl/HeaderView.html and passes forward
+- ```InternationalizationResourceResolver``` transform it to /tpl/HeaderView_en_102.html and passes forward
+- ```CachingResourceResolver``` checks if the respource is in the cache, if not passes forward
+- ```InternationalizationTemplateResourceResolver``` transforms the path again to /tpl/HeaderView.html, gets the resource and translate it then returns it back.
 
 A view in the newly administration menu permits to view all the labels stored into the application and modify them. After the modification it's simply necessarly to refresh the page (maybe Ctrl+Shift+R).
 
@@ -118,7 +123,6 @@ There are two users:
 
 REST webservices (http://www.html.it/pag/19596/i-principi-dellarchitettura-restful/):
 - Spring 4 (https://spring.io/guides/gs/rest-service/)
-- Spring Boot (http://docs.spring.io/spring-boot/docs/current/reference/htmlsingle/#using-boot)
 - JSON (http://it.wikipedia.org/wiki/JSON)
 
 Security:

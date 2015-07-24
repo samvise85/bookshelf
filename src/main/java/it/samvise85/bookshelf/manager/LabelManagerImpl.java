@@ -42,11 +42,17 @@ public class LabelManagerImpl extends AbstractPersistenceUnit<Label> implements 
 		label.setLabel(MessagesUtil.getMessageOrNull(key));
 		return label;
 	}
-
+	
 	@Override
 	public Label update(Label objectToUpdate) {
+		return update(objectToUpdate, true);
+	}
+
+	@Override
+	public Label update(Label objectToUpdate, boolean updateLanguageVersion) {
 		Label label = super.update(objectToUpdate);
-		languageManager.increaseVersion(label.getLang());
+		if(updateLanguageVersion)
+			languageManager.increaseVersion(label.getLang());
 		return label;
 	}
 

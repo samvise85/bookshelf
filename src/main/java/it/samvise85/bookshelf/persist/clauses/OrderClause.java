@@ -1,5 +1,8 @@
 package it.samvise85.bookshelf.persist.clauses;
 
+import java.util.Arrays;
+import java.util.List;
+
 
 public class OrderClause {
 	private String field;
@@ -44,5 +47,9 @@ public class OrderClause {
 			default:
 			return null;
 		}
+	}
+
+	public static List<OrderClause> list(OrderClause ... clauses) {
+		return Arrays.asList(clauses);
 	}
 }
