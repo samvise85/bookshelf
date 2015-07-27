@@ -3,8 +3,11 @@ package it.samvise85.bookshelf.utils;
 
 public enum AppVersion {
 	
+	VOID(null),
+	
 	AGRAJAG("1.0.0"),
-	BLART_VERSENWALT_III("2.0.0"),
+	BLART_VERSENWALT_III("1.3.0"),
+	COLIN("1.4.0"),
 	
 	MILLIWAYS("LAST");
 	
@@ -48,7 +51,8 @@ public enum AppVersion {
 	
 	public static AppVersion findByVersionCode(String versionCode) {
 		for(AppVersion v : AppVersion.values())
-			if(v.getVersionCode().equalsIgnoreCase(versionCode))
+			if(v.getVersionCode() == versionCode //only for nulls! 
+					|| (v.getVersionCode() != null && v.getVersionCode().equalsIgnoreCase(versionCode)))
 				return v;
 		return null;
 	}

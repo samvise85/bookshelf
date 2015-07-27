@@ -1,3 +1,49 @@
+window.HeaderView = Backbone.View.extend({
+	
+    initialize: function () {
+    },
+
+    render: function (options) {
+        $(this.el).html(this.template(options));
+    	this.select(app.headerSelection);
+    	return this;
+    },
+
+    select: function(menuItem) {
+    	this.selection = menuItem;
+        $('.nav li', this.el).removeClass('active');
+        if(menuItem)
+        	$('.' + menuItem, this.el).addClass('active');
+    }
+});
+
+window.MessageView = Backbone.View.extend({
+	
+	messages : [],
+	errors : [],
+	warnings : [],
+
+	render: function() {
+		html = '';
+		if(this.messages.length > 0)
+			html += this.template({type: 'success', messages:this.messages});
+		if(this.warnings.length > 0)
+			html += this.template({type: 'warning', messages:this.warnings});
+		if(this.errors.length > 0)
+			html += this.template({type: 'danger', messages:this.errors});
+		
+		$(this.el).html(html);
+		this.clear();
+        return this;
+    },
+	clear : function() {
+		this.messages = [];
+		this.warnings = [];
+		this.errors = [];
+	}
+
+});
+
 window.LoginView = Backbone.View.extend({
 
     initialize:function () {

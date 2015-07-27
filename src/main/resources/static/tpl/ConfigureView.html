@@ -1,0 +1,5 @@
+<% if(!configured) { %>
+<button id="configure" class="btn">{{generic.view.configure}}</button>
+<% } else { %>
+<a id="gotoapp" class="btn" href="<%= getAppPath() %>/#">{{generic.view.gotoapp}}</a>
+<% } %>

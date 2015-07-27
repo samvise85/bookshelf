@@ -4,9 +4,9 @@
 
             <a class="brand" href="<%= getAppPath() %>/#">Bookshelf</a>
 
+			<% if(typeof showMenu === 'undefined' || showMenu !== false) { %>
             <div class="nav-collapse">
                 <ul class="nav">
-<!--                     <li class="home-menu active"><a href="<%= getAppPath() %>/#">{{header.menu.home}}</a></li> -->
                     <li class="book-menu"><a href="<%= getAppPath() %>/#books">{{header.menu.books}}</a></li>
                     <li class="contact-menu"><a href="<%= getAppPath() %>/#contact">{{header.menu.contact}}</a></li>
                     <% if(app.isAdmin()) { %>
@@ -32,6 +32,7 @@
 				%>
                 </ul>
             </div>
+            <% } %>
         </div>
     </div>
 </div>

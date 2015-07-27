@@ -4,20 +4,6 @@ window.createToken = function (username, password) {
 	return CryptoJS.SHA1(username + ":-1:" + CryptoJS.SHA1(password).toString(CryptoJS.enc.Hex) + ":bookshelf by Samvise85!").toString(CryptoJS.enc.Hex);
 }
 
-$.getToken = function () {
-	if($.cookie('bookshelf-username') && $.cookie('bookshelf-token'))
-		return {'bookshelf-username': $.cookie('bookshelf-username'), 'bookshelf-token': $.cookie('bookshelf-token')};
-	return {};
-}
-window.getAppPath = function() {
-	if(!window.appname) {
-		var name = window.location.pathname.split("/")[1];
-		window.appname = name.toLowerCase().indexOf("bookshelf") >= 0 ? name : null;
-		
-	}
-	return '//' + window.location.host + (window.appname != null ? "/" + window.appname : "");
-};
-
 $.ajaxSetup({
     statusCode: {
         401: function(){
@@ -28,12 +14,6 @@ $.ajaxSetup({
 			}
         }
     }
-});
-
-$.ajaxPrefilter( function( options, originalOptions, jqXHR ) {
-	if(options.url.indexOf('http') != 0)
-		options.url = getAppPath() + options.url;
-	options.headers = $.getToken();
 });
 
 window.htmlEncode = function(value){
@@ -217,3 +197,142 @@ window.downloadFile = function(content, type, name) {
     a.download = name;
     a.click();
 }
+
+window.BookshelfRouter = Backbone.Router.extend({
+	user: null,
+	history: [],
+	clearMessages: true,
+
+    init: function () {
+		var self = this;
+		//load user
+		if($.cookie("bookshelf-username")) {
+			$.ajax({url: '/login',
+				type:'GET',
+				success:function (data) { self.onLoginSuccess(data); },
+				error: function () { self.onLoginError("{{user.js.loginerr}}"); }
+			});
+		} else {
+			self.initHistory();
+			self.initView();
+		}
+	},
+	onLoginSuccess: function(data) {
+		data = eval(data);
+		if(data.errors) {
+			this.onLoginError("{{user.js.loginerr}}");
+		} else if(data.response) {
+			this.user = data.response;
+			if(!this.user) {
+				this.onLoginError("{{user.js.loginerr}} {{user.js.activateaccount}}");
+			} else {
+				this.initHistory();
+				this.initView();
+			}
+		}
+	},
+	onLoginError: function(message) {
+		if($.cookie("bookshelf-username")) {
+			$.deleteCookie("bookshelf-username");
+			$.deleteCookie("bookshelf-token");
+		}
+		this.initHistory();
+		this.initView(null, null, message);
+	},
+	initHistory: function () {
+		this.routesHit = 0;
+        Backbone.history.start();
+		Backbone.history.on('route', function(router, method) {
+			this.routesHit++;
+			app.history.push({
+				method : method,
+				fragment : Backbone.history.fragment
+			});
+//			console.log(app.history); //TODO create and save route
+		}, this);
+	},
+	initView: function (message, warning, error) {
+		var self = this;
+		viewLoader.load("HeaderView", function() { self.initHeader(); });
+		viewLoader.load("MessageView", function() { self.initMessages(message, warning, error); });
+    },
+    initHeader: function() {
+		this.headerView = new HeaderView();
+		$("#header").html(this.headerView.render({showMenu: true}).el);
+    },
+    initMessages: function(message, warning, error) {
+    	this.messageView = new MessageView();
+        if(message) this.messageView.messages.push(message);
+        if(warning) this.messageView.warnings.push(warning);
+        if(error) this.messageView.errors.push(error);
+        $('#messages').html(this.messageView.render().el);
+	},
+	clear: function () {
+		this.currentView = null;
+		this.initView();
+	},
+	back: function() {
+		if(this.routesHit > 1) {
+			//more than one route hit -> user did not land to current page directly
+			window.history.back();
+		} else {
+			//otherwise go to the home page. Use replaceState if available so
+			//the navigation doesn't create an extra history entry
+			this.navigate('/', {trigger:true, replace:true});
+		}
+	},
+	getUser: function (callback) {
+		return this.user;
+	},
+	isAdmin: function () {
+		if(!$.cookie("bookshelf-username")) return false;
+		return this.getUser() && this.getUser().admin === true;
+	},
+	renderView : function(viewName, View, headerOptions, viewOptions) {
+		if(headerOptions)
+			this.headerSelection = headerOptions.selection;
+		
+		//clear current view
+		if(this.currentView) this.currentView.close();
+		this.currentViewName = viewName;
+		this.currentViewClass = View;
+		
+		//renders the view
+		var self = this;
+		var className = viewName.charAt(0).toUpperCase() + viewName.slice(1);
+		viewLoader.load(className, function() {
+			self.currentView = new self.currentViewClass();
+			self.currentView.render(viewOptions);
+			$("#content").html(self.currentView.el);
+			self.currentView.delegateEvents();
+		});
+		
+		//selects header
+		if(this.headerView) {
+			if(!headerOptions || headerOptions.rerender !== false)
+				$("#header").html(this.headerView.render().el);
+		}
+		if(this.clearMessages && this.messageView) {
+			this.messageView.clear();
+			$('#messages').html(this.messageView.render().el);
+		} else {
+			this.clearMessages = true;
+		}
+	},
+	rerenderView : function() {
+		if(this.currentView) {
+			var headerOptions = {rerender: true};
+			this.renderView(this.currentViewName, this.currentViewClass, headerOptions, this.currentView.lastOptions);
+		}
+	},
+	pushMessageAndNavigate: function(messageType, message, route) {
+		if(this.messageView) {
+			eval("this.messageView." + messageType + "s.push(message);");
+			$('#messages').html(this.messageView.render().el);
+		} 
+		if(route != null) {
+			this.clearMessages = false;
+			this.navigate(route, {trigger:true});
+		}
+	},
+});

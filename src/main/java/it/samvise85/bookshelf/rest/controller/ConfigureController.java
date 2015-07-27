@@ -1,14 +1,20 @@
 package it.samvise85.bookshelf.rest.controller;
 
+import it.samvise85.bookshelf.manager.BookManager;
+import it.samvise85.bookshelf.manager.ChapterManager;
 import it.samvise85.bookshelf.manager.SettingManager;
 import it.samvise85.bookshelf.manager.UserManager;
+import it.samvise85.bookshelf.model.Book;
+import it.samvise85.bookshelf.model.Chapter;
 import it.samvise85.bookshelf.model.User;
 import it.samvise85.bookshelf.model.UserProfile;
+import it.samvise85.bookshelf.model.dto.PublishingStatus;
 import it.samvise85.bookshelf.model.dto.ResponseDto;
 import it.samvise85.bookshelf.utils.AppVersion;
 import it.samvise85.bookshelf.utils.SHA1Digester;
 import it.samvise85.bookshelf.web.security.BookshelfRole.Role;
 
+import java.util.Date;
 import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
@@ -27,13 +33,17 @@ public class ConfigureController extends AbstractController {
 	private UserManager userManager;
 	@Autowired
 	private SettingManager settingManager;
+	@Autowired
+	private BookManager bookManager;
+	@Autowired
+	private ChapterManager chapterManager;
 
 	@Override
 	protected Logger getLogger() {
 		return log;
 	}
 
-	@RequestMapping(value = "/configure", method = RequestMethod.PUT)
+	@RequestMapping(value = "/config", method = RequestMethod.PUT)
 	public ResponseDto configure(HttpServletRequest request) {
 		String methodName = getMethodName();
 		return executeMethod(request, methodName);
@@ -96,22 +106,29 @@ public class ConfigureController extends AbstractController {
 		String appVersion = settingManager.getAppVersion();
 		AppVersion version = AppVersion.findByVersionCode(appVersion);
 		
-		if(version == null) {
-			updateFromA();
-		} else {
-			switch(version) {
-			case AGRAJAG:
-				updateFromA();
-			case BLART_VERSENWALT_III:
-				updateFromB();
-			default:
-				break;
-			}
+		String message = "Nothing to update";
+		switch(version) {
+		case VOID:
+			message = updateFromVoid();
+		case AGRAJAG:
+			message = updateFromA();
+		case BLART_VERSENWALT_III:
+			message = updateFromB();
+		case COLIN:
+//			message = updateFromC();
+		default:
+			break;
 		}
-		return "ok";
+		return message;
 	}
 
-	private void updateFromA() {
+	private String updateFromVoid() {
+		configure();
+		settingManager.setAppVersion(AppVersion.AGRAJAG.getVersionCode());
+		return "Updated to " + AppVersion.AGRAJAG.getVersionCode();
+	}
+	
+	private String updateFromA() {
 		//set profiles
 		List<User> list = userManager.getList(null);
 		for(User user : list) {
@@ -127,10 +144,24 @@ public class ConfigureController extends AbstractController {
 			}
 		}
 		settingManager.setAppVersion(AppVersion.BLART_VERSENWALT_III.getVersionCode());
+		return "Updated to " + AppVersion.BLART_VERSENWALT_III.getVersionCode();
 	}
 
-	private void updateFromB() {
-		//for future versions
+	private String updateFromB() {
+		List<Book> list = bookManager.getList(null);
+		for(Book b : list) {
+			b.setPublishingStatus(PublishingStatus.PUBLISHED.name());
+			b.setPublishingDate(new Date());
+			bookManager.update(b);
+		}
+		List<Chapter> list2 = chapterManager.getList(null);
+		for(Chapter c : list2) {
+			c.setPublishingStatus(PublishingStatus.PUBLISHED.name());
+			c.setPublishingDate(new Date());
+			chapterManager.update(c);
+		}
 		
+		settingManager.setAppVersion(AppVersion.COLIN.getVersionCode());
+		return "Updated to " + AppVersion.COLIN.getVersionCode();
 	}
 }

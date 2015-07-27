@@ -82,6 +82,10 @@ public class ChapterManagerImpl extends AbstractPersistenceUnit<Chapter> impleme
 			chapterToUpdate.setTitle(updates.getTitle());
 		if(StringUtils.isNotEmpty(updates.getText()))
 			chapterToUpdate.setText(updates.getText());
+		if(StringUtils.isNotEmpty(updates.getPublishingStatus()))
+			chapterToUpdate.setPublishingStatus(updates.getPublishingStatus());
+		if(updates.getPublishingDate() != null)
+			chapterToUpdate.setPublishingDate(updates.getPublishingDate());
 		
 		boolean last = false;
 		if(updates.getPosition() == null || updates.getPosition() == -1) {

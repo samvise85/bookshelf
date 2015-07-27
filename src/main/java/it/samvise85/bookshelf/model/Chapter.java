@@ -1,7 +1,10 @@
 package it.samvise85.bookshelf.model;
 
 import it.samvise85.bookshelf.model.commons.CommentableImpl;
+import it.samvise85.bookshelf.model.commons.Publishable;
 import it.samvise85.bookshelf.model.commons.StringIdentifiable;
+
+import java.util.Date;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -12,7 +15,7 @@ import com.fasterxml.jackson.annotation.JsonInclude.Include;
 
 @JsonInclude(Include.NON_NULL)
 @Entity
-public class Chapter extends CommentableImpl implements StringIdentifiable {
+public class Chapter extends CommentableImpl implements StringIdentifiable, Publishable {
 	//internal attributes
 	@Id
 	private String id;
@@ -30,6 +33,10 @@ public class Chapter extends CommentableImpl implements StringIdentifiable {
 	private String book;
 	@Column
 	private String section;
+	@Column
+	private String publishingStatus;
+	@Column
+	private Date publishingDate; 
 
 	public Chapter() {};
 	public Chapter(String title, String number, String text, String book) {
@@ -88,4 +95,21 @@ public class Chapter extends CommentableImpl implements StringIdentifiable {
 	public void setSection(String section) {
 		this.section = section;
 	}
+	@Override
+	public String getPublishingStatus() {
+		return publishingStatus;
+	}
+	@Override
+	public void setPublishingStatus(String publishingStatus) {
+		this.publishingStatus = publishingStatus;
+	}
+	@Override
+	public Date getPublishingDate() {
+		return publishingDate;
+	}
+	@Override
+	public void setPublishingDate(Date publishingDate) {
+		this.publishingDate = publishingDate;
+	}
+	
 }

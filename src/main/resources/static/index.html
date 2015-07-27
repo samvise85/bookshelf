@@ -25,5 +25,21 @@
   <script src="//cdnjs.cloudflare.com/ajax/libs/crypto-js/3.1.2/rollups/sha1.js"></script>
   <script src="//tinymce.cachefly.net/4.0/tinymce.min.js"></script>
   <script src="js/init.js"></script>
+  <script type="text/javascript">
+  $(document).ready(function () {
+		var date = new Date().getTime();
+		var scripts = [["/js/utils_" + date + ".js"],
+		               [ "/js/model/modelCommon_" + date + ".js",
+		                 "/js/model/model_" + date + ".js" ],
+		               [ "/js/view/commonViews_" + date + ".js",
+		                 "/js/view/contact_" + date + ".js",
+		                 "/js/view/user_" + date + ".js",
+		                 "/js/view/book_" + date + ".js",
+		                 "/js/view/chapter_" + date + ".js",
+		                 "/js/view/comment_" + date + ".js" ],
+		               [ "/js/main_" + date + ".js" ] ];
+		new ScriptLoader(scripts);
+  });
+  </script>
 </body>
 </html> 

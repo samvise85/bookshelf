@@ -46,6 +46,10 @@ public class BookManagerImpl extends AbstractPersistenceUnit<Book>  implements B
 			bookToUpdate.setTitle(updates.getTitle());
 		if(updates.getYear() != null)
 			bookToUpdate.setYear(updates.getYear());
+		if(StringUtils.isNotEmpty(updates.getPublishingStatus()))
+			bookToUpdate.setPublishingStatus(updates.getPublishingStatus());
+		if(updates.getPublishingDate() != null)
+			bookToUpdate.setPublishingDate(updates.getPublishingDate());
 
 		bookToUpdate.setLastModification(new Date());	
 		return super.update(bookToUpdate);
