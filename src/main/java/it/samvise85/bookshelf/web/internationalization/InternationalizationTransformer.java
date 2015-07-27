@@ -25,7 +25,7 @@ public class InternationalizationTransformer {
 	private LanguageManager languageManager;
 	private UserManager userManager;
 	
-	public Resource transform(HttpServletRequest request, Resource resource) throws IOException {
+	public TransformedResource transform(HttpServletRequest request, Resource resource) throws IOException {
 		String username = request.getHeader(SpringSecurityConfig.USERNAME_PARAM_NAME);
 		String language = request.getLocale().getLanguage();
 		if(username != null) {

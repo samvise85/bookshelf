@@ -8,28 +8,26 @@
             <div class="nav-collapse">
                 <ul class="nav">
                     <li class="book-menu"><a href="<%= getAppPath() %>/#books">{{header.menu.books}}</a></li>
+                    [[AUTHOR]]
+                    <li class="publish-menu"><a href="<%= getAppPath() %>/#publish">{{header.menu.publish}}</a></li>
+                    [[/AUTHOR]]
                     <li class="contact-menu"><a href="<%= getAppPath() %>/#contact">{{header.menu.contact}}</a></li>
-                    <% if(app.isAdmin()) { %>
+                    [[ADMIN]]
                     <li class="user-menu"><a href="<%= getAppPath() %>/#users">{{header.menu.people}}</a></li>
                     <li class="admin-menu"><a href="admin.html">{{header.menu.administration}}</a></li>
-                    <% } %>
-<!--                     <li class="like"><div -->
-<!-- 					  class="fb-like" -->
-<!-- 					  data-share="true" -->
-<!-- 					  data-width="450" -->
-<!-- 					  data-show-faces="false"> -->
-<!-- 					</div></li> -->
+                    [[/ADMIN]]
                 </ul>
                 <ul class="nav pull-right">
-				<%
-					if(app.getUser() != null) {%>
-						<li class="logged-menu"><a href="<%= getAppPath() %>/#user/<%= app.getUser().id %>"><%= app.getUser().firstname %> <%= app.getUser().lastname %>
-						<%= !app.getUser().firstname && !app.getUser().lastname ? app.getUser().username : "" %></a></li>
-						<li class="logout-menu"><a href="#logout">{{header.menu.logout}}</a></li>
-					<%} else {%>
-						<li class="login-menu"><a href="<%= getAppPath() %>/#login">{{header.menu.login}}</a></li>
-					<%}
-				%>
+                	[[ANYONE]]
+					<li class="logged-menu"><a href="<%= getAppPath() %>/#user/<%= app.getUser().id %>">
+						<%= app.getUser().firstname %> <%= app.getUser().lastname %>
+						<%= !app.getUser().firstname && !app.getUser().lastname ? app.getUser().username : "" %>
+					</a></li>
+					<li class="logout-menu"><a href="#logout">{{header.menu.logout}}</a></li>
+					[[/ANYONE]]
+					[[UNKNOWN]]
+					<li class="login-menu"><a href="<%= getAppPath() %>/#login">{{header.menu.login}}</a></li>
+					[[/UNKNOWN]]
                 </ul>
             </div>
             <% } %>

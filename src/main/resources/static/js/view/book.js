@@ -30,7 +30,8 @@ window.BookEditView = Backbone.View.extend({
 	messages: new Messages(true),
 	
 	events: {
-		'submit .edit-book-form': 'saveBook',
+		'click #save': 'saveBook',
+		'click #publish': 'publishBook',
 		'blur [name=title]': 'validateTitle',
 		'blur [name=year]': 'validateYear',
 	},
@@ -62,10 +63,16 @@ window.BookEditView = Backbone.View.extend({
 		this.validateTitle();
 		this.validateYear();
 	},
-	saveBook: function (ev) {
+	publishBook: function (ev) {
+		options = {status: "PUBLISHED"};
+		this.saveBook(ev, options);
+	},
+	saveBook: function (ev, options) {
 		this.validate();
 		if(this.messages.isEmpty()) {
 			var bookDetails = $(ev.currentTarget).serializeObject();
+			if(options && options.status) bookDetails.publishingStatus = options.status;
+			else bookDetails.publishingStatus = "DRAFT";
 			var book = new Book();
 			var self = this;
 			book.save(bookDetails, {

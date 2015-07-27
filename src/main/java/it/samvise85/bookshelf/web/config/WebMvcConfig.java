@@ -7,7 +7,6 @@ import it.samvise85.bookshelf.web.internationalization.TimestampResourceResolver
 import javax.servlet.MultipartConfigElement;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cache.concurrent.ConcurrentMapCache;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.Environment;
@@ -15,7 +14,6 @@ import org.springframework.web.multipart.MultipartResolver;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.ViewControllerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
-import org.springframework.web.servlet.resource.CachingResourceResolver;
 import org.springframework.web.servlet.resource.ResourceUrlProvider;
 
 @Configuration
@@ -30,15 +28,12 @@ public class WebMvcConfig extends WebMvcConfigurerAdapter {
 	@Override
 	public void addResourceHandlers(ResourceHandlerRegistry registry) {
 		String resourceLocations = "classpath:static/";
-		ConcurrentMapCache cache = new ConcurrentMapCache("bookshelfcache");
-		CachingResourceResolver cacheResolver = new CachingResourceResolver(cache);
 		
 		registry.addResourceHandler("/**")
 				.addResourceLocations(resourceLocations)
 				.resourceChain(true)
 				.addResolver(new TimestampResourceResolver())
 				.addResolver(new InternationalizationResourceResolver())
-				.addResolver(cacheResolver)
 				.addResolver(new InternationalizationTemplateResourceResolver())
 				;
 		super.addResourceHandlers(registry);

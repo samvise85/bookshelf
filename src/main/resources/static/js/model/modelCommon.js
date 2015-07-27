@@ -31,6 +31,14 @@ window.Languages = Backbone.Collection.extend({
   }
 });
 
+window.Route = Backbone.Model.extend({
+  urlRoot: '/analytics/routes',
+  parse: function(data) {
+	  this.error = data.error;
+	  return data.response;
+  }
+});
+
 window.Messages = function Messages() {
 	this.messageCount = function() {
 		count = 0;

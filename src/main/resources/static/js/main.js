@@ -143,6 +143,7 @@ window.MainRouter = window.BookshelfRouter.extend({
 		if(!self.getUser()) {
 			self.renderView('loginView', LoginView, {selection: null}, null);
 		} else {
+			self.clear();
 			self.navigate('', {trigger:true});
 		}
     },

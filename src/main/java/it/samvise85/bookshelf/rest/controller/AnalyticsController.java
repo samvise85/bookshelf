@@ -15,6 +15,7 @@ import it.samvise85.bookshelf.web.security.BookshelfRole;
 
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
@@ -154,9 +155,9 @@ public class AnalyticsController extends AbstractController {
 		return executeMethod(request, methodName, new Class<?>[] { Route.class }, new Object[] { route });
     }
 
-	protected void createRoute(Route request) {
-//		request.setCreation(new Date());
-        routeManager.create(request);
+	protected void createRoute(Route route) {
+		route.setDate(new Date());
+        routeManager.create(route);
     }
 
 	@RequestMapping(value="/analytics/routes/{id}", method=RequestMethod.DELETE)

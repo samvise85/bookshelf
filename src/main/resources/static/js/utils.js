@@ -244,11 +244,22 @@ window.BookshelfRouter = Backbone.Router.extend({
         Backbone.history.start();
 		Backbone.history.on('route', function(router, method) {
 			this.routesHit++;
+			
+			route = new Route();
+			route.save({
+					source: this.history.length > 0 ? this.history[this.history.length-1].fragment : null,
+					target: Backbone.history.fragment,
+					username: this.user ? this.user.id : null
+				}, {
+					success: function (response) { 
+						if(response.error) console.err(response.error); //FIXME TOSS ME
+						//DO NOTHING
+					}
+			});
 			app.history.push({
 				method : method,
 				fragment : Backbone.history.fragment
 			});
-//			console.log(app.history); //TODO create and save route
 		}, this);
 	},
 	initView: function (message, warning, error) {
@@ -269,6 +280,7 @@ window.BookshelfRouter = Backbone.Router.extend({
 	},
 	clear: function () {
 		this.currentView = null;
+		viewLoader.clear();
 		this.initView();
 	},
 	back: function() {

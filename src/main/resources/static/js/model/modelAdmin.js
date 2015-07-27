@@ -49,3 +49,12 @@ window.Labels = Backbone.Collection.extend({
 	  return data.response;
   }
 });
+
+window.Routes = Backbone.Collection.extend({
+  url : '/analytics/routes',
+  model: Route,
+  parse: function(data) {
+	  this.error = data.error;
+	  return data.response;
+  }
+});

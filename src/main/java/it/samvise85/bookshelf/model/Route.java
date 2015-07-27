@@ -1,5 +1,7 @@
 package it.samvise85.bookshelf.model;
 
+import java.util.Date;
+
 import it.samvise85.bookshelf.model.commons.GenericIdentifiable;
 
 import javax.persistence.Column;
@@ -18,9 +20,9 @@ public class Route implements GenericIdentifiable<Long> {
 	@Column
 	private String target;
 	@Column
-	private String username;
+	private String user;
 	@Column
-	private String status;
+	private Date date;
 
 	@Override
 	public Long getId() {
@@ -42,17 +44,17 @@ public class Route implements GenericIdentifiable<Long> {
 	public void setTarget(String target) {
 		this.target = target;
 	}
-	public String getUsername() {
-		return username;
+	public String getUser() {
+		return user;
 	}
-	public void setUsername(String username) {
-		this.username = username;
+	public void setUser(String user) {
+		this.user = user;
 	}
-	public String getStatus() {
-		return status;
+	public Date getDate() {
+		return date;
 	}
-	public void setStatus(String status) {
-		this.status = status;
+	public void setDate(Date date2) {
+		this.date = date2;
 	}
 
 }

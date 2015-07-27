@@ -74,7 +74,7 @@ public class BookManagerImpl extends AbstractPersistenceUnit<Book>  implements B
 	@Override
 	public Book get(Serializable id, ProjectionClause projection) {
 		Book book = super.get(id, projection);
-		setAuthorname(book);
+		if(book != null) setAuthorname(book);
 		return book;
 	}
 
