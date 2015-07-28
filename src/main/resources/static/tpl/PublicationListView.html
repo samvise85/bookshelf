@@ -1,0 +1,32 @@
+[[PROFILE out="AUTHOR,ADMIN"]]
+<div>
+<h3>{{publications.view.title}}</h3>
+<p>{{publications.view.sendmail}} <a href="mailto:{{generic.view.adminemail}}">{{generic.view.adminemail}}</a></p>
+</div>
+[[/PROFILE]]
+[[PROFILE in="AUTHOR,ADMIN"]]
+<a href="#publication/new" class="btn btn-primary">{{book.list.button.create}}</a>
+<hr/>
+<table class="table striped">
+	<thead>
+		<tr>
+			<th>{{book.model.title}}</th>
+			<th>{{book.model.year}}</th>
+			<th>{{book.model.author}}</th>
+			<th>{{book.model.genre}}</th>
+			<th></th>
+		</tr>
+	</thead>
+	<tbody>
+	<% _.each(books, function(book) { %>
+		<tr>
+			<td><a href="#book/<%= book.id %>"><%= htmlEncode(book.get('title')) %></a></td>
+			<td><a href="#publications?year=<%= book.get('year') %>"><%= htmlEncode(book.get('year')) %></a></td>
+			<td><a href="#user/<%= book.get('author') %>"><%= htmlEncode(book.get('authorname')) %></a></td>
+			<td><a href="#publications?genre=<%= book.get('genre') %>"><%= htmlEncode(book.get('genre')) %></a></td>
+			<td class="book-options" style="width:200px;text-align:right;"><a class="btn" href="#publication/<%= book.id %>/edit">{{book.list.button.edit}}</a></td>
+		</tr>
+	<% }); %>
+	</tbody>
+</table>
+[[/PROFILE]]

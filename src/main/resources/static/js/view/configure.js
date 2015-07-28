@@ -23,7 +23,7 @@ window.ConfigureView = Backbone.View.extend({
 		app.pushMessageAndNavigate("message", response.response);
 	},
 	onConfigureError: function(message) {
-		if(!message) message = "{{generic.je.error}}".format("{{generic.js.configuring}}");
+		if(!message) message = "{{generic.js.error}}".format("{{generic.js.configuring}}");
 		app.pushMessageAndNavigate("error", message);
 	}
 });

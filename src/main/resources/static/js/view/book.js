@@ -23,6 +23,8 @@ window.BookListView = Backbone.View.extend({
 	}
 });
 
+window.PublicationListView = window.BookListView.extend({});
+
 window.BookEditView = Backbone.View.extend({
 	lastOptions : null,
 	reload : true,

@@ -8,26 +8,28 @@
             <div class="nav-collapse">
                 <ul class="nav">
                     <li class="book-menu"><a href="<%= getAppPath() %>/#books">{{header.menu.books}}</a></li>
-                    [[AUTHOR]]
-                    <li class="publish-menu"><a href="<%= getAppPath() %>/#publish">{{header.menu.publish}}</a></li>
-                    [[/AUTHOR]]
-                    <li class="contact-menu"><a href="<%= getAppPath() %>/#contact">{{header.menu.contact}}</a></li>
-                    [[ADMIN]]
+                    [[PROFILE in="AUTHOR,ADMIN"]]
+                    <li class="publish-menu"><a href="<%= getAppPath() %>/#publications">{{header.menu.publish}}</a></li>
+                    [[/PROFILE]]
+                	[[PROFILE in="ANYONE" out="ADMIN"]]
+                    <li class="user-menu"><a href="<%= getAppPath() %>/#users">{{header.menu.authors}}</a></li>
+					[[/PROFILE]]
+                    [[PROFILE in="ADMIN"]]
                     <li class="user-menu"><a href="<%= getAppPath() %>/#users">{{header.menu.people}}</a></li>
                     <li class="admin-menu"><a href="admin.html">{{header.menu.administration}}</a></li>
-                    [[/ADMIN]]
+                    [[/PROFILE]]
                 </ul>
                 <ul class="nav pull-right">
-                	[[ANYONE]]
+                	[[PROFILE in="ANYONE"]]
 					<li class="logged-menu"><a href="<%= getAppPath() %>/#user/<%= app.getUser().id %>">
 						<%= app.getUser().firstname %> <%= app.getUser().lastname %>
 						<%= !app.getUser().firstname && !app.getUser().lastname ? app.getUser().username : "" %>
 					</a></li>
 					<li class="logout-menu"><a href="#logout">{{header.menu.logout}}</a></li>
-					[[/ANYONE]]
-					[[UNKNOWN]]
+					[[/PROFILE]]
+					[[PROFILE in="UNKNOWN"]]
 					<li class="login-menu"><a href="<%= getAppPath() %>/#login">{{header.menu.login}}</a></li>
-					[[/UNKNOWN]]
+					[[/PROFILE]]
                 </ul>
             </div>
             <% } %>

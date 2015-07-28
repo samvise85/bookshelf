@@ -5,14 +5,14 @@ window.MainRouter = window.BookshelfRouter.extend({
 		"contact": "contact",
         "books": "books",
         "books?*querystring": "books",
-        "books/new": "editBook",
-		"book/:id/edit": "editBook",
         "book/:id": "viewBook",
-//        "book/:book/chapters": "chapters",
-        "book/:book/chapters/new": "editChapter",
-        "book/:book/edit/:chapter": "editChapter",
-        "book/:book/:position/:chapter": "viewChapter3",
+        "book/:book/:position/:chapter": "viewChapter",
         "book/:book/chapter?position=:position": "viewChapterByPosition",
+        "publications": "publications",
+        "publications/new": "editBook",
+		"publication/:id/edit": "editBook",
+        "publication/:book/chapters/new": "editChapter",
+        "publication/:book/edit/:chapter": "editChapter",
 		"users": "users",
 		"user/:id/edit": "editUser",
 		"user/:id/activate/:code": "activateUser",
@@ -26,70 +26,62 @@ window.MainRouter = window.BookshelfRouter.extend({
 	languageChanged: function() {
 		viewLoader.clear();
 		this.clear();
-//		alert('language changed!!!');
 	},
 	
 	//route callbacks (or simply page rendering functions)
     home: function () {
     	var options = {};
-		this.renderView('homeView', HomeView, 
+		this.renderView('HomeView', HomeView, 
 				{selection: 'home-menu'}, options);
     },
     contact: function () {
     	var options = {};
-		this.renderView('contactView', ContactView, 
+		this.renderView('ContactView', ContactView, 
 				{selection: 'contact-menu'}, options);
     },
     books: function (querystring) {
     	options = null;
     	if(querystring) options = {queryparams: parseQueryString(querystring)}; 
-		this.renderView('bookListView', BookListView, 
-				{selection: 'book-menu'}, options);
-	},
-    editBook: function (id) {
-		var options = {id: id};
-		this.renderView('bookEditView', BookEditView, 
+		this.renderView('BookListView', BookListView, 
 				{selection: 'book-menu'}, options);
 	},
     viewBook: function (id) {
 		var options = {id: id};
-		this.renderView('bookReadView', BookReadView, 
+		this.renderView('BookReadView', BookReadView, 
 				{selection: 'book-menu'}, options);
 	},
-    chapters: function (book) {
-		var options = {book: book};
-		this.renderView('chapterListView', ChapterListView, 
-				{selection: 'book-menu'}, options);
-	},
-    editChapter: function (book, chapter) {
-		var options = {book: book, id: chapter};
-		this.renderView('chapterEditView', ChapterEditView,
-				{selection: 'book-menu'}, options);
-	},
-    viewChapter: function (book, id) {
-		var options = {book: book, id: id};
-		this.renderView('chapterReadView', ChapterReadView, 
-				{selection: 'book-menu'}, options);
-	},
-    viewChapter3: function (book, position, chapter) {
+    viewChapter: function (book, position, chapter) {
 		var options = {book: book, title: decodeURI(chapter), position:position};
-		this.renderView('chapterReadView', ChapterReadView, 
+		this.renderView('ChapterReadView', ChapterReadView, 
 				{selection: 'book-menu'}, options);
 	},
     viewChapterByPosition: function (book, position) {
 		var options = {book: book, position: position};
-		this.renderView('chapterReadView', ChapterReadView, 
+		this.renderView('ChapterReadView', ChapterReadView, 
+				{selection: 'book-menu'}, options);
+	},
+	publications: function (querystring) {
+    	options = null;
+    	params = parseQueryString(querystring)
+    	params.author = this.user.id;
+    	if(querystring) options = {queryparams: params}; 
+		this.renderView('PublicationListView', PublicationListView, 
+				{selection: 'publish-menu'}, options);
+	},
+    editBook: function (id) {
+		var options = {id: id};
+		this.renderView('BookEditView', BookEditView, 
+				{selection: 'book-menu'}, options);
+	},
+    editChapter: function (book, chapter) {
+		var options = {book: book, id: chapter};
+		this.renderView('ChapterEditView', ChapterEditView,
 				{selection: 'book-menu'}, options);
 	},
 	users: function () {
-//		console.log("User list requested. Admin: " + this.isAdmin());
-		if(this.isAdmin()) {
-			var options = {};
-			this.renderView('userListView', UserListView, 
-					{selection: 'user-menu'}, options);
-		} else {
-			this.navigate('', {trigger:true});
-		}
+		var options = {};
+		this.renderView('UserListView', UserListView, 
+				{selection: 'user-menu'}, options);
 	},
     editUser: function (id) {
     	var self = this;
@@ -97,7 +89,7 @@ window.MainRouter = window.BookshelfRouter.extend({
 	    	var options = {id: id};
 	    	selectedMenu = 'logged-menu';
 	    	if(self.isAdmin()) selectedMenu = 'user-menu';
-	    	self.renderView('userEditView', UserEditView, 
+	    	self.renderView('UserEditView', UserEditView, 
 					{selection: selectedMenu}, options);
 		} else {
 			self.navigate('', {trigger:true});
@@ -107,7 +99,7 @@ window.MainRouter = window.BookshelfRouter.extend({
 		var self = this;
 		if(!self.getUser()) {
 	    	var options = {id: id, code: code};
-	    	self.renderView('userActivateView', UserActivateView, 
+	    	self.renderView('UserActivateView', UserActivateView, 
 					{selection: 'home-menu'}, options);
 		} else {
 			self.navigate('', {trigger:true});
@@ -115,14 +107,15 @@ window.MainRouter = window.BookshelfRouter.extend({
 	},
     viewUser: function (id) {
     	var options = {id: id};
-    	selectedMenu = 'logged-menu';
-    	if(this.isAdmin() || (this.user && this.user.id != id)) selectedMenu = 'user-menu';
-    	this.renderView('userView', UserView, 
+    	selectedMenu = 'user-menu';
+    	if(this.user && this.user.id == id)
+    		selectedMenu = 'logged-menu';
+    	this.renderView('UserView', UserView, 
 				{selection: selectedMenu}, options);
 	},
 	forgot: function() {
 		if(!this.getUser()) {
-			this.renderView('forgotView', ForgotView, 
+			this.renderView('ForgotView', ForgotView, 
 					{selection: null}, null);
 		} else {
 			this.navigate('', {trigger:true});
@@ -131,7 +124,7 @@ window.MainRouter = window.BookshelfRouter.extend({
 	resetPassword: function(code) {
 		if(!this.getUser()) {
 	    	var options = {code: code};
-			this.renderView('resetView', ResetView, 
+			this.renderView('ResetView', ResetView, 
 					{selection: null}, options);
 		} else {
 			this.navigate('', {trigger:true});
@@ -141,7 +134,7 @@ window.MainRouter = window.BookshelfRouter.extend({
     login: function() {
     	var self = this;
 		if(!self.getUser()) {
-			self.renderView('loginView', LoginView, {selection: null}, null);
+			self.renderView('LoginView', LoginView, {selection: null}, null);
 		} else {
 			self.clear();
 			self.navigate('', {trigger:true});

@@ -9,7 +9,7 @@ window.ConfigRouter = window.BookshelfRouter.extend({
     },
     
     configure: function () {
-		this.renderView('configureView', ConfigureView, {}, null);
+		this.renderView('ConfigureView', ConfigureView, {}, null);
 	},
 });
 

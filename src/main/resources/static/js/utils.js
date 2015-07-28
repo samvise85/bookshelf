@@ -300,18 +300,17 @@ window.BookshelfRouter = Backbone.Router.extend({
 		if(!$.cookie("bookshelf-username")) return false;
 		return this.getUser() && this.getUser().admin === true;
 	},
-	renderView : function(viewName, View, headerOptions, viewOptions) {
+	renderView : function(className, View, headerOptions, viewOptions) {
 		if(headerOptions)
 			this.headerSelection = headerOptions.selection;
 		
 		//clear current view
 		if(this.currentView) this.currentView.close();
-		this.currentViewName = viewName;
+		this.currentViewName = className;
 		this.currentViewClass = View;
 		
 		//renders the view
 		var self = this;
-		var className = viewName.charAt(0).toUpperCase() + viewName.slice(1);
 		viewLoader.load(className, function() {
 			self.currentView = new self.currentViewClass();
 			self.currentView.render(viewOptions);
