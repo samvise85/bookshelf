@@ -3,7 +3,9 @@ package it.samvise85.bookshelf.rest.controller;
 import it.samvise85.bookshelf.manager.BookManager;
 import it.samvise85.bookshelf.manager.RestErrorManager;
 import it.samvise85.bookshelf.manager.RestRequestManager;
+import it.samvise85.bookshelf.manager.UserManager;
 import it.samvise85.bookshelf.model.Book;
+import it.samvise85.bookshelf.model.User;
 import it.samvise85.bookshelf.model.dto.PublishingStatus;
 import it.samvise85.bookshelf.model.dto.ResponseDto;
 import it.samvise85.bookshelf.persist.PersistOptions;
@@ -11,11 +13,13 @@ import it.samvise85.bookshelf.persist.clauses.OrderClause;
 import it.samvise85.bookshelf.persist.clauses.ProjectionClause;
 import it.samvise85.bookshelf.persist.clauses.SelectionClause;
 import it.samvise85.bookshelf.persist.clauses.SelectionOperation;
+import it.samvise85.bookshelf.utils.MessagesUtil;
 import it.samvise85.bookshelf.web.config.SpringSecurityConfig;
 import it.samvise85.bookshelf.web.security.BookshelfRole;
 
 import java.util.Collection;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -24,6 +28,7 @@ import javax.servlet.http.HttpServletRequest;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.annotation.Secured;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
@@ -39,11 +44,14 @@ public class BookController extends AnalyticsAwareController {
 	private BookManager bookManager;
 
 	@Autowired
+	private UserManager userManager;
+	
+	@Autowired
 	private RestRequestManager requestManager;
 
 	@Autowired
 	private RestErrorManager errorManager;
-
+	
 	@RequestMapping("/books")
     public ResponseDto getBookList(HttpServletRequest request,
     		@RequestHeader(value=SpringSecurityConfig.USERNAME_PARAM_NAME, required = false) String user) {
@@ -71,15 +79,27 @@ public class BookController extends AnalyticsAwareController {
 
 	@RequestMapping(value="/books", method=RequestMethod.POST)
 	@Secured({BookshelfRole.ADMIN, BookshelfRole.AUTHOR})
-	public ResponseDto createBook(HttpServletRequest request, @RequestBody Book book) {
+	public ResponseDto createBook(HttpServletRequest request, @RequestBody Book book,
+			@RequestHeader(value=SpringSecurityConfig.USERNAME_PARAM_NAME, required = false) String requestingUser) {
 		String methodName = getMethodName();
-		return executeMethod(request, methodName, new Class<?>[] { Book.class }, new Object[] { book }, book);
+		User user = userManager.getByUsername(requestingUser, User.LANGUAGE);
+		return executeMethod(request, methodName, new Class<?>[] { Book.class, User.class }, new Object[] { book, user }, book);
 	}
 	
-	protected Book createBook(Book request) {
-		request.setCreation(new Date());
-        return bookManager.create(request);
+	protected Book createBook(Book book, User user) {
+		book.setAuthor(user.getId());
+		book.setCreation(new Date());
+        return bookManager.create(book);
     }
+
+	protected Map<String, String> createBookValidation(Book book, User user) {
+		String language = user.getLanguage();
+		Map<String, String> map = new HashMap<String, String>();
+		if(book == null) map.put("general_err", MessagesUtil.getLabel(language, "book.java.null"));
+		if(book.getTitle() == null || StringUtils.isEmpty(book.getTitle().trim()))
+			map.put("title_err", MessagesUtil.getLabel(language, "book.js.titleerr"));
+		return map;
+	}
 
 	@RequestMapping(value="/books/{id}", method=RequestMethod.PUT)
 	@Secured({BookshelfRole.ADMIN, BookshelfRole.AUTHOR})

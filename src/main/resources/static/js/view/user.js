@@ -1,73 +1,10 @@
-window.UserListItemView = Backbone.View.extend({
-	tagName:"tr",
+window.UserListItemView = window.ListItemView.extend({});
 
-	initialize:function (user) {
-		this.model = user;
-		this.model.bind("change", this.render, this);
-		this.model.bind("destroy", this.close, this);
-	},
-	render:function () {
-		$(this.el).html(this.template({user: this.model}));
-		return this;
-	}
-});
-
-window.UserListView = Backbone.View.extend({
-	lastOptions : null,
-	reload : false,
-	clearMessages : true,
-	page: 1,
-	stopScroll: false,
-
-	initialize: function() {
-		var self = this;
-		viewLoader.load("UserListItemView", function() {
-			self.listItemViewReady = true;
-		});
-	},
-	render: function (options) {
-		if(app.isAdmin()) {
-			this.lastOptions = options;
-			$(this.el).empty();
-			$(this.el).html(this.template({view: this}));
-			this.append(options);
-		} else {
-			app.pushMessageAndNavigate("error", "{{user.js.cantedit}}");
-		}
-	},
-	append: function (options) {
-		if(this.listItemViewReady) {
-			this.appendWhenReady(options);
-		} else {
-			var self  = this;
-			setTimeout(function() { self.append(options); }, 100);
-		}
-	},
-	appendWhenReady: function (options) {
-		if(!(this.stopScroll === true)) {
-			var self = this;
-			var users = new Users({page: this.page});
-			users.fetch({
-				success: function(users) { return self.onFetchSuccess(users); },
-				error: function () { self.onFetchError(); }
-			});
-			this.page++;
-		}
-	},
-	onFetchSuccess: function(users) {
-		if(users.error) return this.onFetchError(users.error);
-		if(users.models.length == 0) this.stopScroll = true;
-		_.each(users.models, function (user) {
-			$('table tbody', this.el).append(new UserListItemView(user).render().el);
-		}, this);
-		return this;
-	},
-	onFetchError: function(message) {
-		this.stopScroll = true;
-		$(this.el).empty();
-		$(this.el).html(this.template());
-		return this;
-	}
+window.UserListView = window.ListView.extend({
+	itemClassName: "UserListItemView",
+	ItemClass: UserListItemView,
+	tableClass: ".users_table",
+	ModelClass: Users
 });
 
 window.UserEditView = Backbone.View.extend({

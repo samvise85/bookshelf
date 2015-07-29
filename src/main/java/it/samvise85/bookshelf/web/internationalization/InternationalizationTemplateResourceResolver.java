@@ -1,6 +1,7 @@
 package it.samvise85.bookshelf.web.internationalization;
 
 import it.samvise85.bookshelf.exception.BookshelfException;
+import it.samvise85.bookshelf.web.config.BookshelfTransformerChain;
 import it.samvise85.bookshelf.web.security.ProfilationTransformer;
 
 import java.io.IOException;
@@ -19,10 +20,14 @@ import org.springframework.web.servlet.resource.TransformedResource;
 
 public class InternationalizationTemplateResourceResolver extends PathResourceResolver {
 
-	ConcurrentMapCache cache = new ConcurrentMapCache("bookshelfcache");
-	InternationalizationTransformer languageTransformer = new InternationalizationTransformer();
-	ProfilationTransformer profileTransformer = new ProfilationTransformer();
+	private ConcurrentMapCache cache = new ConcurrentMapCache("bookshelfcache");
+	private ProfilationTransformer profileTransformer = new ProfilationTransformer();
+	private BookshelfTransformerChain chain;
 	
+	public InternationalizationTemplateResourceResolver(BookshelfTransformerChain chain) {
+		this.chain = chain;
+	}
+
 	@Override
 	protected Resource resolveResourceInternal(HttpServletRequest request, String requestPath, List<? extends Resource> locations,
 			ResourceResolverChain chain) {
@@ -35,8 +40,8 @@ public class InternationalizationTemplateResourceResolver extends PathResourceRe
 			
 			try {
 				//add transformed resource to cache
-				TransformedResource transformedResource = languageTransformer.transform(request, resource);
-				cache.put(requestPath, transformedResource);
+				resource = this.chain.transform(request, resource);
+				cache.put(requestPath, resource);
 			} catch(IOException e) {
 				throw new BookshelfException(e.getMessage(), e);
 			}

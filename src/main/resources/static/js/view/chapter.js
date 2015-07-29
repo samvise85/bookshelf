@@ -1,77 +1,14 @@
-window.ChapterListItemView = Backbone.View.extend({
-    tagName:"tr",
+window.ChapterListItemView = window.ListItemView.extend({});
 
-    initialize: function(chapter) {
-    	this.model = chapter;
-    },
-    render: function() {
-        $(this.el).html(this.template({chapter: this.model}));
-        return this;
-    }
-});
-
-window.ChapterListView = Backbone.View.extend({
-	lastOptions : null,
-	reload : false,
-	clearMessages : true,
-	page: 1,
-	num: null,
-	stopScroll: false,
+window.ChapterListView = window.ListView.extend({
+	itemClassName: "ChapterListItemView",
+	ItemClass: ChapterListItemView,
+	tableClass: ".chapters_table",
+	ModelClass: Chapters,
 	
-	initialize: function() {
-		var self = this;
-		viewLoader.load("ChapterListItemView", function() {
-			self.listItemViewReady = true;
-		});
-	},
-	render: function (options) {
-		this.lastOptions = options;
-		$(this.el).empty();
-		$(this.el).html(this.template({view: this}));
-		if(options.parentElement)
-			options.parentElement.html(this.el);
-		pageHeight = $(window).height();
-//		console.log("pageHeight: " + pageHeight);
-//		console.log("offset: " + $(this.el).find('.chapters_table').offset().top);
-		maxh = pageHeight- $(this.el).find('.chapters_table').offset().top;
-		
-		$(this.el).find('.chapters_table').css("max-height", maxh + "px");
-		this.num = parseInt(parseInt(maxh)/(app.isAdmin() ? 47 : 37)) + 5;
-		this.append(options);
-	},
-	append: function (options) {
-		if(this.listItemViewReady) {
-			this.appendWhenReady(options);
-		} else {
-			var self  = this;
-			setTimeout(function() { self.append(options); }, 100);
-		}
-	},
-	appendWhenReady: function (options) {
-		if(!(this.stopScroll === true)) {
-			var self = this;
-			var chapters = new Chapters({book: options.book});
-			chapters.fetch({
-				data: $.param({"page": self.page, "num": self.num}),
-				success: function(chapters) { self.onFetchSuccess(chapters); },
-				error: function () { self.onFetchError(); }
-			});
-			this.page++;
-		}
-	},
-	onFetchSuccess: function(chapters) {
-		if(chapters.error) return this.onFetchError();
-		if(chapters.models.length == 0 || chapters.models.length < this.num) this.stopScroll = true;
-		_.each(chapters.models, function (chapter) {
-			$('table tbody', this.el).append(new ChapterListItemView(chapter).render().el);
-		}, this);
-		return this;
-	},
-	onFetchError: function() {
-		this.stopScroll = true;
-		$(this.el).empty();
-		$(this.el).html(this.template());
-	},
+	getFetchOptions: function(options) {
+		return {book: options.book};
+	}
 });
 
 window.ChapterSelectItemView = Backbone.View.extend({

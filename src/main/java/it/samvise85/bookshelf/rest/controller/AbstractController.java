@@ -54,22 +54,51 @@ public abstract class AbstractController {
 
 	protected ResponseDto invokeMethod(String methodName, Class<?>[] parameterTypes, Object[] args) throws NoSuchMethodException,
 			IllegalAccessException, InvocationTargetException {
-		Method method = null;
-		if(parameterTypes != null)
-			method = this.getClass().getDeclaredMethod(methodName, parameterTypes);
-		else
-			method = this.getClass().getDeclaredMethod(methodName);
-		method.setAccessible(true);
-		
 		ResponseDto res = new ResponseDto();
-		res.setResponse(method.invoke(this, args));
+		Map<String, String> errorMap = invokeValidate(methodName, parameterTypes, args);
+		
+		if(errorMap == null || errorMap.isEmpty()) {
+			Method method = null;
+			if(parameterTypes != null)
+				method = this.getClass().getDeclaredMethod(methodName, parameterTypes);
+			else
+				method = this.getClass().getDeclaredMethod(methodName);
+			method.setAccessible(true);
+			
+			res.setResponse(method.invoke(this, args));
+		} else {
+			res.setErrorMap(errorMap);
+		}
 		return res;
+	}
+
+	@SuppressWarnings("unchecked")
+	private Map<String, String> invokeValidate(String methodName, Class<?>[] parameterTypes, Object[] args) throws IllegalAccessException, IllegalArgumentException, InvocationTargetException {
+		methodName = methodName + "Validation";
+		try {
+			Method method = null;
+			if(parameterTypes != null)
+				method = this.getClass().getDeclaredMethod(methodName, parameterTypes);
+			else
+				method = this.getClass().getDeclaredMethod(methodName);
+			method.setAccessible(true);
+			
+			return (Map<String, String>)method.invoke(this, args);
+		} catch(NoSuchMethodException e) {
+			return null;
+		}
 	}
 
 	protected ResponseDto manageError(String methodName, Throwable e) {
 		getLogger().error(methodName, e.getCause());
 		ResponseDto res = new ResponseDto();
-		res.setError(e.getCause().getMessage());
+		String message = e.getCause().getMessage();
+		if(e.getCause() instanceof NullPointerException) {
+			StackTraceElement[] stackTrace = e.getCause().getStackTrace();
+			if(stackTrace.length > 0)
+			message = "NullPointerException: at " + stackTrace[0].getClassName() + "." + stackTrace[0].getMethodName() + " (line " + stackTrace[0].getLineNumber() + ")";
+		}
+		res.setError(message);
 		return res;
 	}
 
@@ -129,5 +158,4 @@ public abstract class AbstractController {
 	}
 
 	protected abstract Logger getLogger();
-
 }

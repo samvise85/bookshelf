@@ -24,22 +24,30 @@
   <script src="//cdnjs.cloudflare.com/ajax/libs/jquery-cookie/1.4.1/jquery.cookie.min.js"></script>
   <script src="//cdnjs.cloudflare.com/ajax/libs/crypto-js/3.1.2/rollups/sha1.js"></script>
   <script src="//tinymce.cachefly.net/4.0/tinymce.min.js"></script>
-  <script src="js/init.js"></script>
+  <script src="js/init.js[[VERSION]]"></script>
+  <script src="js/utils.js[[VERSION]]"></script>
+  <script src="js/model/modelCommon.js[[VERSION]]"></script>
+  <script src="js/model/model.js[[VERSION]]"></script>
+  <script src="js/view/commonViews.js[[VERSION]]"></script>
+  <script src="js/view/user.js[[VERSION]]"></script>
+  <script src="js/view/book.js[[VERSION]]"></script>
+  <script src="js/view/chapter.js[[VERSION]]"></script>
+  <script src="js/view/comment.js[[VERSION]]"></script>
+  <script src="js/main.js[[VERSION]]"></script>
   <script type="text/javascript">
-  $(document).ready(function () {
-		var date = new Date().getTime();
-		var scripts = [["/js/utils_" + date + ".js"],
-		               [ "/js/model/modelCommon_" + date + ".js",
-		                 "/js/model/model_" + date + ".js" ],
-		               [ "/js/view/commonViews_" + date + ".js",
-		                 "/js/view/contact_" + date + ".js",
-		                 "/js/view/user_" + date + ".js",
-		                 "/js/view/book_" + date + ".js",
-		                 "/js/view/chapter_" + date + ".js",
-		                 "/js/view/comment_" + date + ".js" ],
-		               [ "/js/main_" + date + ".js" ] ];
-		new ScriptLoader(scripts);
-  });
+//   $(document).ready(function () {
+// 		var date = new Date().getTime();
+// 		var scripts = [[ "/js/utils.js?_=" + date ],
+// 		               [ "/js/model/modelCommon.js?_=" + date,
+// 		                 "/js/model/model.js?_=" + date ],
+// 		               [ "/js/view/commonViews.js?_=" + date,
+// 		                 "/js/view/user.js?_=" + date,
+// 		                 "/js/view/book.js?_=" + date,
+// 		                 "/js/view/chapter.js?_=" + date,
+// 		                 "/js/view/comment.js?_=" + date ],
+// 		               [ "/js/main.js?_=" + date ] ];
+// 		new ScriptLoader(scripts);
+//   });
   </script>
 </body>
 </html> 

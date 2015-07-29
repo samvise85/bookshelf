@@ -4,6 +4,7 @@ import it.samvise85.bookshelf.context.ServiceLocator;
 import it.samvise85.bookshelf.manager.UserManager;
 import it.samvise85.bookshelf.model.User;
 import it.samvise85.bookshelf.model.UserProfile;
+import it.samvise85.bookshelf.web.config.BookshelfTransformer;
 import it.samvise85.bookshelf.web.config.SpringSecurityConfig;
 import it.samvise85.bookshelf.web.security.BookshelfRole.Role;
 
@@ -18,10 +19,10 @@ import javax.servlet.http.HttpServletRequest;
 import org.springframework.core.io.Resource;
 import org.springframework.web.servlet.resource.TransformedResource;
 
-public class ProfilationTransformer {
+public class ProfilationTransformer extends BookshelfTransformer {
 	private UserManager userManager;
 	
-	public Resource transform(HttpServletRequest request, TransformedResource resource) throws IOException {
+	public Resource transform(HttpServletRequest request, Resource resource) throws IOException {
 		String username = request.getHeader(SpringSecurityConfig.USERNAME_PARAM_NAME);
 		List<Role> profiles = new ArrayList<Role>();
 		if(username != null) {
@@ -37,7 +38,7 @@ public class ProfilationTransformer {
 		if(profiles.isEmpty())
 			profiles.add(Role.UNKNOWN);
 		
-		String fileContent = new String(resource.getByteArray());
+		String fileContent = getResourceContent(resource);
 		
 		StringBuffer sb = new StringBuffer();
 		Pattern pattern = Pattern.compile("\\[\\[PROFILE([^\\]]+)\\]\\]([^\\[]*)\\[\\[\\/PROFILE\\]\\]", Pattern.DOTALL);

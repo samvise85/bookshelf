@@ -1,42 +1,34 @@
-window.User = Backbone.Model.extend({
-  urlRoot: '/users',
-  parse: function(data) {
-	  this.error = data.error;
-	  return data.response;
-  }
+window.AbstractModel = Backbone.Model.extend({
+	parse: function(data) {
+		this.error = data.error;
+		this.errorMap = data.errorMap;
+		return data.response ? data.response : data;
+	}
 });
-window.Users = Backbone.Collection.extend({
-  url: '/users',
-  initialize: function(options) {
-	  this.url = '/users' + (options.page ? '?page=' + options.page : '');
-  },
-  parse: function(data) {
-	  this.error = data.error;
-	  return data.response;
-  }
+window.AbstractCollection = Backbone.Collection.extend({
+	parse: function(data) {
+		this.error = data.error;
+		this.errorMap = data.errorMap;
+		return data.response ? data.response : data;
+	}
 });
 
-window.Language = Backbone.Model.extend({
-  urlRoot: '/languages',
-  parse: function(data) {
-	  this.error = data.error;
-	  return data.response;
-  }
+window.User = window.AbstractModel.extend({
+  urlRoot: '/users'  
 });
-window.Languages = Backbone.Collection.extend({
-  url : '/languages',
-  parse: function(data) {
-	  this.error = data.error;
-	  return data.response;
-  }
+window.Users = window.AbstractCollection.extend({
+  url: '/users'
 });
 
-window.Route = Backbone.Model.extend({
-  urlRoot: '/analytics/routes',
-  parse: function(data) {
-	  this.error = data.error;
-	  return data.response;
-  }
+window.Language = window.AbstractModel.extend({
+  urlRoot: '/languages'
+});
+window.Languages = window.AbstractCollection.extend({
+  url : '/languages'
+});
+
+window.Route = window.AbstractModel.extend({
+  urlRoot: '/analytics/routes'
 });
 
 window.Messages = function Messages() {
@@ -54,7 +46,6 @@ window.Messages = function Messages() {
 	this.add = function(key, message) {
 		eval('this.messages.' + key + ' = "' + message + '";');
 		this.refresh(key);
-//		this.messageCount++;
 	};
 	this.get = function(key) {
 		eval('var message = this.messages.' + key + ';');
@@ -64,7 +55,6 @@ window.Messages = function Messages() {
 		if(eval('this.messages.' + key + ';')) {
 			eval('this.messages.' + key + ' = "";');
 			this.refresh(key);
-//			if(this.messageCount > 0) this.messageCount--;
 		}
 	};
 	this.isEmpty = function() {
@@ -74,5 +64,9 @@ window.Messages = function Messages() {
 		if($('#'+key)) {
 			$('#'+key).html(this.get(key));
 		}
+	};
+	this.clear = function() {
+		for(key in message)
+			this.remove(key);
 	};
 };

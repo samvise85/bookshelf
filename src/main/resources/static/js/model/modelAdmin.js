@@ -1,60 +1,29 @@
 
-window.RestRequest = Backbone.Model.extend({
-  urlRoot: null,
-  initialize: function(options) {
-	this.urlRoot = '/analytics/requests';
-  },
-  parse: function(data) {
-	  this.error = data.error;
-	  return data.response;
-  }
+window.RestRequest = window.AbstractModel.extend({
+  urlRoot: '/analytics/requests'
 });
-window.RestRequests = Backbone.Collection.extend({
+window.RestRequests = window.AbstractCollection.extend({
   url : '/analytics/requests',
-  parse: function(data) {
-	  this.error = data.error;
-	  return data.response;
-  }
+  model: RestRequest
 });
 
-window.RestError = Backbone.Model.extend({
-  urlRoot: null,
-  initialize: function(options) {
-	this.urlRoot = '/analytics/errors';
-  },
-  parse: function(data) {
-	  this.error = data.error;
-	  return data.response;
-  }
+window.RestError = window.AbstractModel.extend({
+  urlRoot: '/analytics/errors'
 });
-window.RestErrors = Backbone.Collection.extend({
+window.RestErrors = window.AbstractCollection.extend({
   url : '/analytics/errors',
-  parse: function(data) {
-	  this.error = data.error;
-	  return data.response;
-  }
+  model: RestError
 });
 
-window.Label = Backbone.Model.extend({
-  urlRoot: '/labels',
-  parse: function(data) {
-	  this.error = data.error;
-	  return data.response;
-  }
+window.Label = window.AbstractModel.extend({
+  urlRoot: '/labels'
 });
-window.Labels = Backbone.Collection.extend({
+window.Labels = window.AbstractCollection.extend({
   url : '/labels',
-  parse: function(data) {
-	  this.error = data.error;
-	  return data.response;
-  }
+  model: Label
 });
 
-window.Routes = Backbone.Collection.extend({
+window.Routes = window.AbstractCollection.extend({
   url : '/analytics/routes',
-  model: Route,
-  parse: function(data) {
-	  this.error = data.error;
-	  return data.response;
-  }
+  model: Route
 });

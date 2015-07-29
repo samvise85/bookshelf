@@ -29,11 +29,14 @@ window.ScriptLoader = function ScriptLoader(scriptMatrix) {
 		var self = this;
 		self.scriptMatrix[self.groupIndex].forEach(function (script) {
 			$.getScript(script, function() {
-				self.addDownloaded();
+				self.addDownloaded(script);
+			}).fail(function(){
+				console.log(script + " has errors!");
 			});
 		});
 	},
-	this.addDownloaded = function() {
+	this.addDownloaded = function(script) {
+//		console.log("Downloaded " + script);
 		var self = this;
 		self.scriptDownloaded++;
 		if(self.scriptDownloaded >= self.scriptMatrix[self.groupIndex].length) {

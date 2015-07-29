@@ -72,7 +72,7 @@ window.templateLoader = {
 		
 		$.each(views, function(index, view) {
 			if (window[view]) {
-				var resource = getAppPath() + '/tpl/' + view + "_" + date +'.html';
+				var resource = getAppPath() + '/tpl/' + view + ".html?_=" + date;
 				deferreds.push($.get(resource, function(data) {
 					try {
 //						console.log("Caricato template in vista " + view);
@@ -201,7 +201,6 @@ window.downloadFile = function(content, type, name) {
 window.BookshelfRouter = Backbone.Router.extend({
 	user: null,
 	history: [],
-	clearMessages: true,
 
     init: function () {
 		var self = this;
@@ -249,10 +248,11 @@ window.BookshelfRouter = Backbone.Router.extend({
 			route.save({
 					source: this.history.length > 0 ? this.history[this.history.length-1].fragment : null,
 					target: Backbone.history.fragment,
-					username: this.user ? this.user.id : null
+					username: this.user ? this.user.id : null,
+					date: new Date()
 				}, {
 					success: function (response) { 
-						if(response.error) console.err(response.error); //FIXME TOSS ME
+//						if(response.error) console.err(response.error); //FIXME TOSS ME
 						//DO NOTHING
 					}
 			});
@@ -323,12 +323,8 @@ window.BookshelfRouter = Backbone.Router.extend({
 			if(!headerOptions || headerOptions.rerender !== false)
 				$("#header").html(this.headerView.render().el);
 		}
-		if(this.clearMessages && this.messageView) {
-			this.messageView.clear();
+		if(this.messageView)
 			$('#messages').html(this.messageView.render().el);
-		} else {
-			this.clearMessages = true;
-		}
 	},
 	rerenderView : function() {
 		if(this.currentView) {
@@ -336,14 +332,16 @@ window.BookshelfRouter = Backbone.Router.extend({
 			this.renderView(this.currentViewName, this.currentViewClass, headerOptions, this.currentView.lastOptions);
 		}
 	},
-	pushMessageAndNavigate: function(messageType, message, route) {
+	pushMessageAndNavigate: function(messages, route) {
 		if(this.messageView) {
-			eval("this.messageView." + messageType + "s.push(message);");
-			$('#messages').html(this.messageView.render().el);
-		} 
-		if(route != null) {
-			this.clearMessages = false;
-			this.navigate(route, {trigger:true});
+			for(messageType in messages) {
+				var message = messages[messageType];
+				eval("this.messageView." + messageType + "s.push(message);");
+			}
 		}
-	},
+		if(route != null)
+			this.navigate(route, {trigger:true});
+		else
+			$('#messages').html(this.messageView.render().el);
+	}
 });

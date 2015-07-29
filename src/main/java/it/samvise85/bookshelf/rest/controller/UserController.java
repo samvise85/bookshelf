@@ -92,7 +92,7 @@ public class UserController extends AnalyticsAwareController {
 
 	@RequestMapping(value="/users/{id}", method=RequestMethod.PUT)
 	@Secured(BookshelfRole.ANYONE)
-    public ResponseDto updateUser(HttpServletRequest request, String id, @RequestBody User user,
+    public ResponseDto updateUser(HttpServletRequest request, @PathVariable String id, @RequestBody User user,
     		@RequestHeader(value=SpringSecurityConfig.USERNAME_PARAM_NAME) String requestingUser) {
 		String methodName = getMethodName();
 		return executeMethod(request, methodName, new Class<?>[] { String.class, User.class, String.class }, new Object[] { id, user, requestingUser }, user);

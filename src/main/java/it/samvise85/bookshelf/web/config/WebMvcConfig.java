@@ -2,6 +2,7 @@ package it.samvise85.bookshelf.web.config;
 
 import it.samvise85.bookshelf.web.internationalization.InternationalizationResourceResolver;
 import it.samvise85.bookshelf.web.internationalization.InternationalizationTemplateResourceResolver;
+import it.samvise85.bookshelf.web.internationalization.InternationalizationTransformer;
 import it.samvise85.bookshelf.web.internationalization.TimestampResourceResolver;
 
 import javax.servlet.MultipartConfigElement;
@@ -34,7 +35,11 @@ public class WebMvcConfig extends WebMvcConfigurerAdapter {
 				.resourceChain(true)
 				.addResolver(new TimestampResourceResolver())
 				.addResolver(new InternationalizationResourceResolver())
-				.addResolver(new InternationalizationTemplateResourceResolver())
+				.addResolver(new InternationalizationTemplateResourceResolver(
+						new BookshelfTransformerChain()
+						.add(new VersionTransformer())
+						.add(new InternationalizationTransformer())
+				))
 				;
 		super.addResourceHandlers(registry);
 	}
